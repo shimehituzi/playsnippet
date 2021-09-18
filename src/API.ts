@@ -68,6 +68,7 @@ export type Post = {
   createdAt: string,
   updatedAt: string,
   codes?: ModelCodeConnection | null,
+  comments?: ModelCommentConnection | null,
 };
 
 export type ModelCodeConnection = {
@@ -86,6 +87,23 @@ export type Code = {
   code: string,
   skipline: string,
   type: string,
+  createdAt: string,
+  updatedAt: string,
+  post?: Post | null,
+};
+
+export type ModelCommentConnection = {
+  __typename: "ModelCommentConnection",
+  items?:  Array<Comment | null > | null,
+  nextToken?: string | null,
+};
+
+export type Comment = {
+  __typename: "Comment",
+  id: string,
+  owner?: string | null,
+  postID: string,
+  comment: string,
   createdAt: string,
   updatedAt: string,
   post?: Post | null,
@@ -160,6 +178,35 @@ export type DeleteCodeInput = {
   id: string,
 };
 
+export type CreateCommentInput = {
+  id?: string | null,
+  owner?: string | null,
+  postID: string,
+  comment: string,
+  createdAt?: string | null,
+};
+
+export type ModelCommentConditionInput = {
+  postID?: ModelIDInput | null,
+  comment?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  and?: Array< ModelCommentConditionInput | null > | null,
+  or?: Array< ModelCommentConditionInput | null > | null,
+  not?: ModelCommentConditionInput | null,
+};
+
+export type UpdateCommentInput = {
+  id: string,
+  owner?: string | null,
+  postID?: string | null,
+  comment?: string | null,
+  createdAt?: string | null,
+};
+
+export type DeleteCommentInput = {
+  id: string,
+};
+
 export type ModelPostFilterInput = {
   id?: ModelIDInput | null,
   owner?: ModelStringInput | null,
@@ -208,6 +255,17 @@ export type ModelCodeFilterInput = {
   not?: ModelCodeFilterInput | null,
 };
 
+export type ModelCommentFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  postID?: ModelIDInput | null,
+  comment?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  and?: Array< ModelCommentFilterInput | null > | null,
+  or?: Array< ModelCommentFilterInput | null > | null,
+  not?: ModelCommentFilterInput | null,
+};
+
 export type CreatePostMutationVariables = {
   input: CreatePostInput,
   condition?: ModelPostConditionInput | null,
@@ -234,6 +292,19 @@ export type CreatePostMutation = {
         code: string,
         skipline: string,
         type: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null > | null,
+      nextToken?: string | null,
+    } | null,
+    comments?:  {
+      __typename: "ModelCommentConnection",
+      items?:  Array< {
+        __typename: "Comment",
+        id: string,
+        owner?: string | null,
+        postID: string,
+        comment: string,
         createdAt: string,
         updatedAt: string,
       } | null > | null,
@@ -273,6 +344,19 @@ export type UpdatePostMutation = {
       } | null > | null,
       nextToken?: string | null,
     } | null,
+    comments?:  {
+      __typename: "ModelCommentConnection",
+      items?:  Array< {
+        __typename: "Comment",
+        id: string,
+        owner?: string | null,
+        postID: string,
+        comment: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null > | null,
+      nextToken?: string | null,
+    } | null,
   } | null,
 };
 
@@ -302,6 +386,19 @@ export type DeletePostMutation = {
         code: string,
         skipline: string,
         type: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null > | null,
+      nextToken?: string | null,
+    } | null,
+    comments?:  {
+      __typename: "ModelCommentConnection",
+      items?:  Array< {
+        __typename: "Comment",
+        id: string,
+        owner?: string | null,
+        postID: string,
+        comment: string,
         createdAt: string,
         updatedAt: string,
       } | null > | null,
@@ -340,6 +437,10 @@ export type CreateCodeMutation = {
         __typename: "ModelCodeConnection",
         nextToken?: string | null,
       } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
     } | null,
   } | null,
 };
@@ -372,6 +473,10 @@ export type UpdateCodeMutation = {
       updatedAt: string,
       codes?:  {
         __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
         nextToken?: string | null,
       } | null,
     } | null,
@@ -408,6 +513,112 @@ export type DeleteCodeMutation = {
         __typename: "ModelCodeConnection",
         nextToken?: string | null,
       } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
+    } | null,
+  } | null,
+};
+
+export type CreateCommentMutationVariables = {
+  input: CreateCommentInput,
+  condition?: ModelCommentConditionInput | null,
+};
+
+export type CreateCommentMutation = {
+  createComment?:  {
+    __typename: "Comment",
+    id: string,
+    owner?: string | null,
+    postID: string,
+    comment: string,
+    createdAt: string,
+    updatedAt: string,
+    post?:  {
+      __typename: "Post",
+      id: string,
+      owner?: string | null,
+      content: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      codes?:  {
+        __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
+    } | null,
+  } | null,
+};
+
+export type UpdateCommentMutationVariables = {
+  input: UpdateCommentInput,
+  condition?: ModelCommentConditionInput | null,
+};
+
+export type UpdateCommentMutation = {
+  updateComment?:  {
+    __typename: "Comment",
+    id: string,
+    owner?: string | null,
+    postID: string,
+    comment: string,
+    createdAt: string,
+    updatedAt: string,
+    post?:  {
+      __typename: "Post",
+      id: string,
+      owner?: string | null,
+      content: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      codes?:  {
+        __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
+    } | null,
+  } | null,
+};
+
+export type DeleteCommentMutationVariables = {
+  input: DeleteCommentInput,
+  condition?: ModelCommentConditionInput | null,
+};
+
+export type DeleteCommentMutation = {
+  deleteComment?:  {
+    __typename: "Comment",
+    id: string,
+    owner?: string | null,
+    postID: string,
+    comment: string,
+    createdAt: string,
+    updatedAt: string,
+    post?:  {
+      __typename: "Post",
+      id: string,
+      owner?: string | null,
+      content: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      codes?:  {
+        __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
     } | null,
   } | null,
 };
@@ -442,6 +653,19 @@ export type GetPostQuery = {
       } | null > | null,
       nextToken?: string | null,
     } | null,
+    comments?:  {
+      __typename: "ModelCommentConnection",
+      items?:  Array< {
+        __typename: "Comment",
+        id: string,
+        owner?: string | null,
+        postID: string,
+        comment: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null > | null,
+      nextToken?: string | null,
+    } | null,
   } | null,
 };
 
@@ -464,6 +688,10 @@ export type ListPostsQuery = {
       updatedAt: string,
       codes?:  {
         __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
         nextToken?: string | null,
       } | null,
     } | null > | null,
@@ -495,6 +723,10 @@ export type ListPostsByDateQuery = {
         __typename: "ModelCodeConnection",
         nextToken?: string | null,
       } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
     } | null > | null,
     nextToken?: string | null,
   } | null,
@@ -522,6 +754,10 @@ export type ListPostsByOwnerQuery = {
       updatedAt: string,
       codes?:  {
         __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
         nextToken?: string | null,
       } | null,
     } | null > | null,
@@ -556,6 +792,10 @@ export type GetCodeQuery = {
       updatedAt: string,
       codes?:  {
         __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
         nextToken?: string | null,
       } | null,
     } | null,
@@ -673,6 +913,138 @@ export type ListCodesByOwnerQuery = {
   } | null,
 };
 
+export type GetCommentQueryVariables = {
+  id: string,
+};
+
+export type GetCommentQuery = {
+  getComment?:  {
+    __typename: "Comment",
+    id: string,
+    owner?: string | null,
+    postID: string,
+    comment: string,
+    createdAt: string,
+    updatedAt: string,
+    post?:  {
+      __typename: "Post",
+      id: string,
+      owner?: string | null,
+      content: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      codes?:  {
+        __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
+    } | null,
+  } | null,
+};
+
+export type ListCommentsQueryVariables = {
+  filter?: ModelCommentFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListCommentsQuery = {
+  listComments?:  {
+    __typename: "ModelCommentConnection",
+    items?:  Array< {
+      __typename: "Comment",
+      id: string,
+      owner?: string | null,
+      postID: string,
+      comment: string,
+      createdAt: string,
+      updatedAt: string,
+      post?:  {
+        __typename: "Post",
+        id: string,
+        owner?: string | null,
+        content: string,
+        type: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null,
+    } | null > | null,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ListCommentsByOwnerQueryVariables = {
+  owner?: string | null,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelCommentFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListCommentsByOwnerQuery = {
+  listCommentsByOwner?:  {
+    __typename: "ModelCommentConnection",
+    items?:  Array< {
+      __typename: "Comment",
+      id: string,
+      owner?: string | null,
+      postID: string,
+      comment: string,
+      createdAt: string,
+      updatedAt: string,
+      post?:  {
+        __typename: "Post",
+        id: string,
+        owner?: string | null,
+        content: string,
+        type: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null,
+    } | null > | null,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ListCommentsByPostQueryVariables = {
+  postID?: string | null,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelCommentFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListCommentsByPostQuery = {
+  listCommentsByPost?:  {
+    __typename: "ModelCommentConnection",
+    items?:  Array< {
+      __typename: "Comment",
+      id: string,
+      owner?: string | null,
+      postID: string,
+      comment: string,
+      createdAt: string,
+      updatedAt: string,
+      post?:  {
+        __typename: "Post",
+        id: string,
+        owner?: string | null,
+        content: string,
+        type: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null,
+    } | null > | null,
+    nextToken?: string | null,
+  } | null,
+};
+
 export type OnCreatePostSubscription = {
   onCreatePost?:  {
     __typename: "Post",
@@ -694,6 +1066,19 @@ export type OnCreatePostSubscription = {
         code: string,
         skipline: string,
         type: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null > | null,
+      nextToken?: string | null,
+    } | null,
+    comments?:  {
+      __typename: "ModelCommentConnection",
+      items?:  Array< {
+        __typename: "Comment",
+        id: string,
+        owner?: string | null,
+        postID: string,
+        comment: string,
         createdAt: string,
         updatedAt: string,
       } | null > | null,
@@ -728,6 +1113,19 @@ export type OnUpdatePostSubscription = {
       } | null > | null,
       nextToken?: string | null,
     } | null,
+    comments?:  {
+      __typename: "ModelCommentConnection",
+      items?:  Array< {
+        __typename: "Comment",
+        id: string,
+        owner?: string | null,
+        postID: string,
+        comment: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null > | null,
+      nextToken?: string | null,
+    } | null,
   } | null,
 };
 
@@ -752,6 +1150,19 @@ export type OnDeletePostSubscription = {
         code: string,
         skipline: string,
         type: string,
+        createdAt: string,
+        updatedAt: string,
+      } | null > | null,
+      nextToken?: string | null,
+    } | null,
+    comments?:  {
+      __typename: "ModelCommentConnection",
+      items?:  Array< {
+        __typename: "Comment",
+        id: string,
+        owner?: string | null,
+        postID: string,
+        comment: string,
         createdAt: string,
         updatedAt: string,
       } | null > | null,
@@ -785,6 +1196,10 @@ export type OnCreateCodeSubscription = {
         __typename: "ModelCodeConnection",
         nextToken?: string | null,
       } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
     } | null,
   } | null,
 };
@@ -814,6 +1229,10 @@ export type OnUpdateCodeSubscription = {
         __typename: "ModelCodeConnection",
         nextToken?: string | null,
       } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
     } | null,
   } | null,
 };
@@ -841,6 +1260,97 @@ export type OnDeleteCodeSubscription = {
       updatedAt: string,
       codes?:  {
         __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
+    } | null,
+  } | null,
+};
+
+export type OnCreateCommentSubscription = {
+  onCreateComment?:  {
+    __typename: "Comment",
+    id: string,
+    owner?: string | null,
+    postID: string,
+    comment: string,
+    createdAt: string,
+    updatedAt: string,
+    post?:  {
+      __typename: "Post",
+      id: string,
+      owner?: string | null,
+      content: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      codes?:  {
+        __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
+    } | null,
+  } | null,
+};
+
+export type OnUpdateCommentSubscription = {
+  onUpdateComment?:  {
+    __typename: "Comment",
+    id: string,
+    owner?: string | null,
+    postID: string,
+    comment: string,
+    createdAt: string,
+    updatedAt: string,
+    post?:  {
+      __typename: "Post",
+      id: string,
+      owner?: string | null,
+      content: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      codes?:  {
+        __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
+        nextToken?: string | null,
+      } | null,
+    } | null,
+  } | null,
+};
+
+export type OnDeleteCommentSubscription = {
+  onDeleteComment?:  {
+    __typename: "Comment",
+    id: string,
+    owner?: string | null,
+    postID: string,
+    comment: string,
+    createdAt: string,
+    updatedAt: string,
+    post?:  {
+      __typename: "Post",
+      id: string,
+      owner?: string | null,
+      content: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      codes?:  {
+        __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+      comments?:  {
+        __typename: "ModelCommentConnection",
         nextToken?: string | null,
       } | null,
     } | null,

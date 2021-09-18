@@ -14,6 +14,7 @@ type Post
   owner: String
   content: String!
   codes: [Code] @connection(keyName: "byPost", fields: ["id"])
+  comments: [Comment] @connection(keyName: "byPost", fields: ["id"])
   type: String!
   createdAt: String!
 }
@@ -40,5 +41,25 @@ type Code
   code: String!
   skipline: String!
   type: String!
+  createdAt: String!
+}
+
+type Comment
+  @model (subscriptions: { level: public })
+  @auth (
+    rules: [
+      { allow: owner },
+      { allow: private, operations: [read] },
+      { allow: public, operations: [read] }
+    ]
+  )
+  @key(name: "commentsByOwner", fields: ["owner", "createdAt"], queryField: "listCommentsByOwner")
+  @key(name: "byPost", fields: ["postID", "createdAt"], queryField: "listCommentsByPost")
+{
+  id: ID!
+  owner: String
+  postID: ID!
+  post: Post @connection(fields: ["postID"])
+  comment: String!
   createdAt: String!
 }

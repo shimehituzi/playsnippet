@@ -29,6 +29,17 @@ export const createPost = /* GraphQL */ `
         }
         nextToken
       }
+      comments {
+        items {
+          id
+          owner
+          postID
+          comment
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
@@ -54,6 +65,17 @@ export const updatePost = /* GraphQL */ `
           code
           skipline
           type
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
+      comments {
+        items {
+          id
+          owner
+          postID
+          comment
           createdAt
           updatedAt
         }
@@ -89,6 +111,17 @@ export const deletePost = /* GraphQL */ `
         }
         nextToken
       }
+      comments {
+        items {
+          id
+          owner
+          postID
+          comment
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
@@ -116,6 +149,9 @@ export const createCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          nextToken
+        }
+        comments {
           nextToken
         }
       }
@@ -148,6 +184,9 @@ export const updateCode = /* GraphQL */ `
         codes {
           nextToken
         }
+        comments {
+          nextToken
+        }
       }
     }
   }
@@ -176,6 +215,96 @@ export const deleteCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          nextToken
+        }
+        comments {
+          nextToken
+        }
+      }
+    }
+  }
+`;
+export const createComment = /* GraphQL */ `
+  mutation CreateComment(
+    $input: CreateCommentInput!
+    $condition: ModelCommentConditionInput
+  ) {
+    createComment(input: $input, condition: $condition) {
+      id
+      owner
+      postID
+      comment
+      createdAt
+      updatedAt
+      post {
+        id
+        owner
+        content
+        type
+        createdAt
+        updatedAt
+        codes {
+          nextToken
+        }
+        comments {
+          nextToken
+        }
+      }
+    }
+  }
+`;
+export const updateComment = /* GraphQL */ `
+  mutation UpdateComment(
+    $input: UpdateCommentInput!
+    $condition: ModelCommentConditionInput
+  ) {
+    updateComment(input: $input, condition: $condition) {
+      id
+      owner
+      postID
+      comment
+      createdAt
+      updatedAt
+      post {
+        id
+        owner
+        content
+        type
+        createdAt
+        updatedAt
+        codes {
+          nextToken
+        }
+        comments {
+          nextToken
+        }
+      }
+    }
+  }
+`;
+export const deleteComment = /* GraphQL */ `
+  mutation DeleteComment(
+    $input: DeleteCommentInput!
+    $condition: ModelCommentConditionInput
+  ) {
+    deleteComment(input: $input, condition: $condition) {
+      id
+      owner
+      postID
+      comment
+      createdAt
+      updatedAt
+      post {
+        id
+        owner
+        content
+        type
+        createdAt
+        updatedAt
+        codes {
+          nextToken
+        }
+        comments {
           nextToken
         }
       }

@@ -26,6 +26,17 @@ export const onCreatePost = /* GraphQL */ `
         }
         nextToken
       }
+      comments {
+        items {
+          id
+          owner
+          postID
+          comment
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
@@ -48,6 +59,17 @@ export const onUpdatePost = /* GraphQL */ `
           code
           skipline
           type
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
+      comments {
+        items {
+          id
+          owner
+          postID
+          comment
           createdAt
           updatedAt
         }
@@ -80,6 +102,17 @@ export const onDeletePost = /* GraphQL */ `
         }
         nextToken
       }
+      comments {
+        items {
+          id
+          owner
+          postID
+          comment
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
@@ -104,6 +137,9 @@ export const onCreateCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          nextToken
+        }
+        comments {
           nextToken
         }
       }
@@ -133,6 +169,9 @@ export const onUpdateCode = /* GraphQL */ `
         codes {
           nextToken
         }
+        comments {
+          nextToken
+        }
       }
     }
   }
@@ -158,6 +197,87 @@ export const onDeleteCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          nextToken
+        }
+        comments {
+          nextToken
+        }
+      }
+    }
+  }
+`;
+export const onCreateComment = /* GraphQL */ `
+  subscription OnCreateComment {
+    onCreateComment {
+      id
+      owner
+      postID
+      comment
+      createdAt
+      updatedAt
+      post {
+        id
+        owner
+        content
+        type
+        createdAt
+        updatedAt
+        codes {
+          nextToken
+        }
+        comments {
+          nextToken
+        }
+      }
+    }
+  }
+`;
+export const onUpdateComment = /* GraphQL */ `
+  subscription OnUpdateComment {
+    onUpdateComment {
+      id
+      owner
+      postID
+      comment
+      createdAt
+      updatedAt
+      post {
+        id
+        owner
+        content
+        type
+        createdAt
+        updatedAt
+        codes {
+          nextToken
+        }
+        comments {
+          nextToken
+        }
+      }
+    }
+  }
+`;
+export const onDeleteComment = /* GraphQL */ `
+  subscription OnDeleteComment {
+    onDeleteComment {
+      id
+      owner
+      postID
+      comment
+      createdAt
+      updatedAt
+      post {
+        id
+        owner
+        content
+        type
+        createdAt
+        updatedAt
+        codes {
+          nextToken
+        }
+        comments {
           nextToken
         }
       }
