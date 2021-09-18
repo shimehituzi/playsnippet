@@ -7,11 +7,14 @@ type Post
       { allow: public, operations: [read] }
     ]
   )
+  @key(name: "postsByDate", fields: ["type", "createdAt"], queryField: "postsByDate")
 {
   id: ID!
   owner: String
   content: String!
   codes: [Code] @connection(keyName: "byPost", fields: ["id"])
+  type: String!
+  createdAt: String!
 }
 
 type Code
@@ -23,7 +26,7 @@ type Code
       { allow: public, operations: [read] }
     ]
   )
-  @key(name: "byPost", fields: ["postID", "title"])
+  @key(name: "byPost", fields: ["postID", "createdAt"])
 {
   id: ID!
   owner: String
@@ -33,4 +36,5 @@ type Code
   lang: String!
   code: String!
   skipline: String!
+  createdAt: String!
 }

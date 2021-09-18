@@ -11,6 +11,7 @@ export const createPost = /* GraphQL */ `
       id
       owner
       content
+      type
       createdAt
       updatedAt
       codes {
@@ -39,6 +40,7 @@ export const updatePost = /* GraphQL */ `
       id
       owner
       content
+      type
       createdAt
       updatedAt
       codes {
@@ -67,6 +69,7 @@ export const deletePost = /* GraphQL */ `
       id
       owner
       content
+      type
       createdAt
       updatedAt
       codes {
@@ -105,6 +108,7 @@ export const createCode = /* GraphQL */ `
         id
         owner
         content
+        type
         createdAt
         updatedAt
         codes {
@@ -133,6 +137,7 @@ export const updateCode = /* GraphQL */ `
         id
         owner
         content
+        type
         createdAt
         updatedAt
         codes {
@@ -161,6 +166,7 @@ export const deleteCode = /* GraphQL */ `
         id
         owner
         content
+        type
         createdAt
         updatedAt
         codes {

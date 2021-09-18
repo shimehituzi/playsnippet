@@ -8,6 +8,7 @@ export const getPost = /* GraphQL */ `
       id
       owner
       content
+      type
       createdAt
       updatedAt
       codes {
@@ -38,6 +39,39 @@ export const listPosts = /* GraphQL */ `
         id
         owner
         content
+        type
+        createdAt
+        updatedAt
+        codes {
+          nextToken
+        }
+      }
+      nextToken
+    }
+  }
+`;
+export const postsByDate = /* GraphQL */ `
+  query PostsByDate(
+    $type: String
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPostFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    postsByDate(
+      type: $type
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        owner
+        content
+        type
         createdAt
         updatedAt
         codes {
@@ -64,6 +98,7 @@ export const getCode = /* GraphQL */ `
         id
         owner
         content
+        type
         createdAt
         updatedAt
         codes {
@@ -94,6 +129,7 @@ export const listCodes = /* GraphQL */ `
           id
           owner
           content
+          type
           createdAt
           updatedAt
         }

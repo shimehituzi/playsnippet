@@ -6,10 +6,14 @@ export type CreatePostInput = {
   id?: string | null,
   owner?: string | null,
   content: string,
+  type: string,
+  createdAt?: string | null,
 };
 
 export type ModelPostConditionInput = {
   content?: ModelStringInput | null,
+  type?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
   and?: Array< ModelPostConditionInput | null > | null,
   or?: Array< ModelPostConditionInput | null > | null,
   not?: ModelPostConditionInput | null,
@@ -60,6 +64,7 @@ export type Post = {
   id: string,
   owner?: string | null,
   content: string,
+  type: string,
   createdAt: string,
   updatedAt: string,
   codes?: ModelCodeConnection | null,
@@ -89,6 +94,8 @@ export type UpdatePostInput = {
   id: string,
   owner?: string | null,
   content?: string | null,
+  type?: string | null,
+  createdAt?: string | null,
 };
 
 export type DeletePostInput = {
@@ -103,6 +110,7 @@ export type CreateCodeInput = {
   lang: string,
   code: string,
   skipline: string,
+  createdAt?: string | null,
 };
 
 export type ModelCodeConditionInput = {
@@ -111,6 +119,7 @@ export type ModelCodeConditionInput = {
   lang?: ModelStringInput | null,
   code?: ModelStringInput | null,
   skipline?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
   and?: Array< ModelCodeConditionInput | null > | null,
   or?: Array< ModelCodeConditionInput | null > | null,
   not?: ModelCodeConditionInput | null,
@@ -140,6 +149,7 @@ export type UpdateCodeInput = {
   lang?: string | null,
   code?: string | null,
   skipline?: string | null,
+  createdAt?: string | null,
 };
 
 export type DeleteCodeInput = {
@@ -150,6 +160,8 @@ export type ModelPostFilterInput = {
   id?: ModelIDInput | null,
   owner?: ModelStringInput | null,
   content?: ModelStringInput | null,
+  type?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
   and?: Array< ModelPostFilterInput | null > | null,
   or?: Array< ModelPostFilterInput | null > | null,
   not?: ModelPostFilterInput | null,
@@ -161,6 +173,22 @@ export type ModelPostConnection = {
   nextToken?: string | null,
 };
 
+export type ModelStringKeyConditionInput = {
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+};
+
+export enum ModelSortDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+
+
 export type ModelCodeFilterInput = {
   id?: ModelIDInput | null,
   owner?: ModelStringInput | null,
@@ -169,6 +197,7 @@ export type ModelCodeFilterInput = {
   lang?: ModelStringInput | null,
   code?: ModelStringInput | null,
   skipline?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
   and?: Array< ModelCodeFilterInput | null > | null,
   or?: Array< ModelCodeFilterInput | null > | null,
   not?: ModelCodeFilterInput | null,
@@ -185,6 +214,7 @@ export type CreatePostMutation = {
     id: string,
     owner?: string | null,
     content: string,
+    type: string,
     createdAt: string,
     updatedAt: string,
     codes?:  {
@@ -217,6 +247,7 @@ export type UpdatePostMutation = {
     id: string,
     owner?: string | null,
     content: string,
+    type: string,
     createdAt: string,
     updatedAt: string,
     codes?:  {
@@ -249,6 +280,7 @@ export type DeletePostMutation = {
     id: string,
     owner?: string | null,
     content: string,
+    type: string,
     createdAt: string,
     updatedAt: string,
     codes?:  {
@@ -292,6 +324,7 @@ export type CreateCodeMutation = {
       id: string,
       owner?: string | null,
       content: string,
+      type: string,
       createdAt: string,
       updatedAt: string,
       codes?:  {
@@ -324,6 +357,7 @@ export type UpdateCodeMutation = {
       id: string,
       owner?: string | null,
       content: string,
+      type: string,
       createdAt: string,
       updatedAt: string,
       codes?:  {
@@ -356,6 +390,7 @@ export type DeleteCodeMutation = {
       id: string,
       owner?: string | null,
       content: string,
+      type: string,
       createdAt: string,
       updatedAt: string,
       codes?:  {
@@ -376,6 +411,7 @@ export type GetPostQuery = {
     id: string,
     owner?: string | null,
     content: string,
+    type: string,
     createdAt: string,
     updatedAt: string,
     codes?:  {
@@ -411,6 +447,36 @@ export type ListPostsQuery = {
       id: string,
       owner?: string | null,
       content: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      codes?:  {
+        __typename: "ModelCodeConnection",
+        nextToken?: string | null,
+      } | null,
+    } | null > | null,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type PostsByDateQueryVariables = {
+  type?: string | null,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelPostFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type PostsByDateQuery = {
+  postsByDate?:  {
+    __typename: "ModelPostConnection",
+    items?:  Array< {
+      __typename: "Post",
+      id: string,
+      owner?: string | null,
+      content: string,
+      type: string,
       createdAt: string,
       updatedAt: string,
       codes?:  {
@@ -443,6 +509,7 @@ export type GetCodeQuery = {
       id: string,
       owner?: string | null,
       content: string,
+      type: string,
       createdAt: string,
       updatedAt: string,
       codes?:  {
@@ -478,6 +545,7 @@ export type ListCodesQuery = {
         id: string,
         owner?: string | null,
         content: string,
+        type: string,
         createdAt: string,
         updatedAt: string,
       } | null,
@@ -492,6 +560,7 @@ export type OnCreatePostSubscription = {
     id: string,
     owner?: string | null,
     content: string,
+    type: string,
     createdAt: string,
     updatedAt: string,
     codes?:  {
@@ -519,6 +588,7 @@ export type OnUpdatePostSubscription = {
     id: string,
     owner?: string | null,
     content: string,
+    type: string,
     createdAt: string,
     updatedAt: string,
     codes?:  {
@@ -546,6 +616,7 @@ export type OnDeletePostSubscription = {
     id: string,
     owner?: string | null,
     content: string,
+    type: string,
     createdAt: string,
     updatedAt: string,
     codes?:  {
@@ -584,6 +655,7 @@ export type OnCreateCodeSubscription = {
       id: string,
       owner?: string | null,
       content: string,
+      type: string,
       createdAt: string,
       updatedAt: string,
       codes?:  {
@@ -611,6 +683,7 @@ export type OnUpdateCodeSubscription = {
       id: string,
       owner?: string | null,
       content: string,
+      type: string,
       createdAt: string,
       updatedAt: string,
       codes?:  {
@@ -638,6 +711,7 @@ export type OnDeleteCodeSubscription = {
       id: string,
       owner?: string | null,
       content: string,
+      type: string,
       createdAt: string,
       updatedAt: string,
       codes?:  {
