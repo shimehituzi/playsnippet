@@ -19,10 +19,11 @@ export const createPost = /* GraphQL */ `
           id
           owner
           postID
-          title
+          name
           lang
           code
           skipline
+          type
           createdAt
           updatedAt
         }
@@ -48,10 +49,11 @@ export const updatePost = /* GraphQL */ `
           id
           owner
           postID
-          title
+          name
           lang
           code
           skipline
+          type
           createdAt
           updatedAt
         }
@@ -77,10 +79,11 @@ export const deletePost = /* GraphQL */ `
           id
           owner
           postID
-          title
+          name
           lang
           code
           skipline
+          type
           createdAt
           updatedAt
         }
@@ -98,10 +101,11 @@ export const createCode = /* GraphQL */ `
       id
       owner
       postID
-      title
+      name
       lang
       code
       skipline
+      type
       createdAt
       updatedAt
       post {
@@ -127,10 +131,11 @@ export const updateCode = /* GraphQL */ `
       id
       owner
       postID
-      title
+      name
       lang
       code
       skipline
+      type
       createdAt
       updatedAt
       post {
@@ -156,10 +161,11 @@ export const deleteCode = /* GraphQL */ `
       id
       owner
       postID
-      title
+      name
       lang
       code
       skipline
+      type
       createdAt
       updatedAt
       post {

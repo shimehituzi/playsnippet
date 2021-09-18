@@ -7,7 +7,8 @@ type Post
       { allow: public, operations: [read] }
     ]
   )
-  @key(name: "postsByDate", fields: ["type", "createdAt"], queryField: "postsByDate")
+  @key(name: "postsByDate", fields: ["type", "createdAt"], queryField: "listPostsByDate")
+  @key(name: "postsByOwner", fields: ["owner", "createdAt"], queryField: "listPostsByOwner")
 {
   id: ID!
   owner: String
@@ -26,15 +27,18 @@ type Code
       { allow: public, operations: [read] }
     ]
   )
+  @key(name: "codesByDate", fields: ["type", "createdAt"], queryField: "listCodesByDate")
+  @key(name: "codesByOwner", fields: ["owner", "createdAt"], queryField: "listCodesByOwner")
   @key(name: "byPost", fields: ["postID", "createdAt"])
 {
   id: ID!
   owner: String
   postID: ID!
   post: Post @connection(fields: ["postID"])
-  title: String!
+  name: String!
   lang: String!
   code: String!
   skipline: String!
+  type: String!
   createdAt: String!
 }

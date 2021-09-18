@@ -16,10 +16,11 @@ export const getPost = /* GraphQL */ `
           id
           owner
           postID
-          title
+          name
           lang
           code
           skipline
+          type
           createdAt
           updatedAt
         }
@@ -50,8 +51,8 @@ export const listPosts = /* GraphQL */ `
     }
   }
 `;
-export const postsByDate = /* GraphQL */ `
-  query PostsByDate(
+export const listPostsByDate = /* GraphQL */ `
+  query ListPostsByDate(
     $type: String
     $createdAt: ModelStringKeyConditionInput
     $sortDirection: ModelSortDirection
@@ -59,8 +60,40 @@ export const postsByDate = /* GraphQL */ `
     $limit: Int
     $nextToken: String
   ) {
-    postsByDate(
+    listPostsByDate(
       type: $type
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        owner
+        content
+        type
+        createdAt
+        updatedAt
+        codes {
+          nextToken
+        }
+      }
+      nextToken
+    }
+  }
+`;
+export const listPostsByOwner = /* GraphQL */ `
+  query ListPostsByOwner(
+    $owner: String
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelPostFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listPostsByOwner(
+      owner: $owner
       createdAt: $createdAt
       sortDirection: $sortDirection
       filter: $filter
@@ -88,10 +121,11 @@ export const getCode = /* GraphQL */ `
       id
       owner
       postID
-      title
+      name
       lang
       code
       skipline
+      type
       createdAt
       updatedAt
       post {
@@ -119,10 +153,93 @@ export const listCodes = /* GraphQL */ `
         id
         owner
         postID
-        title
+        name
         lang
         code
         skipline
+        type
+        createdAt
+        updatedAt
+        post {
+          id
+          owner
+          content
+          type
+          createdAt
+          updatedAt
+        }
+      }
+      nextToken
+    }
+  }
+`;
+export const listCodesByDate = /* GraphQL */ `
+  query ListCodesByDate(
+    $type: String
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelCodeFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listCodesByDate(
+      type: $type
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        owner
+        postID
+        name
+        lang
+        code
+        skipline
+        type
+        createdAt
+        updatedAt
+        post {
+          id
+          owner
+          content
+          type
+          createdAt
+          updatedAt
+        }
+      }
+      nextToken
+    }
+  }
+`;
+export const listCodesByOwner = /* GraphQL */ `
+  query ListCodesByOwner(
+    $owner: String
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelCodeFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listCodesByOwner(
+      owner: $owner
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        owner
+        postID
+        name
+        lang
+        code
+        skipline
+        type
         createdAt
         updatedAt
         post {
