@@ -32,5 +32,30 @@
         ]
       }
     }
+  },
+  "api": {
+    "playsnippet": {
+      "service": "AppSync",
+      "providerPlugin": "awscloudformation",
+      "output": {
+        "authConfig": {
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authplaysnippetcb8cab0c"
+            }
+          },
+          "additionalAuthenticationProviders": [
+            {
+              "authenticationType": "API_KEY",
+              "apiKeyConfig": {
+                "apiKeyExpirationDays": 30,
+                "description": "Public API"
+              }
+            }
+          ]
+        }
+      }
+    }
   }
 }

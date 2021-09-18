@@ -1,0 +1,36 @@
+type Post
+  @model (subscriptions: { level: public })
+  @auth (
+    rules: [
+      { allow: owner },
+      { allow: private, operations: [read] },
+      { allow: public, operations: [read] }
+    ]
+  )
+{
+  id: ID!
+  owner: String
+  content: String!
+  codes: [Code] @connection(keyName: "byPost", fields: ["id"])
+}
+
+type Code
+  @model (subscriptions: { level: public })
+  @auth (
+    rules: [
+      { allow: owner },
+      { allow: private, operations: [read] },
+      { allow: public, operations: [read] }
+    ]
+  )
+  @key(name: "byPost", fields: ["postID", "title"])
+{
+  id: ID!
+  owner: String
+  postID: ID!
+  post: Post @connection(fields: ["postID"])
+  title: String!
+  lang: String!
+  code: String!
+  skipline: String!
+}
