@@ -1,0 +1,65 @@
+type Post
+  @model (subscriptions: { level: public })
+  @auth (
+    rules: [
+      { allow: owner },
+      { allow: private, operations: [read] },
+      { allow: public, operations: [read] }
+    ]
+  )
+  @key(name: "postsByDate", fields: ["type", "createdAt"], queryField: "listPostsByDate")
+  @key(name: "postsByOwner", fields: ["owner", "createdAt"], queryField: "listPostsByOwner")
+{
+  id: ID!
+  owner: String
+  content: String!
+  codes: [Code] @connection(keyName: "byPost", fields: ["id"])
+  comments: [Comment] @connection(keyName: "byPost", fields: ["id"])
+  type: String!
+  createdAt: String!
+}
+
+type Code
+  @model (subscriptions: { level: public })
+  @auth (
+    rules: [
+      { allow: owner },
+      { allow: private, operations: [read] },
+      { allow: public, operations: [read] }
+    ]
+  )
+  @key(name: "codesByDate", fields: ["type", "createdAt"], queryField: "listCodesByDate")
+  @key(name: "codesByOwner", fields: ["owner", "createdAt"], queryField: "listCodesByOwner")
+  @key(name: "byPost", fields: ["postID", "createdAt"])
+{
+  id: ID!
+  owner: String
+  postID: ID!
+  post: Post @connection(fields: ["postID"])
+  name: String!
+  lang: String!
+  code: String!
+  skipline: String!
+  type: String!
+  createdAt: String!
+}
+
+type Comment
+  @model (subscriptions: { level: public })
+  @auth (
+    rules: [
+      { allow: owner },
+      { allow: private, operations: [read] },
+      { allow: public, operations: [read] }
+    ]
+  )
+  @key(name: "commentsByOwner", fields: ["owner", "createdAt"], queryField: "listCommentsByOwner")
+  @key(name: "byPost", fields: ["postID", "createdAt"], queryField: "listCommentsByPost")
+{
+  id: ID!
+  owner: String
+  postID: ID!
+  post: Post @connection(fields: ["postID"])
+  comment: String!
+  createdAt: String!
+}

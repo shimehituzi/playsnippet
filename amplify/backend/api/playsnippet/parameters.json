@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "playsnippet",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authplaysnippetcb8cab0c",
+      "Outputs.UserPoolId"
+    ]
+  }
+}
