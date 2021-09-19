@@ -7,17 +7,43 @@ import {
   AmplifySignUp,
 } from '@aws-amplify/ui-react'
 import { useAuth } from '../src/hooks'
+import { Container, Button, Grid, Typography } from '@material-ui/core'
 
 const Home: NextPage = () => {
   const { authenticated } = useAuth()
 
   return authenticated ? (
     <React.Fragment>
-      <AmplifySignOut />
-      <h1>Next.js with Amplify</h1>
-      <Link href={'/isr'}>
-        <a>ISR ページ</a>
-      </Link>
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={2}
+      >
+        <Grid item md={6}>
+          <Typography variant="h3" color="primary">
+            Play Snippet
+          </Typography>
+        </Grid>
+        <Grid item md={3}>
+          <Link href={'/posts'}>
+            <Button
+              component="a"
+              variant="outlined"
+              color="secondary"
+              size="large"
+            >
+              <Typography variant="h6">Posts</Typography>
+            </Button>
+          </Link>
+        </Grid>
+        <Grid item md={3}>
+          <Button>
+            <AmplifySignOut />
+          </Button>
+        </Grid>
+      </Grid>
     </React.Fragment>
   ) : (
     <AmplifyAuthenticator>
