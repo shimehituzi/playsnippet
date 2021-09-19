@@ -5,6 +5,10 @@ import { CssBaseline } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core'
 import { theme } from '../src/theme'
 
+import Amplify from 'aws-amplify'
+import awsconfig from '../src/aws-exports'
+Amplify.configure(awsconfig)
+
 const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   useEffect(() => {
     const jssStyles = document.querySelector('#jss-server-side')

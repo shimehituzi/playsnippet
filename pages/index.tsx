@@ -1,30 +1,19 @@
 import React from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
-import Amplify from 'aws-amplify'
 import {
-  AuthState,
-  CognitoUserInterface,
-  onAuthUIStateChange,
-} from '@aws-amplify/ui-components'
-import awsconfig from '../src/aws-exports'
-import { AmplifyAuthenticator, AmplifySignUp } from '@aws-amplify/ui-react'
-
-Amplify.configure(awsconfig)
+  AmplifyAuthenticator,
+  AmplifySignOut,
+  AmplifySignUp,
+} from '@aws-amplify/ui-react'
+import { useAuth } from '../src/hooks'
 
 const Home: NextPage = () => {
-  const [authState, setAuthState] = React.useState<AuthState>()
-  const [user, setUser] = React.useState<CognitoUserInterface | undefined>()
+  const { authenticated } = useAuth()
 
-  React.useEffect(() => {
-    return onAuthUIStateChange((nextAuthState, authData) => {
-      setAuthState(nextAuthState)
-      setUser(authData as CognitoUserInterface)
-    })
-  })
-
-  return authState == AuthState.SignedIn && user ? (
+  return authenticated ? (
     <React.Fragment>
+      <AmplifySignOut />
       <h1>Next.js with Amplify</h1>
       <Link href={'/isr'}>
         <a>ISR ページ</a>
