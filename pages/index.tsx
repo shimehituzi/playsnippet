@@ -7,7 +7,7 @@ import {
   AmplifySignUp,
 } from '@aws-amplify/ui-react'
 import { useAuth } from '../src/hooks'
-import { Container, Button, Grid, Typography } from '@material-ui/core'
+import { Button, Grid, Typography } from '@material-ui/core'
 
 const Home: NextPage = () => {
   const { authenticated } = useAuth()

@@ -7,7 +7,7 @@ import { theme } from '../src/theme'
 
 import Amplify from 'aws-amplify'
 import awsconfig from '../src/aws-exports'
-Amplify.configure(awsconfig)
+Amplify.configure({ ...awsconfig, ssr: true })
 
 const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   useEffect(() => {
@@ -25,7 +25,7 @@ const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
         />
       </Head>
       <ThemeProvider theme={theme}>
-        <CssBaseline/>
+        <CssBaseline />
         <Container>
           <Paper elevation={10} square>
             <Component {...pageProps} />
