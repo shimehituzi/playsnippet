@@ -4,6 +4,7 @@ import { AmplifySignOut } from '@aws-amplify/ui-react'
 import { useAuth } from '../src/hooks'
 import { API, graphqlOperation } from 'aws-amplify'
 import { createPost } from '../src/graphql/mutations'
+import { CreatePostInput } from '../src/API'
 
 const Posts: NextPage = () => {
   const { authenticated } = useAuth()
@@ -18,33 +19,35 @@ const Posts: NextPage = () => {
 }
 
 const Form: React.FC = () => {
-  const [content, setContent] = useState('')
+  const initialInput: CreatePostInput = {
+    type: 'post',
+    content: '',
+  }
+  const [createPostInput, setCreatePostInput] =
+    useState<CreatePostInput>(initialInput)
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setContent(e.target.value)
+    setCreatePostInput({
+      ...createPostInput,
+      content: e.target.value,
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    const res = await API.graphql(
+    await API.graphql(
       graphqlOperation(createPost, {
-        input: {
-          type: 'post',
-          content: content,
-        },
+        input: createPostInput,
       })
     )
 
-    // eslint-disable-next-line no-console
-    console.log(res)
-
-    setContent('')
+    setCreatePostInput(initialInput)
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" value={content} onChange={onChange} />
+      <input type="text" value={createPostInput.content} onChange={onChange} />
       <button type="submit">create post</button>
     </form>
   )
