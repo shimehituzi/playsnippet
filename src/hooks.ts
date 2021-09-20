@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Auth } from 'aws-amplify'
 import {
   AuthState,
   CognitoUserInterface,
@@ -8,25 +9,32 @@ import {
 type AmplifyAuth = {
   user: CognitoUserInterface | undefined
   authenticated: boolean
-  authState: AuthState
+  authUIState: AuthState | undefined
 }
 
 export const useAuth = (): AmplifyAuth => {
-  const [authState, setAuthState] = useState<AuthState>()
-  const [user, setUser] = useState<CognitoUserInterface | undefined>()
-  const [authenticated, setAuthenticated] = useState<boolean>()
-  const unsubscribe = onAuthUIStateChange((nextAuthState, authData) => {
-    setAuthState(nextAuthState)
-    setUser(authData as CognitoUserInterface)
-  })
+  const [user, setUser] = useState<CognitoUserInterface>()
+  const [authenticated, setAuthenticated] = useState<boolean>(false)
+  const [authUIState, setAuthUIState] = useState<AuthState>()
 
   useEffect(() => {
-    setAuthenticated(authState == AuthState.SignedIn && user !== undefined)
-  }, [user, authState])
+    Auth.currentAuthenticatedUser()
+      .then(user => {
+        setUser(user as CognitoUserInterface)
+        setAuthenticated(true)
+      })
+      .catch(() => {
+        setUser(null)
+        setAuthenticated(false)
+      })
+  }, [authUIState])
 
   useEffect(() => {
+    const unsubscribe = onAuthUIStateChange((nextAuthUIState) => {
+      setAuthUIState(nextAuthUIState)
+    })
     return unsubscribe
   }, [])
 
-  return { user, authenticated, authState }
+  return { user, authenticated, authUIState }
 }

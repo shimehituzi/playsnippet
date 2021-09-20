@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
-import { CssBaseline } from '@material-ui/core'
+import { Container, CssBaseline, Paper } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core'
 import { theme } from '../src/theme'
 
 import Amplify from 'aws-amplify'
 import awsconfig from '../src/aws-exports'
-Amplify.configure(awsconfig)
+Amplify.configure({ ...awsconfig, ssr: true })
 
 const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   useEffect(() => {
@@ -25,8 +25,12 @@ const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
         />
       </Head>
       <ThemeProvider theme={theme}>
-        <CssBaseline/>
-        <Component {...pageProps} />
+        <CssBaseline />
+        <Container>
+          <Paper elevation={10} square>
+            <Component {...pageProps} />
+          </Paper>
+        </Container>
       </ThemeProvider>
     </React.Fragment>
   )
