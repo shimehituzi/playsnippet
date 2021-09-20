@@ -5,7 +5,7 @@ import { useAuth } from '../src/hooks'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import { createPost } from '../src/graphql/mutations'
 import {
-  CreatePostInput,
+  CreatePostMutationVariables,
   ListPostsByDateQueryVariables,
   ModelSortDirection,
   ListPostsByDateQuery,
@@ -48,7 +48,7 @@ const Posts: NextPage = () => {
   const [nextToken, setNextToken] = useState<string | null>(null)
 
   const getPosts = async (type: ActionType, nextToken = null) => {
-    const queryInput: ListPostsByDateQueryVariables = {
+    const queryVariables: ListPostsByDateQueryVariables = {
       type: 'post',
       sortDirection: ModelSortDirection.DESC,
       limit: 20,
@@ -56,7 +56,7 @@ const Posts: NextPage = () => {
     }
 
     const res = (await API.graphql(
-      graphqlOperation(listPostsByDate, queryInput)
+      graphqlOperation(listPostsByDate, queryVariables)
     )) as GraphQLResult<ListPostsByDateQuery>
 
     dispatch({ type: type, posts: res.data.listPostsByDate.items })
@@ -101,35 +101,29 @@ const Posts: NextPage = () => {
 }
 
 const Form: React.FC = () => {
-  const initialInput: CreatePostInput = {
-    type: 'post',
-    content: '',
-  }
-  const [createPostInput, setCreatePostInput] =
-    useState<CreatePostInput>(initialInput)
+  const [content, setContent] = useState('')
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCreatePostInput({
-      ...createPostInput,
-      content: e.target.value,
-    })
+    setContent(e.target.value)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    await API.graphql(
-      graphqlOperation(createPost, {
-        input: createPostInput,
-      })
-    )
+    const mutationVariables: CreatePostMutationVariables = {
+      input: {
+        content: content,
+        type: 'post',
+      },
+    }
+    await API.graphql(graphqlOperation(createPost, mutationVariables))
 
-    setCreatePostInput(initialInput)
+    setContent('')
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" value={createPostInput.content} onChange={onChange} />
+      <input type="text" value={content} onChange={onChange} />
       <button type="submit">create post</button>
     </form>
   )
