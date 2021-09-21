@@ -15,6 +15,7 @@ import {
 import { listPostsByDate } from '../src/graphql/queries'
 import { onCreatePost } from '../src/graphql/subscriptions'
 import { Observable } from './../node_modules/zen-observable-ts'
+import ReactMarkdown from 'react-markdown'
 
 enum ActionType {
   Subscription = 'subscription',
@@ -89,21 +90,19 @@ const Posts: NextPage = () => {
     <React.Fragment>
       {authenticated && <AmplifySignOut />}
       <h1>post page</h1>
-      {authenticated && <Form />}
-      <li>
-        {posts.map((post, key) => (
-          <ul key={key}>{post.content}</ul>
-        ))}
-      </li>
+      {authenticated && <PostForm />}
+      {posts.map((post, key) => (
+        <ReactMarkdown key={key}>{post.content}</ReactMarkdown>
+      ))}
       <button onClick={getAdditionalPosts}>Read more</button>
     </React.Fragment>
   )
 }
 
-const Form: React.FC = () => {
+const PostForm: React.FC = () => {
   const [content, setContent] = useState('')
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
   }
 
@@ -123,7 +122,7 @@ const Form: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" value={content} onChange={onChange} />
+      <textarea value={content} onChange={onChange} />
       <button type="submit">create post</button>
     </form>
   )
