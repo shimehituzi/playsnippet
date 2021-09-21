@@ -10,7 +10,7 @@ import {
   makeStyles,
   Container,
 } from '@material-ui/core'
-import PostList from '../src/container/postList'
+import { PostList } from '../src/container/PostList'
 
 const useStyle = makeStyles({
   header: {
