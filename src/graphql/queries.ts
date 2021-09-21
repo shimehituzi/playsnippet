@@ -23,6 +23,14 @@ export const getPost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -34,6 +42,14 @@ export const getPost = /* GraphQL */ `
           comment
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -55,9 +71,29 @@ export const listPosts = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -90,9 +126,29 @@ export const listPostsByDate = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -125,9 +181,29 @@ export const listPostsByOwner = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -156,9 +232,29 @@ export const getCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -190,6 +286,12 @@ export const listCodes = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
@@ -231,6 +333,12 @@ export const listCodesByDate = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
@@ -272,6 +380,12 @@ export const listCodesByOwner = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
@@ -295,9 +409,29 @@ export const getComment = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -325,6 +459,12 @@ export const listComments = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
@@ -362,6 +502,12 @@ export const listCommentsByOwner = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
@@ -399,6 +545,12 @@ export const listCommentsByPost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken

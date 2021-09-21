@@ -4,3 +4,5 @@ yarn.lock
 package-lock.json
 public
 amplify/
+src/graphql/
+API.ts

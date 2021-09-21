@@ -26,6 +26,14 @@ export const createPost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -37,6 +45,14 @@ export const createPost = /* GraphQL */ `
           comment
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -67,6 +83,14 @@ export const updatePost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -78,6 +102,14 @@ export const updatePost = /* GraphQL */ `
           comment
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -108,6 +140,14 @@ export const deletePost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -119,6 +159,14 @@ export const deletePost = /* GraphQL */ `
           comment
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -149,9 +197,29 @@ export const createCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -182,9 +250,29 @@ export const updateCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -215,9 +303,29 @@ export const deleteCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -244,9 +352,29 @@ export const createComment = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -273,9 +401,29 @@ export const updateComment = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
@@ -302,9 +450,29 @@ export const deleteComment = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }

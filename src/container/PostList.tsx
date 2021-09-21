@@ -1,19 +1,31 @@
 import React, { useEffect, useReducer, useState } from 'react'
 import { useAuth } from '../hooks'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createPost } from '../graphql/mutations'
 import {
-  CreatePostMutationVariables,
   ListPostsByDateQueryVariables,
   ModelSortDirection,
   ListPostsByDateQuery,
-  OnCreatePostSubscription,
+  OnCreateCodeSubscription,
   Post,
 } from '../API'
 import { listPostsByDate } from '../graphql/queries'
-import { onCreatePost } from '../graphql/subscriptions'
+import { onCreateCode } from '../graphql/subscriptions'
 import { Observable } from '../../node_modules/zen-observable-ts'
-import ReactMarkdown from 'react-markdown'
+import { PostListItem } from '../component/PostListItem'
+import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
+import { PostForm } from './PostForm'
+
+const useStyle = makeStyles({
+  card: {
+    backgroundColor: colors.grey[500],
+    padding: '1%',
+    paddingLeft: '5%',
+    paddingRight: '5%',
+  },
+  grid: {
+    padding: '2%',
+  },
+})
 
 enum ActionType {
   Subscription = 'subscription',
@@ -40,11 +52,13 @@ const reducer = (state: Post[], action: ReducerAction) => {
   }
 }
 
-const Posts: React.FC = () => {
+export const PostList: React.FC = () => {
   const { authenticated, authMode, isInit } = useAuth()
 
   const [posts, dispatch] = useReducer(reducer, [])
   const [nextToken, setNextToken] = useState<string | null>(null)
+
+  const classes = useStyle()
 
   const getPosts = async (type: ActionType, nextToken = null) => {
     const queryVariables: ListPostsByDateQueryVariables = {
@@ -73,14 +87,14 @@ const Posts: React.FC = () => {
     if (!isInit) return
     getPosts(ActionType.InitialQuery)
 
-    type Clinet = Observable<{ value: GraphQLResult<OnCreatePostSubscription> }>
+    type Clinet = Observable<{ value: GraphQLResult<OnCreateCodeSubscription> }>
     const client = API.graphql({
-      ...graphqlOperation(onCreatePost),
+      ...graphqlOperation(onCreateCode),
       authMode,
     }) as Clinet
     const subscription = client.subscribe({
       next: (msg) => {
-        const post = msg.value.data.onCreatePost
+        const post = msg.value.data.onCreateCode.post
         dispatch({ type: ActionType.Subscription, post: post })
       },
     })
@@ -93,41 +107,22 @@ const Posts: React.FC = () => {
   return (
     <React.Fragment>
       {authenticated && <PostForm />}
-      {posts.map((post, key) => (
-        <ReactMarkdown key={key}>{post.content}</ReactMarkdown>
-      ))}
-      <button onClick={getAdditionalPosts}>Read more</button>
+      <Grid container alignItems="center" justifyContent="center">
+        {posts.map((post, key) => (
+          <Grid item xs={12} className={classes.grid} key={key}>
+            <Card className={classes.card}>
+              <PostListItem post={post} />
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container alignItems="center" justifyContent="center">
+        <Grid item>
+          <Button onClick={getAdditionalPosts} variant="outlined">
+            Read more
+          </Button>
+        </Grid>
+      </Grid>
     </React.Fragment>
   )
 }
-
-const PostForm: React.FC = () => {
-  const [content, setContent] = useState('')
-
-  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value)
-  }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const mutationVariables: CreatePostMutationVariables = {
-      input: {
-        content: content,
-        type: 'post',
-      },
-    }
-    await API.graphql(graphqlOperation(createPost, mutationVariables))
-
-    setContent('')
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <textarea value={content} onChange={onChange} />
-      <button type="submit">create post</button>
-    </form>
-  )
-}
-
-export default Posts
