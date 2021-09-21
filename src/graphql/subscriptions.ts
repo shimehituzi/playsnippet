@@ -55,7 +55,7 @@ export const onCreatePost = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const onUpdatePost = /* GraphQL */ `
   subscription OnUpdatePost {
     onUpdatePost {
@@ -109,7 +109,7 @@ export const onUpdatePost = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const onDeletePost = /* GraphQL */ `
   subscription OnDeletePost {
     onDeletePost {
@@ -163,7 +163,7 @@ export const onDeletePost = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const onCreateCode = /* GraphQL */ `
   subscription OnCreateCode {
     onCreateCode {
@@ -213,7 +213,7 @@ export const onCreateCode = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const onUpdateCode = /* GraphQL */ `
   subscription OnUpdateCode {
     onUpdateCode {
@@ -263,7 +263,7 @@ export const onUpdateCode = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const onDeleteCode = /* GraphQL */ `
   subscription OnDeleteCode {
     onDeleteCode {
@@ -313,7 +313,7 @@ export const onDeleteCode = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const onCreateComment = /* GraphQL */ `
   subscription OnCreateComment {
     onCreateComment {
@@ -359,7 +359,7 @@ export const onCreateComment = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const onUpdateComment = /* GraphQL */ `
   subscription OnUpdateComment {
     onUpdateComment {
@@ -405,7 +405,7 @@ export const onUpdateComment = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const onDeleteComment = /* GraphQL */ `
   subscription OnDeleteComment {
     onDeleteComment {
@@ -451,4 +451,4 @@ export const onDeleteComment = /* GraphQL */ `
       }
     }
   }
-`
+`;

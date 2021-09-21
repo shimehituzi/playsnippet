@@ -8,16 +8,15 @@ import {
   ListPostsByDateQueryVariables,
   ModelSortDirection,
   ListPostsByDateQuery,
-  OnCreatePostSubscription,
   CreateCodeMutationVariables,
+  OnCreateCodeSubscription,
   Post,
 } from '../API'
 import { listPostsByDate } from '../graphql/queries'
-import { onCreatePost } from '../graphql/subscriptions'
+import { onCreateCode } from '../graphql/subscriptions'
 import { Observable } from '../../node_modules/zen-observable-ts'
 import { PostListItem } from '../component/postListItem'
 import { Card, colors, Grid, makeStyles } from '@material-ui/core'
-import Editor from 'react-simple-code-editor'
 
 const useStyle = makeStyles({
   tiles: {
@@ -30,9 +29,6 @@ const useStyle = makeStyles({
   },
   grid: {
     padding: '1%',
-  },
-  editor: {
-    backgroundColor: colors.grey[500],
   },
 })
 
@@ -96,14 +92,14 @@ const PostList: React.FC = () => {
     if (!isInit) return
     getPosts(ActionType.InitialQuery)
 
-    type Clinet = Observable<{ value: GraphQLResult<OnCreatePostSubscription> }>
+    type Clinet = Observable<{ value: GraphQLResult<OnCreateCodeSubscription> }>
     const client = API.graphql({
-      ...graphqlOperation(onCreatePost),
+      ...graphqlOperation(onCreateCode),
       authMode,
     }) as Clinet
     const subscription = client.subscribe({
       next: (msg) => {
-        const post = msg.value.data.onCreatePost
+        const post = msg.value.data.onCreateCode.post
         dispatch({ type: ActionType.Subscription, post: post })
       },
     })
@@ -137,8 +133,6 @@ type CodeInput = {
 }
 
 const PostForm: React.FC = () => {
-  const classes = useStyle()
-
   const [content, setContent] = useState('')
   const [code, setCode] = useState<CodeInput>({
     code: '',
@@ -146,14 +140,21 @@ const PostForm: React.FC = () => {
     name: '',
   })
 
-  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onChangeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
   }
 
-  const onValueChange = (value: string) => {
+  const onChangeCode = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCode({
       ...code,
-      code: value,
+      code: e.target.value,
+    })
+  }
+
+  const onChangeInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCode({
+      ...code,
+      [e.target.id]: e.target.value,
     })
   }
 
@@ -185,46 +186,42 @@ const PostForm: React.FC = () => {
     await API.graphql(graphqlOperation(createCode, createCodeMutationVariables))
 
     setContent('')
-  }
-
-  const onChangeInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setCode({
-      ...code,
-      [e.target.id]: e.target.value,
+      code: '',
+      lang: '',
+      name: '',
     })
   }
-
-  const highlight = (s: string) => s
 
   return (
     <form onSubmit={handleSubmit}>
       <Grid container>
         <Grid item xs={12}>
-          <textarea value={content} onChange={onChange} />
-        </Grid>
-        <Grid item xs={3}>
+          <textarea
+            value={code.code}
+            onChange={onChangeCode}
+            placeholder="code"
+          />
           <input
             type="text"
             value={code.name}
             id="name"
             onChange={onChangeInput}
-            size={40}
+            placeholder="code title"
           />
-        </Grid>
-        <Grid item xs={7} className={classes.editor}>
-          <Editor
-            value={code.code}
-            onValueChange={onValueChange}
-            highlight={highlight}
-          />
-        </Grid>
-        <Grid item xs={2}>
           <input
             type="text"
             value={code.lang}
             id="lang"
             onChange={onChangeInput}
-            size={20}
+            placeholder="code lang"
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <textarea
+            value={content}
+            onChange={onChangeContent}
+            placeholder="post content"
           />
         </Grid>
       </Grid>

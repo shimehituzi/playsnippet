@@ -58,7 +58,7 @@ export const createPost = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const updatePost = /* GraphQL */ `
   mutation UpdatePost(
     $input: UpdatePostInput!
@@ -115,7 +115,7 @@ export const updatePost = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const deletePost = /* GraphQL */ `
   mutation DeletePost(
     $input: DeletePostInput!
@@ -172,7 +172,7 @@ export const deletePost = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const createCode = /* GraphQL */ `
   mutation CreateCode(
     $input: CreateCodeInput!
@@ -225,7 +225,7 @@ export const createCode = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const updateCode = /* GraphQL */ `
   mutation UpdateCode(
     $input: UpdateCodeInput!
@@ -278,7 +278,7 @@ export const updateCode = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const deleteCode = /* GraphQL */ `
   mutation DeleteCode(
     $input: DeleteCodeInput!
@@ -331,7 +331,7 @@ export const deleteCode = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const createComment = /* GraphQL */ `
   mutation CreateComment(
     $input: CreateCommentInput!
@@ -380,7 +380,7 @@ export const createComment = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const updateComment = /* GraphQL */ `
   mutation UpdateComment(
     $input: UpdateCommentInput!
@@ -429,7 +429,7 @@ export const updateComment = /* GraphQL */ `
       }
     }
   }
-`
+`;
 export const deleteComment = /* GraphQL */ `
   mutation DeleteComment(
     $input: DeleteCommentInput!
@@ -478,4 +478,4 @@ export const deleteComment = /* GraphQL */ `
       }
     }
   }
-`
+`;
