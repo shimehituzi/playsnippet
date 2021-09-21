@@ -19,6 +19,9 @@ const useStyle = makeStyles({
   postList: {
     marginBottom: '3%',
   },
+  button: {
+    textTransform: 'none',
+  },
 })
 
 const Home: NextPage = () => {
@@ -31,9 +34,9 @@ const Home: NextPage = () => {
       <Container>
         <Grid
           container
-          direction="column"
-          justifyContent="center"
-          spacing={3}
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
           className={classes.header}
         >
           <Grid item md={6}>
@@ -41,7 +44,7 @@ const Home: NextPage = () => {
               Play Snippet
             </Typography>
           </Grid>
-          <Grid item md={6}>
+          <Grid item md={2}>
             {authenticated ? (
               <Button>
                 <AmplifySignOut />
@@ -53,8 +56,9 @@ const Home: NextPage = () => {
                   variant="outlined"
                   color="primary"
                   size="large"
+                  className={classes.button}
                 >
-                  <Typography variant="h6">SingIn</Typography>
+                  <Typography variant="h5">Sign in</Typography>
                 </Button>
               </Link>
             )}
