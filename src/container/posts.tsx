@@ -1,9 +1,7 @@
 import React, { useEffect, useReducer, useState } from 'react'
-import { NextPage } from 'next'
-import { AmplifySignOut } from '@aws-amplify/ui-react'
-import { useAuth } from '../src/hooks'
+import { useAuth } from '../hooks'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createPost } from '../src/graphql/mutations'
+import { createPost } from '../graphql/mutations'
 import {
   CreatePostMutationVariables,
   ListPostsByDateQueryVariables,
@@ -11,10 +9,11 @@ import {
   ListPostsByDateQuery,
   OnCreatePostSubscription,
   Post,
-} from '../src/API'
-import { listPostsByDate } from '../src/graphql/queries'
-import { onCreatePost } from '../src/graphql/subscriptions'
-import { Observable } from './../node_modules/zen-observable-ts'
+} from '../API'
+import { listPostsByDate } from '../graphql/queries'
+import { onCreatePost } from '../graphql/subscriptions'
+import { Observable } from '../../node_modules/zen-observable-ts'
+import ReactMarkdown from 'react-markdown'
 
 enum ActionType {
   Subscription = 'subscription',
@@ -41,8 +40,8 @@ const reducer = (state: Post[], action: ReducerAction) => {
   }
 }
 
-const Posts: NextPage = () => {
-  const { authenticated } = useAuth()
+const Posts: React.FC = () => {
+  const { authenticated, authMode, isInit } = useAuth()
 
   const [posts, dispatch] = useReducer(reducer, [])
   const [nextToken, setNextToken] = useState<string | null>(null)
@@ -55,9 +54,10 @@ const Posts: NextPage = () => {
       nextToken: nextToken,
     }
 
-    const res = (await API.graphql(
-      graphqlOperation(listPostsByDate, queryVariables)
-    )) as GraphQLResult<ListPostsByDateQuery>
+    const res = (await API.graphql({
+      ...graphqlOperation(listPostsByDate, queryVariables),
+      authMode,
+    })) as GraphQLResult<ListPostsByDateQuery>
 
     dispatch({ type: type, posts: res.data.listPostsByDate.items })
     setNextToken(res.data.listPostsByDate.nextToken)
@@ -65,14 +65,19 @@ const Posts: NextPage = () => {
 
   const getAdditionalPosts = () => {
     if (nextToken === null) return
+    if (!isInit) return
     getPosts(ActionType.AdditionalQuery, nextToken)
   }
 
   useEffect(() => {
+    if (!isInit) return
     getPosts(ActionType.InitialQuery)
 
     type Clinet = Observable<{ value: GraphQLResult<OnCreatePostSubscription> }>
-    const client = API.graphql(graphqlOperation(onCreatePost)) as Clinet
+    const client = API.graphql({
+      ...graphqlOperation(onCreatePost),
+      authMode,
+    }) as Clinet
     const subscription = client.subscribe({
       next: (msg) => {
         const post = msg.value.data.onCreatePost
@@ -83,27 +88,23 @@ const Posts: NextPage = () => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [isInit])
 
   return (
     <React.Fragment>
-      {authenticated && <AmplifySignOut />}
-      <h1>post page</h1>
-      {authenticated && <Form />}
-      <li>
-        {posts.map((post, key) => (
-          <ul key={key}>{post.content}</ul>
-        ))}
-      </li>
+      {authenticated && <PostForm />}
+      {posts.map((post, key) => (
+        <ReactMarkdown key={key}>{post.content}</ReactMarkdown>
+      ))}
       <button onClick={getAdditionalPosts}>Read more</button>
     </React.Fragment>
   )
 }
 
-const Form: React.FC = () => {
+const PostForm: React.FC = () => {
   const [content, setContent] = useState('')
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
   }
 
@@ -123,7 +124,7 @@ const Form: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" value={content} onChange={onChange} />
+      <textarea value={content} onChange={onChange} />
       <button type="submit">create post</button>
     </form>
   )

@@ -36,6 +36,9 @@ yarn-error.log*
 # secret
 amplify/team-provider-info.json
 
+# GraphQL resolvers
+resolvers/
+
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
