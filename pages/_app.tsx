@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
-import { Container, CssBaseline, Paper } from '@material-ui/core'
+import { CssBaseline } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core'
 import { theme } from '../src/theme'
 
@@ -26,11 +26,7 @@ const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Container>
-          <Paper elevation={10} square>
-            <Component {...pageProps} />
-          </Paper>
-        </Container>
+        <Component {...pageProps} />
       </ThemeProvider>
     </React.Fragment>
   )
