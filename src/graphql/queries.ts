@@ -23,6 +23,14 @@ export const getPost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -34,12 +42,20 @@ export const getPost = /* GraphQL */ `
           comment
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
     }
   }
-`;
+`
 export const listPosts = /* GraphQL */ `
   query ListPosts(
     $filter: ModelPostFilterInput
@@ -55,16 +71,36 @@ export const listPosts = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
       nextToken
     }
   }
-`;
+`
 export const listPostsByDate = /* GraphQL */ `
   query ListPostsByDate(
     $type: String
@@ -90,16 +126,36 @@ export const listPostsByDate = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
       nextToken
     }
   }
-`;
+`
 export const listPostsByOwner = /* GraphQL */ `
   query ListPostsByOwner(
     $owner: String
@@ -125,16 +181,36 @@ export const listPostsByOwner = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
       nextToken
     }
   }
-`;
+`
 export const getCode = /* GraphQL */ `
   query GetCode($id: ID!) {
     getCode(id: $id) {
@@ -156,15 +232,35 @@ export const getCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
     }
   }
-`;
+`
 export const listCodes = /* GraphQL */ `
   query ListCodes(
     $filter: ModelCodeFilterInput
@@ -190,12 +286,18 @@ export const listCodes = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
     }
   }
-`;
+`
 export const listCodesByDate = /* GraphQL */ `
   query ListCodesByDate(
     $type: String
@@ -231,12 +333,18 @@ export const listCodesByDate = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
     }
   }
-`;
+`
 export const listCodesByOwner = /* GraphQL */ `
   query ListCodesByOwner(
     $owner: String
@@ -272,12 +380,18 @@ export const listCodesByOwner = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
     }
   }
-`;
+`
 export const getComment = /* GraphQL */ `
   query GetComment($id: ID!) {
     getComment(id: $id) {
@@ -295,15 +409,35 @@ export const getComment = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
     }
   }
-`;
+`
 export const listComments = /* GraphQL */ `
   query ListComments(
     $filter: ModelCommentFilterInput
@@ -325,12 +459,18 @@ export const listComments = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
     }
   }
-`;
+`
 export const listCommentsByOwner = /* GraphQL */ `
   query ListCommentsByOwner(
     $owner: String
@@ -362,12 +502,18 @@ export const listCommentsByOwner = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
     }
   }
-`;
+`
 export const listCommentsByPost = /* GraphQL */ `
   query ListCommentsByPost(
     $postID: ID
@@ -399,9 +545,15 @@ export const listCommentsByPost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
         }
       }
       nextToken
     }
   }
-`;
+`

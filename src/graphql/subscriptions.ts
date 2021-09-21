@@ -23,6 +23,14 @@ export const onCreatePost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -34,12 +42,20 @@ export const onCreatePost = /* GraphQL */ `
           comment
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
     }
   }
-`;
+`
 export const onUpdatePost = /* GraphQL */ `
   subscription OnUpdatePost {
     onUpdatePost {
@@ -61,6 +77,14 @@ export const onUpdatePost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -72,12 +96,20 @@ export const onUpdatePost = /* GraphQL */ `
           comment
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
     }
   }
-`;
+`
 export const onDeletePost = /* GraphQL */ `
   subscription OnDeletePost {
     onDeletePost {
@@ -99,6 +131,14 @@ export const onDeletePost = /* GraphQL */ `
           type
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
@@ -110,12 +150,20 @@ export const onDeletePost = /* GraphQL */ `
           comment
           createdAt
           updatedAt
+          post {
+            id
+            owner
+            content
+            type
+            createdAt
+            updatedAt
+          }
         }
         nextToken
       }
     }
   }
-`;
+`
 export const onCreateCode = /* GraphQL */ `
   subscription OnCreateCode {
     onCreateCode {
@@ -137,15 +185,35 @@ export const onCreateCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
     }
   }
-`;
+`
 export const onUpdateCode = /* GraphQL */ `
   subscription OnUpdateCode {
     onUpdateCode {
@@ -167,15 +235,35 @@ export const onUpdateCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
     }
   }
-`;
+`
 export const onDeleteCode = /* GraphQL */ `
   subscription OnDeleteCode {
     onDeleteCode {
@@ -197,15 +285,35 @@ export const onDeleteCode = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
     }
   }
-`;
+`
 export const onCreateComment = /* GraphQL */ `
   subscription OnCreateComment {
     onCreateComment {
@@ -223,15 +331,35 @@ export const onCreateComment = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
     }
   }
-`;
+`
 export const onUpdateComment = /* GraphQL */ `
   subscription OnUpdateComment {
     onUpdateComment {
@@ -249,15 +377,35 @@ export const onUpdateComment = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
     }
   }
-`;
+`
 export const onDeleteComment = /* GraphQL */ `
   subscription OnDeleteComment {
     onDeleteComment {
@@ -275,12 +423,32 @@ export const onDeleteComment = /* GraphQL */ `
         createdAt
         updatedAt
         codes {
+          items {
+            id
+            owner
+            postID
+            name
+            lang
+            code
+            skipline
+            type
+            createdAt
+            updatedAt
+          }
           nextToken
         }
         comments {
+          items {
+            id
+            owner
+            postID
+            comment
+            createdAt
+            updatedAt
+          }
           nextToken
         }
       }
     }
   }
-`;
+`
