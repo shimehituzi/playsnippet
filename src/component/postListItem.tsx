@@ -2,7 +2,7 @@ import React from 'react'
 import { Post } from '../API'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Typography } from '@material-ui/core'
 
 type Props = {
@@ -19,7 +19,7 @@ export const PostListItem: React.FC<Props> = ({ post }) => {
             <Typography variant="body2" color="secondary">
               {code.name}
             </Typography>
-            <SyntaxHighlighter language={code.lang} style={dark}>
+            <SyntaxHighlighter language={code.lang} style={vscDarkPlus}>
               {code.code}
             </SyntaxHighlighter>
           </React.Fragment>

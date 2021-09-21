@@ -16,19 +16,17 @@ import { listPostsByDate } from '../graphql/queries'
 import { onCreateCode } from '../graphql/subscriptions'
 import { Observable } from '../../node_modules/zen-observable-ts'
 import { PostListItem } from '../component/postListItem'
-import { Card, colors, Grid, makeStyles } from '@material-ui/core'
+import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
 
 const useStyle = makeStyles({
-  tiles: {
-    padding: '1%',
-  },
   card: {
     backgroundColor: colors.grey[500],
     padding: '1%',
     paddingLeft: '5%',
+    paddingRight: '5%',
   },
   grid: {
-    padding: '1%',
+    padding: '2%',
   },
 })
 
@@ -112,16 +110,22 @@ const PostList: React.FC = () => {
   return (
     <React.Fragment>
       {authenticated && <PostForm />}
-      <Grid container className={classes.tiles}>
+      <Grid container>
         {posts.map((post, key) => (
-          <Grid item xs={4} className={classes.grid} key={key}>
+          <Grid item xs={12} className={classes.grid} key={key}>
             <Card className={classes.card}>
               <PostListItem post={post} />
             </Card>
           </Grid>
         ))}
       </Grid>
-      <button onClick={getAdditionalPosts}>Read more</button>
+      <Grid container alignItems="center" justifyContent="center">
+        <Grid item>
+          <Button onClick={getAdditionalPosts} variant="outlined">
+            Read more
+          </Button>
+        </Grid>
+      </Grid>
     </React.Fragment>
   )
 }
@@ -225,7 +229,9 @@ const PostForm: React.FC = () => {
           />
         </Grid>
       </Grid>
-      <button type="submit">create post</button>
+      <Button variant="contained" type="submit">
+        create post
+      </Button>
     </form>
   )
 }
