@@ -1,9 +1,7 @@
 import React, { useEffect, useReducer, useState } from 'react'
-import { NextPage } from 'next'
-import { AmplifySignOut } from '@aws-amplify/ui-react'
-import { useAuth } from '../src/hooks'
+import { useAuth } from '../hooks'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createPost } from '../src/graphql/mutations'
+import { createPost } from '../graphql/mutations'
 import {
   CreatePostMutationVariables,
   ListPostsByDateQueryVariables,
@@ -11,10 +9,10 @@ import {
   ListPostsByDateQuery,
   OnCreatePostSubscription,
   Post,
-} from '../src/API'
-import { listPostsByDate } from '../src/graphql/queries'
-import { onCreatePost } from '../src/graphql/subscriptions'
-import { Observable } from './../node_modules/zen-observable-ts'
+} from '../API'
+import { listPostsByDate } from '../graphql/queries'
+import { onCreatePost } from '../graphql/subscriptions'
+import { Observable } from '../../node_modules/zen-observable-ts'
 import ReactMarkdown from 'react-markdown'
 
 enum ActionType {
@@ -42,7 +40,7 @@ const reducer = (state: Post[], action: ReducerAction) => {
   }
 }
 
-const Posts: NextPage = () => {
+const Posts: React.FC = () => {
   const { authenticated } = useAuth()
 
   const [posts, dispatch] = useReducer(reducer, [])
@@ -70,6 +68,7 @@ const Posts: NextPage = () => {
   }
 
   useEffect(() => {
+    if (!authenticated) return
     getPosts(ActionType.InitialQuery)
 
     type Clinet = Observable<{ value: GraphQLResult<OnCreatePostSubscription> }>
@@ -88,8 +87,6 @@ const Posts: NextPage = () => {
 
   return (
     <React.Fragment>
-      {authenticated && <AmplifySignOut />}
-      <h1>post page</h1>
       {authenticated && <PostForm />}
       {posts.map((post, key) => (
         <ReactMarkdown key={key}>{post.content}</ReactMarkdown>
