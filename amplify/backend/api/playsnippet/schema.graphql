@@ -1,5 +1,5 @@
 type Post
-  @model (subscriptions: { level: public })
+  @model
   @auth (
     rules: [
       { allow: owner },
@@ -20,7 +20,7 @@ type Post
 }
 
 type Code
-  @model (subscriptions: { level: public })
+  @model
   @auth (
     rules: [
       { allow: owner },
@@ -45,7 +45,7 @@ type Code
 }
 
 type Comment
-  @model (subscriptions: { level: public })
+  @model
   @auth (
     rules: [
       { allow: owner },

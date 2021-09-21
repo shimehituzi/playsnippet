@@ -41,7 +41,7 @@ const reducer = (state: Post[], action: ReducerAction) => {
 }
 
 const Posts: React.FC = () => {
-  const { authenticated } = useAuth()
+  const { authenticated, authMode, isInit } = useAuth()
 
   const [posts, dispatch] = useReducer(reducer, [])
   const [nextToken, setNextToken] = useState<string | null>(null)
@@ -54,9 +54,10 @@ const Posts: React.FC = () => {
       nextToken: nextToken,
     }
 
-    const res = (await API.graphql(
-      graphqlOperation(listPostsByDate, queryVariables)
-    )) as GraphQLResult<ListPostsByDateQuery>
+    const res = (await API.graphql({
+      ...graphqlOperation(listPostsByDate, queryVariables),
+      authMode,
+    })) as GraphQLResult<ListPostsByDateQuery>
 
     dispatch({ type: type, posts: res.data.listPostsByDate.items })
     setNextToken(res.data.listPostsByDate.nextToken)
@@ -64,15 +65,19 @@ const Posts: React.FC = () => {
 
   const getAdditionalPosts = () => {
     if (nextToken === null) return
+    if (!isInit) return
     getPosts(ActionType.AdditionalQuery, nextToken)
   }
 
   useEffect(() => {
-    if (!authenticated) return
+    if (!isInit) return
     getPosts(ActionType.InitialQuery)
 
     type Clinet = Observable<{ value: GraphQLResult<OnCreatePostSubscription> }>
-    const client = API.graphql(graphqlOperation(onCreatePost)) as Clinet
+    const client = API.graphql({
+      ...graphqlOperation(onCreatePost),
+      authMode,
+    }) as Clinet
     const subscription = client.subscribe({
       next: (msg) => {
         const post = msg.value.data.onCreatePost
@@ -83,7 +88,7 @@ const Posts: React.FC = () => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [isInit])
 
   return (
     <React.Fragment>
