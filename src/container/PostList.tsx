@@ -107,7 +107,7 @@ export const PostList: React.FC = () => {
   return (
     <React.Fragment>
       {authenticated && <PostForm />}
-      <Grid container>
+      <Grid container alignItems="center" justifyContent="center">
         {posts.map((post, key) => (
           <Grid item xs={12} className={classes.grid} key={key}>
             <Card className={classes.card}>

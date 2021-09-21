@@ -6,7 +6,13 @@ import {
   CreatePostMutation,
   CreateCodeMutationVariables,
 } from '../API'
-import { Button, Grid } from '@material-ui/core'
+import { Button, Grid, makeStyles, TextField } from '@material-ui/core'
+
+const useStyle = makeStyles({
+  form: {
+    margin: '2%',
+  },
+})
 
 type CodeInput = {
   name: string
@@ -15,6 +21,8 @@ type CodeInput = {
 }
 
 export const PostForm: React.FC = () => {
+  const classes = useStyle()
+
   const [content, setContent] = useState('')
   const [code, setCode] = useState<CodeInput>({
     code: '',
@@ -22,26 +30,18 @@ export const PostForm: React.FC = () => {
     name: '',
   })
 
-  const onChangeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onChangeContent = (e: React.ChangeEvent<HTMLInputElement>) => {
     setContent(e.target.value)
   }
 
-  const onChangeCode = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCode({
-      ...code,
-      code: e.target.value,
-    })
-  }
-
-  const onChangeInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeCode = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCode({
       ...code,
       [e.target.id]: e.target.value,
     })
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     if (code.code === '') return
     if (code.name === '') return
     if (code.lang === '') return
@@ -76,40 +76,53 @@ export const PostForm: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Grid container>
-        <Grid item xs={12}>
-          <textarea
-            value={code.code}
-            onChange={onChangeCode}
-            placeholder="code"
-          />
-          <input
-            type="text"
-            value={code.name}
-            id="name"
-            onChange={onChangeInput}
-            placeholder="code title"
-          />
-          <input
-            type="text"
-            value={code.lang}
-            id="lang"
-            onChange={onChangeInput}
-            placeholder="code lang"
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <textarea
-            value={content}
-            onChange={onChangeContent}
-            placeholder="post content"
-          />
-        </Grid>
+    <Grid container justifyContent="center" alignItems="center">
+      <Grid item xs={10} className={classes.form}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          label="Post Content"
+          multiline
+          value={content}
+          onChange={onChangeContent}
+        />
       </Grid>
-      <Button variant="contained" type="submit">
-        create post
-      </Button>
-    </form>
+      <Grid item xs={5} className={classes.form}>
+        <TextField
+          fullWidth
+          variant="standard"
+          label="Code Name"
+          value={code.name}
+          onChange={onChangeCode}
+          id="name"
+        />
+      </Grid>
+      <Grid item xs={3} className={classes.form}>
+        <TextField
+          fullWidth
+          variant="standard"
+          label="Code Language"
+          value={code.lang}
+          onChange={onChangeCode}
+          id="lang"
+        />
+      </Grid>
+      <Grid item xs={10} className={classes.form}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          label="Code"
+          multiline
+          value={code.code}
+          onChange={onChangeCode}
+          id="code"
+        />
+      </Grid>
+      <Grid item>
+        <Button variant="contained" onClick={handleSubmit}>
+          create post
+        </Button>
+      </Grid>
+    </Grid>
   )
 }
