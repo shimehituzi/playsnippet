@@ -67,6 +67,7 @@ export const PostList: React.FC = () => {
 
   const [posts, dispatch] = useReducer(reducer, [])
   const [nextToken, setNextToken] = useState<string | null>(null)
+  const [typingID, setTypingID] = useState<string>('')
 
   const classes = useStyle()
 
@@ -170,6 +171,8 @@ export const PostList: React.FC = () => {
             <Card className={classes.card}>
               <PostListItem
                 post={post}
+                typingID={typingID}
+                setTypingID={setTypingID}
                 handleDeletePost={handleDeletePost}
                 isOwner={user ? user.username === post.owner : false}
               />

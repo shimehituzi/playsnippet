@@ -1,12 +1,33 @@
 import React, { useEffect, useCallback, useMemo, useState } from 'react'
-import { Wrapper, Pre, Line, LineNo } from './styled'
+import { Pre, Line, LineNo } from './styled'
 import { FinishedLine } from './FinishedLine'
 import { ProgressingLine } from './ProgressingLine'
 import { UnFinishedLine } from './UnFinishedLine'
+import Highlight, { defaultProps, Language } from 'prism-react-renderer'
+import theme from 'prism-react-renderer/themes/vsDark'
 
-type Props = App.CodeRendererProps
+type Props = {
+  code: string
+  lang: string
+  stop: () => void
+}
 
-export type CharMap = {
+export const TypingCode: React.FC<Props> = ({ code, lang, stop }) => {
+  return (
+    <Highlight
+      {...defaultProps}
+      theme={theme}
+      code={code}
+      language={lang as Language}
+    >
+      {(props) => <CodeRenderer {...props} stop={stop} />}
+    </Highlight>
+  )
+}
+
+const isSpace = (str: string) => str.match(/^\s+$/) !== null
+
+type CharMap = {
   l: number
   t: number
   c: number
@@ -14,14 +35,13 @@ export type CharMap = {
   token: App.CodeToken
 }[]
 
-const isSpace = (str: string) => str.match(/^\s+$/) !== null
-
-export const CodeRenderer: React.FC<Props> = ({
+const CodeRenderer: React.FC<App.CodeRendererProps & { stop: () => void }> = ({
   className,
   style,
   tokens,
   getLineProps,
   getTokenProps,
+  stop,
 }) => {
   const [gameOver, setGameOver] = useState<boolean>(false)
   const [cursor, setCursor] = useState<number>(0)
@@ -40,15 +60,13 @@ export const CodeRenderer: React.FC<Props> = ({
       remapedTokens
         .map((line, l) =>
           line.map((token, t) =>
-            token.content
-              .split('')
-              .map((character, c) => ({
-                l: l,
-                t: t,
-                c: c,
-                character: character,
-                token: token,
-              }))
+            token.content.split('').map((character, c) => ({
+              l: l,
+              t: t,
+              c: c,
+              character: character,
+              token: token,
+            }))
           )
         )
         .flat(2)
@@ -88,7 +106,10 @@ export const CodeRenderer: React.FC<Props> = ({
   }, [judge])
 
   useEffect(() => {
-    if (gameOver) alert('Finish')
+    if (gameOver) {
+      alert('Finish')
+      stop()
+    }
   }, [gameOver])
 
   useEffect(() => {
@@ -118,15 +139,13 @@ export const CodeRenderer: React.FC<Props> = ({
   }
 
   return (
-    <Wrapper>
-      <Pre className={className} style={style}>
-        {remapedTokens.map((line, l) => (
-          <Line key={l} {...getLineProps({ line, key: l })}>
-            <LineNo>{l + 1}</LineNo>
-            {renderLine(line, l)}
-          </Line>
-        ))}
-      </Pre>
-    </Wrapper>
+    <Pre className={className} style={style}>
+      {remapedTokens.map((line, l) => (
+        <Line key={l} {...getLineProps({ line, key: l })}>
+          <LineNo>{l + 1}</LineNo>
+          {renderLine(line, l)}
+        </Line>
+      ))}
+    </Pre>
   )
 }

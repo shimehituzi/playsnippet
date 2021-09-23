@@ -1,10 +1,5 @@
 import styled from 'styled-components'
 
-export const Wrapper = styled.div`
-  font-size: 1.2em;
-  text-align: center;
-`
-
 export const Pre = styled.pre`
   font-family: 'Ricty', 'Ricty Diminished', 'Ricty Diminished Discord',
     'Courier New', Consolas, monospace;
