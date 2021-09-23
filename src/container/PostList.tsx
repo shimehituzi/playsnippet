@@ -2,14 +2,19 @@ import React, { useEffect, useReducer, useState } from 'react'
 import { useAuth } from '../hooks'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import {
+  Post,
   ListPostsByDateQueryVariables,
   ModelSortDirection,
   ListPostsByDateQuery,
   OnCreateCodeSubscription,
-  Post,
+  OnDeletePostSubscription,
+  DeletePostMutationVariables,
+  DeletePostMutation,
+  DeleteCodeMutationVariables,
 } from '../API'
 import { listPostsByDate } from '../graphql/queries'
-import { onCreateCode } from '../graphql/subscriptions'
+import { deletePost, deleteCode } from '../graphql/mutations'
+import { onCreateCode, onDeletePost } from '../graphql/subscriptions'
 import { Observable } from '../../node_modules/zen-observable-ts'
 import { PostListItem } from '../component/PostListItem'
 import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
@@ -21,6 +26,7 @@ const useStyle = makeStyles({
     padding: '1%',
     paddingLeft: '5%',
     paddingRight: '5%',
+    minWidth: 726,
   },
   grid: {
     padding: '2%',
@@ -28,6 +34,7 @@ const useStyle = makeStyles({
 })
 
 enum ActionType {
+  Delete = 'Delete',
   Subscription = 'subscription',
   InitialQuery = 'initialQuery',
   AdditionalQuery = 'additionalQuery',
@@ -37,6 +44,7 @@ type ReducerAction = {
   type: ActionType
   post?: Post
   posts?: Post[]
+  deleteID?: string
 }
 
 const reducer = (state: Post[], action: ReducerAction) => {
@@ -47,20 +55,23 @@ const reducer = (state: Post[], action: ReducerAction) => {
       return [...state, ...action.posts]
     case ActionType.Subscription:
       return [action.post, ...state]
+    case ActionType.Delete:
+      return state.filter((post) => post.id !== action.deleteID)
     default:
       return state
   }
 }
 
 export const PostList: React.FC = () => {
-  const { authenticated, authMode, isInit } = useAuth()
+  const { authenticated, user, authMode, isInit } = useAuth()
 
   const [posts, dispatch] = useReducer(reducer, [])
   const [nextToken, setNextToken] = useState<string | null>(null)
+  const [typingID, setTypingID] = useState<string>('')
 
   const classes = useStyle()
 
-  const getPosts = async (type: ActionType, nextToken = null) => {
+  const handleGetPosts = async (type: ActionType, nextToken = null) => {
     const queryVariables: ListPostsByDateQueryVariables = {
       type: 'post',
       sortDirection: ModelSortDirection.DESC,
@@ -77,30 +88,77 @@ export const PostList: React.FC = () => {
     setNextToken(res.data.listPostsByDate.nextToken)
   }
 
-  const getAdditionalPosts = () => {
+  const handleDeletePost = async (postId: string) => {
+    const deletePostVariables: DeletePostMutationVariables = {
+      input: {
+        id: postId,
+      },
+    }
+
+    const deletePostResult = (await API.graphql({
+      ...graphqlOperation(deletePost, deletePostVariables),
+      authMode,
+    })) as GraphQLResult<DeletePostMutation>
+
+    const codeIds = deletePostResult.data.deletePost.codes.items.map(
+      (code) => code.id
+    )
+
+    codeIds.forEach(async (id) => {
+      const deleteCodeVariables: DeleteCodeMutationVariables = {
+        input: {
+          id: id,
+        },
+      }
+
+      await API.graphql({
+        ...graphqlOperation(deleteCode, deleteCodeVariables),
+        authMode,
+      })
+    })
+  }
+
+  const handleGetAdditionalPosts = () => {
     if (nextToken === null) return
     if (!isInit) return
-    getPosts(ActionType.AdditionalQuery, nextToken)
+    handleGetPosts(ActionType.AdditionalQuery, nextToken)
   }
 
   useEffect(() => {
     if (!isInit) return
-    getPosts(ActionType.InitialQuery)
+    handleGetPosts(ActionType.InitialQuery)
 
-    type Clinet = Observable<{ value: GraphQLResult<OnCreateCodeSubscription> }>
-    const client = API.graphql({
+    type CreateCodeClient = Observable<{
+      value: GraphQLResult<OnCreateCodeSubscription>
+    }>
+    const createCodeClient = API.graphql({
       ...graphqlOperation(onCreateCode),
       authMode,
-    }) as Clinet
-    const subscription = client.subscribe({
+    }) as CreateCodeClient
+    const createCodeSubscription = createCodeClient.subscribe({
       next: (msg) => {
         const post = msg.value.data.onCreateCode.post
         dispatch({ type: ActionType.Subscription, post: post })
       },
     })
 
+    type DeleteCodeClient = Observable<{
+      value: GraphQLResult<OnDeletePostSubscription>
+    }>
+    const deleteCodeClient = API.graphql({
+      ...graphqlOperation(onDeletePost),
+      authMode,
+    }) as DeleteCodeClient
+    const deleteCodeSubscription = deleteCodeClient.subscribe({
+      next: (msg) => {
+        const deleteID = msg.value.data.onDeletePost.id
+        dispatch({ type: ActionType.Delete, deleteID })
+      },
+    })
+
     return () => {
-      subscription.unsubscribe()
+      createCodeSubscription.unsubscribe()
+      deleteCodeSubscription.unsubscribe()
     }
   }, [isInit])
 
@@ -111,14 +169,20 @@ export const PostList: React.FC = () => {
         {posts.map((post, key) => (
           <Grid item xs={12} className={classes.grid} key={key}>
             <Card className={classes.card}>
-              <PostListItem post={post} />
+              <PostListItem
+                post={post}
+                typingID={typingID}
+                setTypingID={setTypingID}
+                handleDeletePost={handleDeletePost}
+                isOwner={user ? user.username === post.owner : false}
+              />
             </Card>
           </Grid>
         ))}
       </Grid>
       <Grid container alignItems="center" justifyContent="center">
         <Grid item>
-          <Button onClick={getAdditionalPosts} variant="outlined">
+          <Button onClick={handleGetAdditionalPosts} variant="outlined">
             Read more
           </Button>
         </Grid>
