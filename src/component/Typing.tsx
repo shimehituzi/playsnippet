@@ -170,7 +170,7 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
 
   return (
     <pre className={className + ' ' + classes.pre} style={style}>
-      {tokens.map((line, l) => {
+      {remapedTokens.map((line, l) => {
         const lineProps = { ...getLineProps({ line, key: l }) }
         lineProps.className = lineProps.className + ' ' + classes.line
         return (
