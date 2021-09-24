@@ -3,12 +3,6 @@ import Highlight, { defaultProps, Language } from 'prism-react-renderer'
 import theme from 'prism-react-renderer/themes/vsDark'
 import { makeStyles } from '@material-ui/core'
 
-type Props = {
-  code: string
-  lang: string
-  stop: () => void
-}
-
 const useStyle = makeStyles({
   pre: {
     fontFamily:
@@ -37,6 +31,12 @@ const useStyle = makeStyles({
   },
 })
 
+type Props = {
+  code: string
+  lang: string
+  stop: () => void
+}
+
 export const Typing: React.FC<Props> = ({ code, lang, stop }) => {
   return (
     <Highlight
@@ -50,10 +50,8 @@ export const Typing: React.FC<Props> = ({ code, lang, stop }) => {
   )
 }
 
-type GetTokenProps = Highlight['getTokenProps']
 type Token = Parameters<Highlight['getTokenProps']>[0]['token']
 type RenderProps = Parameters<Highlight['props']['children']>[0]
-
 type CharMap = {
   l: number
   t: number
@@ -61,8 +59,6 @@ type CharMap = {
   character: string
   token: Token
 }[]
-
-const isSpace = (str: string) => str.match(/^\s+$/) !== null
 
 const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
   className,
@@ -77,6 +73,7 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
   const [gameOver, setGameOver] = useState<boolean>(false)
   const [cursor, setCursor] = useState<number>(0)
 
+  const isSpace = (str: string) => str.match(/^\s+$/) !== null
   const remapedTokens: Token[][] = useMemo(
     () =>
       tokens.map((line) => {
@@ -150,24 +147,6 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
     }
   }, [])
 
-  const renderLine = (line: Token[], l: number): JSX.Element => {
-    if (gameOver) return <Finished line={line} getTokenProps={getTokenProps} />
-    if (l < charMap[cursor]?.l) {
-      return <Finished line={line} getTokenProps={getTokenProps} />
-    } else if (l === charMap[cursor]?.l) {
-      return (
-        <Progressing
-          line={line}
-          getTokenProps={getTokenProps}
-          ct={charMap[cursor]?.t}
-          cc={charMap[cursor]?.c}
-        />
-      )
-    } else {
-      return <UnFinished line={line} />
-    }
-  }
-
   return (
     <pre className={className + ' ' + classes.pre} style={style}>
       {remapedTokens.map((line, l) => {
@@ -176,7 +155,11 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
         return (
           <div key={l} {...lineProps}>
             <span className={classes.lineNo}>{l + 1}</span>
-            {renderLine(line, l)}
+            <span className={classes.lineContonet}>
+              <LineRenderer
+                {...{ l, line, cursor, gameOver, charMap, getTokenProps }}
+              />
+            </span>
           </div>
         )
       })}
@@ -184,99 +167,75 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
   )
 }
 
-type FinishedProps = {
+type GetTokenProps = Highlight['getTokenProps']
+type LineRendererProps = {
   line: Token[]
+  l: number
+  cursor: number
+  charMap: CharMap
   getTokenProps: GetTokenProps
+  gameOver: boolean
 }
 
-export const Finished: React.FC<FinishedProps> = ({ line, getTokenProps }) => {
-  const classes = useStyle()
-
-  return (
-    <span className={classes.lineContonet}>
-      {line.map((token, t) => (
-        <span key={t} {...getTokenProps({ token, key: t })} />
-      ))}
-    </span>
-  )
-}
-
-type ProgreessingProps = {
-  line: Token[]
-  getTokenProps: GetTokenProps
-  ct: number
-  cc: number
-}
-
-type ProgressingChildProps = {
-  token: Token
-  cc: number
-}
-
-export const Progressing: React.FC<ProgreessingProps> = ({
+const LineRenderer: React.FC<LineRendererProps> = ({
   line,
+  l,
+  cursor,
+  charMap,
   getTokenProps,
-  ct,
-  cc,
+  gameOver,
 }) => {
-  const classes = useStyle()
-
-  const renderToken = (token: Token, t: number) => {
-    if (t < ct) {
-      return <span key={t} {...getTokenProps({ token, key: t })} />
-    } else if (t === ct) {
-      return <ProgressingToken key={t} token={token} cc={cc} />
-    } else {
-      return (
-        <span key={t} style={{ color: 'gray' }}>
-          {token.content}
-        </span>
-      )
-    }
-  }
-
   return (
-    <span className={classes.lineContonet}>
-      {line.map((token, t) => renderToken(token, t))}
-    </span>
+    <>
+      {gameOver || l < charMap[cursor]?.l ? (
+        <>
+          {line.map((token, t) => (
+            <span key={t} {...getTokenProps({ token, key: t })} />
+          ))}
+        </>
+      ) : l === charMap[cursor]?.l ? (
+        <>
+          {line.map((token, t) =>
+            t < charMap[cursor]?.t ? (
+              <span key={t} {...getTokenProps({ token, key: t })} />
+            ) : t === charMap[cursor]?.t ? (
+              <span key={t}>
+                {token?.content.split('').map((v, c) => {
+                  return c < charMap[cursor]?.c ? (
+                    <Normal key={c} value={v} />
+                  ) : c === charMap[cursor]?.c ? (
+                    <Yellow key={c} value={v} />
+                  ) : (
+                    <Gray key={c} value={v} />
+                  )
+                })}
+              </span>
+            ) : (
+              <Gray key={t} value={token.content} />
+            )
+          )}
+        </>
+      ) : (
+        <>
+          {line.map((token, t) => (
+            <Gray key={t} value={token.content} />
+          ))}
+        </>
+      )}
+    </>
   )
 }
 
-const ProgressingToken: React.FC<ProgressingChildProps> = ({ token, cc }) => {
-  const caracters = token?.content.split('').map((v, c) => {
-    if (c < cc) {
-      return <span key={c}>{v}</span>
-    } else if (c === cc) {
-      return (
-        <span key={c} style={{ backgroundColor: 'yellow', color: 'black' }}>
-          {v === '\n' ? '↵' : v}
-        </span>
-      )
-    } else {
-      return (
-        <span key={c} style={{ color: 'gray' }}>
-          {v}
-        </span>
-      )
-    }
-  })
-  return <React.Fragment>{caracters}</React.Fragment>
+type StringProps = {
+  value: string
 }
 
-type UnFinishedProps = {
-  line: Token[]
-}
-
-export const UnFinished: React.FC<UnFinishedProps> = ({ line }) => {
-  const classes = useStyle()
-
-  return (
-    <span className={classes.lineContonet}>
-      {line.map((token, t) => (
-        <span key={t} style={{ color: 'gray' }}>
-          {token.content}
-        </span>
-      ))}
-    </span>
-  )
-}
+const Normal: React.FC<StringProps> = ({ value }) => <span>{value}</span>
+const Yellow: React.FC<StringProps> = ({ value }) => (
+  <span style={{ background: 'yellow', color: 'black' }}>
+    {value === '\n' ? '↵' : value}
+  </span>
+)
+const Gray: React.FC<StringProps> = ({ value }) => (
+  <span style={{ color: 'gray' }}>{value}</span>
+)
