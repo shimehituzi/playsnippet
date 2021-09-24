@@ -37,7 +37,7 @@ type Props = {
   stop: () => void
 }
 
-export const Typing: React.FC<Props> = ({ code, lang, stop }) => {
+export const CodeTyping: React.FC<Props> = ({ code, lang, stop }) => {
   return (
     <Highlight
       {...defaultProps}
@@ -190,14 +190,14 @@ const LineRenderer: React.FC<LineRendererProps> = ({
       {gameOver || l < charMap[cursor]?.l ? (
         <>
           {line.map((token, t) => (
-            <span key={t} {...getTokenProps({ token, key: t })} />
+            <Syntax key={t} {...{ getTokenProps, token, t }} />
           ))}
         </>
       ) : l === charMap[cursor]?.l ? (
         <>
           {line.map((token, t) =>
             t < charMap[cursor]?.t ? (
-              <span key={t} {...getTokenProps({ token, key: t })} />
+              <Syntax key={t} {...{ getTokenProps, token, t }} />
             ) : t === charMap[cursor]?.t ? (
               <span key={t}>
                 {token?.content.split('').map((v, c) => {
@@ -226,10 +226,18 @@ const LineRenderer: React.FC<LineRendererProps> = ({
   )
 }
 
+type SyntaxProps = {
+  getTokenProps: GetTokenProps
+  token: Token
+  t: number
+}
+const Syntax: React.FC<SyntaxProps> = ({ getTokenProps, token, t }) => {
+  return <span {...getTokenProps({ token, key: t })} />
+}
+
 type StringProps = {
   value: string
 }
-
 const Normal: React.FC<StringProps> = ({ value }) => <span>{value}</span>
 const Yellow: React.FC<StringProps> = ({ value }) => (
   <span style={{ background: 'yellow', color: 'black' }}>
