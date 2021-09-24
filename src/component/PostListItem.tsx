@@ -7,7 +7,7 @@ import {
   PlayArrow as PlayIcon,
   Stop as StopIcon,
 } from '@material-ui/icons'
-import { TypingCode } from './TypingCode'
+import { Typing } from './Typing'
 import { Code } from './Code'
 
 const useStyle = makeStyles({
@@ -93,7 +93,7 @@ export const PostListItem: React.FC<Props> = ({
               )}
             </Grid>
             {typingID === code.id ? (
-              <TypingCode code={code.code} lang={code.lang} stop={stop} />
+              <Typing code={code.code} lang={code.lang} stop={stop} />
             ) : (
               <Code code={code.code} lang={code.lang} />
             )}
