@@ -32,10 +32,59 @@ type CharMap = {
   t: number
   c: number
   character: string
-  token: App.CodeToken
+  token: CodeToken
 }[]
 
-const CodeRenderer: React.FC<App.CodeRendererProps & { stop: () => void }> = ({
+type CodeToken = {
+  types: string[]
+  content: string
+  empty?: boolean
+}
+
+type StyleObj = {
+  [key: string]: string | number | null
+}
+
+type LineInputProps = {
+  key?: React.Key
+  style?: StyleObj
+  className?: string
+  line: CodeToken[]
+  [otherProp: string]: any
+}
+
+type LineOutputProps = {
+  key?: React.Key
+  style?: StyleObj
+  className: string
+  [otherProps: string]: any
+}
+
+type TokenInputProps = {
+  key?: React.Key
+  style?: StyleObj
+  className?: string
+  token: CodeToken
+  [otherProp: string]: any
+}
+
+type TokenOutputProps = {
+  key?: React.Key
+  style?: StyleObj
+  className: string
+  children: string
+  [otherProp: string]: any
+}
+
+type CodeRendererProps = {
+  tokens: CodeToken[][]
+  className: string
+  style: StyleObj
+  getLineProps: (input: LineInputProps) => LineOutputProps
+  getTokenProps: (input: TokenInputProps) => TokenOutputProps
+}
+
+const CodeRenderer: React.FC<CodeRendererProps & { stop: () => void }> = ({
   className,
   style,
   tokens,
@@ -46,10 +95,10 @@ const CodeRenderer: React.FC<App.CodeRendererProps & { stop: () => void }> = ({
   const [gameOver, setGameOver] = useState<boolean>(false)
   const [cursor, setCursor] = useState<number>(0)
 
-  const remapedTokens: App.CodeToken[][] = useMemo(
+  const remapedTokens: CodeToken[][] = useMemo(
     () =>
       tokens.map((line) => {
-        const crtoken: App.CodeToken = { content: '\n', types: ['cr'] }
+        const crtoken: CodeToken = { content: '\n', types: ['cr'] }
         return [...line.filter((token) => !token.empty), crtoken]
       }),
     [tokens]
@@ -119,7 +168,7 @@ const CodeRenderer: React.FC<App.CodeRendererProps & { stop: () => void }> = ({
     }
   }, [])
 
-  const renderLine = (line: App.CodeToken[], l: number): JSX.Element => {
+  const renderLine = (line: CodeToken[], l: number): JSX.Element => {
     if (gameOver)
       return <FinishedLine line={line} getTokenProps={getTokenProps} />
     if (l < charMap[cursor]?.l) {

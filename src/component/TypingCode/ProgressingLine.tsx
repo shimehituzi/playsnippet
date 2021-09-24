@@ -1,15 +1,43 @@
 import React from 'react'
 import { LineContent } from './styled'
 
+type CodeToken = {
+  types: string[]
+  content: string
+  empty?: boolean
+}
+
+type StyleObj = {
+  [key: string]: string | number | null
+}
+
+type TokenInputProps = {
+  key?: React.Key
+  style?: StyleObj
+  className?: string
+  token: CodeToken
+  [otherProp: string]: any
+}
+
+type TokenOutputProps = {
+  key?: React.Key
+  style?: StyleObj
+  className: string
+  children: string
+  [otherProp: string]: any
+}
+
+type GetTokenProps = (input: TokenInputProps) => TokenOutputProps
+
 type Props = {
-  line: App.CodeToken[]
-  getTokenProps: App.CodeRendererProps['getTokenProps']
+  line: CodeToken[]
+  getTokenProps: GetTokenProps
   ct: number
   cc: number
 }
 
 type ChildProps = {
-  token: App.CodeToken
+  token: CodeToken
   cc: number
 }
 
@@ -19,7 +47,7 @@ export const ProgressingLine: React.FC<Props> = ({
   ct,
   cc,
 }) => {
-  const renderToken = (token: App.CodeToken, t: number) => {
+  const renderToken = (token: CodeToken, t: number) => {
     if (t < ct) {
       return <span key={t} {...getTokenProps({ token, key: t })} />
     } else if (t === ct) {

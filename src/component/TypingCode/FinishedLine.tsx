@@ -1,10 +1,36 @@
 import React from 'react'
 import { LineContent } from './styled'
 
-type GetTokenProps = App.CodeRendererProps['getTokenProps']
+type CodeToken = {
+  types: string[]
+  content: string
+  empty?: boolean
+}
+
+type StyleObj = {
+  [key: string]: string | number | null
+}
+
+type TokenInputProps = {
+  key?: React.Key
+  style?: StyleObj
+  className?: string
+  token: CodeToken
+  [otherProp: string]: any
+}
+
+type TokenOutputProps = {
+  key?: React.Key
+  style?: StyleObj
+  className: string
+  children: string
+  [otherProp: string]: any
+}
+
+type GetTokenProps = (input: TokenInputProps) => TokenOutputProps
 
 type Props = {
-  line: App.CodeToken[]
+  line: CodeToken[]
   getTokenProps: GetTokenProps
 }
 

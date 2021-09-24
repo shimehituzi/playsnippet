@@ -1,8 +1,14 @@
 import React from 'react'
 import { LineContent } from './styled'
 
+type CodeToken = {
+  types: string[]
+  content: string
+  empty?: boolean
+}
+
 type Props = {
-  line: App.CodeToken[]
+  line: CodeToken[]
 }
 
 export const UnFinishedLine: React.FC<Props> = ({ line }) => {
