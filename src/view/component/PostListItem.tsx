@@ -1,5 +1,5 @@
 import React from 'react'
-import { Post } from '../API'
+import { Post } from '../../API'
 import ReactMarkdown from 'react-markdown'
 import { Button, Grid, makeStyles, Typography } from '@material-ui/core'
 import {

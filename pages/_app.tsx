@@ -3,7 +3,7 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { CssBaseline } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core'
-import { theme } from '../src/theme'
+import { theme } from '../src/etc/theme'
 
 import Amplify from 'aws-amplify'
 import awsconfig from '../src/aws-exports'

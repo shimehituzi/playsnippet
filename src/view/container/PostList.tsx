@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useState } from 'react'
-import { useAuth } from '../hooks'
+import { useAuth } from '../../hooks/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import {
   Post,
@@ -11,11 +11,11 @@ import {
   DeletePostMutationVariables,
   DeletePostMutation,
   DeleteCodeMutationVariables,
-} from '../API'
-import { listPostsByDate } from '../graphql/queries'
-import { deletePost, deleteCode } from '../graphql/mutations'
-import { onCreateCode, onDeletePost } from '../graphql/subscriptions'
-import { Observable } from '../../node_modules/zen-observable-ts'
+} from '../../API'
+import { listPostsByDate } from '../../graphql/queries'
+import { deletePost, deleteCode } from '../../graphql/mutations'
+import { onCreateCode, onDeletePost } from '../../graphql/subscriptions'
+import { Observable } from '../../../node_modules/zen-observable-ts'
 import { PostListItem } from '../component/PostListItem'
 import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
 import { PostForm } from './PostForm'
