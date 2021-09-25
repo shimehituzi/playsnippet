@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '../../hooks/auth'
+import { useAuth } from '../../utils/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import {
   ListPostsByDateQueryVariables,
@@ -26,7 +26,7 @@ import {
   subscribeDeleteCode,
   subscribeDeletePost,
 } from '../../utils/subscribe'
-import { useArraySettor } from '../../state/utils'
+import { useArraySettor } from '../../utils/recoilArraySettor'
 import { connectedPostsState, postsState } from '../../state/postsState'
 import { codesState } from '../../state/codesState'
 

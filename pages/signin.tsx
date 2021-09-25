@@ -1,6 +1,6 @@
 import { NextPage } from 'next'
 import { AmplifyAuthenticator, AmplifySignUp } from '@aws-amplify/ui-react'
-import { useAuth } from '../src/hooks/auth'
+import { useAuth } from '../src/utils/auth'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 

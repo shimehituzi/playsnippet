@@ -2,7 +2,7 @@ import React from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
-import { useAuth } from '../src/hooks/auth'
+import { useAuth } from '../src/utils/auth'
 import {
   Button,
   Grid,
