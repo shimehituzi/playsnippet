@@ -4,6 +4,7 @@ import { createCode, createPost } from '../../graphql/mutations'
 import {
   CreatePostMutationVariables,
   CreatePostMutation,
+  CreateCodeInput,
   CreateCodeMutationVariables,
 } from '../../API'
 import { Button, Grid, makeStyles, TextField } from '@material-ui/core'
@@ -14,20 +15,16 @@ const useStyle = makeStyles({
   },
 })
 
-type CodeInput = {
-  name: string
-  lang: string
-  code: string
-}
+type CodeInput = Pick<CreateCodeInput, 'title' | 'content' | 'lang'>
 
 export const PostForm: React.FC = () => {
   const classes = useStyle()
 
   const [content, setContent] = useState('')
   const [code, setCode] = useState<CodeInput>({
-    code: '',
+    title: '',
+    content: '',
     lang: '',
-    name: '',
   })
 
   const onChangeContent = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,13 +39,14 @@ export const PostForm: React.FC = () => {
   }
 
   const handleSubmit = async () => {
-    if (code.code === '') return
-    if (code.name === '') return
+    if (code.title === '') return
+    if (code.content === '') return
     if (code.lang === '') return
     if (content === '') return
 
     const createPostMutationVariables: CreatePostMutationVariables = {
       input: {
+        title: '',
         content: content,
         type: 'post',
       },
@@ -69,9 +67,9 @@ export const PostForm: React.FC = () => {
 
     setContent('')
     setCode({
-      code: '',
+      title: '',
+      content: '',
       lang: '',
-      name: '',
     })
   }
 
@@ -81,7 +79,7 @@ export const PostForm: React.FC = () => {
         <TextField
           fullWidth
           variant="outlined"
-          label="Post Content"
+          label="Post"
           multiline
           value={content}
           onChange={onChangeContent}
@@ -91,10 +89,10 @@ export const PostForm: React.FC = () => {
         <TextField
           fullWidth
           variant="standard"
-          label="Code Name"
-          value={code.name}
+          label="Code Title"
+          value={code.title}
           onChange={onChangeCode}
-          id="name"
+          id="title"
         />
       </Grid>
       <Grid item xs={3} className={classes.form}>
@@ -113,9 +111,9 @@ export const PostForm: React.FC = () => {
           variant="outlined"
           label="Code"
           multiline
-          value={code.code}
+          value={code.content}
           onChange={onChangeCode}
-          id="code"
+          id="content"
         />
       </Grid>
       <Grid item>

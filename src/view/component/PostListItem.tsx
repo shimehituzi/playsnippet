@@ -61,7 +61,7 @@ export const PostListItem: React.FC<Props> = ({
             >
               <Grid item>
                 <Typography variant="body2" color="secondary">
-                  {code.name}
+                  {code.title}
                 </Typography>
               </Grid>
               {typingID === code.id ? (
@@ -93,9 +93,9 @@ export const PostListItem: React.FC<Props> = ({
               )}
             </Grid>
             {typingID === code.id ? (
-              <CodeTyping code={code.code} lang={code.lang} stop={stop} />
+              <CodeTyping code={code.content} lang={code.lang} stop={stop} />
             ) : (
-              <Code code={code.code} lang={code.lang} />
+              <Code code={code.content} lang={code.lang} />
             )}
           </React.Fragment>
         ))}
