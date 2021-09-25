@@ -1,20 +1,22 @@
 import { atom, selector } from 'recoil'
 import { Post } from '../API'
-import { codesState } from './codesState'
-import { commentsState } from './commentsState'
+import { codesState, OmittedCode } from './codesState'
+import { commentsState, OmittedComment } from './commentsState'
 import { useArraySettor } from './utils'
 
-export const postsState = atom<Post[]>({
+export type OmittedPost = Omit<Post, 'codes' | 'comments'>
+
+export const postsState = atom<OmittedPost[]>({
   key: 'postsAtom',
   default: [],
 })
 
 export const usePostsSettor = (): {
-  initPosts: (items: Post[]) => void
-  appendPosts: (items: Post[]) => void
-  createPost: (item: Post) => void
-  updatePost: (prevItem: Post, newItem: Post) => void
-  deletePost: (item: Post) => void
+  initPosts: (items: OmittedPost[]) => void
+  appendPosts: (items: OmittedPost[]) => void
+  createPost: (item: OmittedPost) => void
+  updatePost: (prevItem: OmittedPost, newItem: OmittedPost) => void
+  deletePost: (item: OmittedPost) => void
 } => {
   const settor = useArraySettor(postsState, 'DESC')
 
@@ -27,7 +29,12 @@ export const usePostsSettor = (): {
   }
 }
 
-export const connectedPostsState = selector({
+type ConnectedPost = OmittedPost & {
+  codes: OmittedCode[]
+  comments: OmittedComment[]
+}
+
+export const connectedPostsState = selector<ConnectedPost[]>({
   key: 'connectedPostsState',
   get: ({ get }) => {
     const posts = get(postsState)

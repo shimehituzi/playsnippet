@@ -2,17 +2,19 @@ import { atom } from 'recoil'
 import { Comment } from '../API'
 import { useArraySettor } from './utils'
 
-export const commentsState = atom<Comment[]>({
+export type OmittedComment = Omit<Comment, 'post'>
+
+export const commentsState = atom<OmittedComment[]>({
   key: 'commentsAtom',
   default: [],
 })
 
 export const useCommentsSettor = (): {
-  initComments: (items: Comment[]) => void
-  appendComments: (items: Comment[]) => void
-  createComment: (item: Comment) => void
-  updateComment: (prevItem: Comment, newItem: Comment) => void
-  deleteComment: (item: Comment) => void
+  initComments: (items: OmittedComment[]) => void
+  appendComments: (items: OmittedComment[]) => void
+  createComment: (item: OmittedComment) => void
+  updateComment: (prevItem: OmittedComment, newItem: OmittedComment) => void
+  deleteComment: (item: OmittedComment) => void
 } => {
   const settor = useArraySettor(commentsState, 'ASC')
 
