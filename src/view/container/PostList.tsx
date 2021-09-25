@@ -3,11 +3,11 @@ import { useAuth } from '../../hooks/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import {
   ListPostsByDateQueryVariables,
-  ModelSortDirection,
   ListPostsByDateQuery,
   DeletePostMutationVariables,
   DeletePostMutation,
   DeleteCodeMutationVariables,
+  ModelSortDirection,
   Post,
   Code,
 } from '../../API'
@@ -16,18 +16,19 @@ import {
   deletePost as deletePostQuery,
   deleteCode as deleteCodeQuery,
 } from '../../graphql/mutations'
-import { PostListItem } from '../component/PostListItem'
-import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
-import { PostForm } from './PostForm'
 import { useRecoilValue } from 'recoil'
-import { connectedPostsState, usePostsSettor } from '../../state/postsState'
-import { useCodesSettor } from '../../state/codesState'
+import { PostListItem } from '../component/PostListItem'
+import { PostForm } from './PostForm'
+import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
 import {
   subscribeCreateCode,
   subscribeCreatePost,
   subscribeDeleteCode,
   subscribeDeletePost,
 } from '../../utils/subscribe'
+import { useArraySettor } from '../../state/utils'
+import { connectedPostsState, postsState } from '../../state/postsState'
+import { codesState } from '../../state/codesState'
 
 const useStyle = makeStyles({
   card: {
@@ -55,9 +56,9 @@ const omitCode = (code: Code) => {
 type QueryType = 'INIT' | 'APPEND'
 export const PostList: React.FC = () => {
   const { authenticated, user, isInit } = useAuth()
-  const rPost = useRecoilValue(connectedPostsState)
-  const { initPosts, appendPosts, deletePost, createPost } = usePostsSettor()
-  const { initCodes, appendCodes, deleteCode, createCode } = useCodesSettor()
+  const posts = useRecoilValue(connectedPostsState)
+  const setPosts = useArraySettor(postsState, 'DESC')
+  const setCodes = useArraySettor(codesState, 'ASC')
 
   const [nextToken, setNextToken] = useState<string | null>(null)
   const [typingID, setTypingID] = useState<string>('')
@@ -83,12 +84,12 @@ export const PostList: React.FC = () => {
 
     switch (type) {
       case 'INIT':
-        initPosts(omitPosts)
-        initCodes(omitCodes)
+        setPosts.initItems(omitPosts)
+        setCodes.initItems(omitCodes)
         break
       case 'APPEND':
-        appendPosts(omitPosts)
-        appendCodes(omitCodes)
+        setPosts.appendItems(omitPosts)
+        setCodes.appendItems(omitCodes)
         break
     }
     setNextToken(res.data.listPostsByDate.nextToken)
@@ -136,24 +137,24 @@ export const PostList: React.FC = () => {
 
     const createPostSubscription = subscribeCreatePost({
       next: (msg) => {
-        createPost(omitPost(msg.value.data.onCreatePost))
+        setPosts.createItem(omitPost(msg.value.data.onCreatePost))
       },
     })
 
     const deletePostSubscription = subscribeDeletePost({
       next: (msg) => {
-        deletePost(omitPost(msg.value.data.onDeletePost))
+        setPosts.deleteItem(omitPost(msg.value.data.onDeletePost))
       },
     })
 
     const createCodeSubscription = subscribeCreateCode({
       next: (msg) => {
-        createCode(omitCode(msg.value.data.onCreateCode))
+        setCodes.createItem(omitCode(msg.value.data.onCreateCode))
       },
     })
     const deleteCodeSubscription = subscribeDeleteCode({
       next: (msg) => {
-        deleteCode(omitCode(msg.value.data.onDeleteCode))
+        setCodes.deleteItem(omitCode(msg.value.data.onDeleteCode))
       },
     })
 
@@ -169,7 +170,7 @@ export const PostList: React.FC = () => {
     <React.Fragment>
       {authenticated && <PostForm />}
       <Grid container alignItems="center" justifyContent="center">
-        {rPost.map((post, key) => (
+        {posts.map((post, key) => (
           <Grid item xs={12} className={classes.grid} key={key}>
             <Card className={classes.card}>
               <PostListItem
