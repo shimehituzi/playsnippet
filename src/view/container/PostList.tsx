@@ -1,8 +1,7 @@
-import React, { useEffect, useReducer, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../hooks/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import {
-  Post,
   ListPostsByDateQueryVariables,
   ModelSortDirection,
   ListPostsByDateQuery,
@@ -11,10 +10,19 @@ import {
   DeletePostMutationVariables,
   DeletePostMutation,
   DeleteCodeMutationVariables,
+  OnCreatePostSubscription,
+  OnDeleteCodeSubscription,
+  Post,
+  Code,
 } from '../../API'
 import { listPostsByDate } from '../../graphql/queries'
 import { deletePost, deleteCode } from '../../graphql/mutations'
-import { onCreateCode, onDeletePost } from '../../graphql/subscriptions'
+import {
+  onCreateCode,
+  onCreatePost,
+  onDeleteCode,
+  onDeletePost,
+} from '../../graphql/subscriptions'
 import { Observable } from '../../../node_modules/zen-observable-ts'
 import { PostListItem } from '../component/PostListItem'
 import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
@@ -36,35 +44,23 @@ const useStyle = makeStyles({
   },
 })
 
-enum ActionType {
-  Delete = 'Delete',
-  Subscription = 'subscription',
-  InitialQuery = 'initialQuery',
-  AdditionalQuery = 'additionalQuery',
+type AuthMode = 'API_KEY' | 'AMAZON_COGNITO_USER_POOLS'
+type Client<T> = Observable<{ value: GraphQLResult<T> }>
+function getClient<T>(query: any, authMode: AuthMode) {
+  return API.graphql({ ...graphqlOperation(query), authMode }) as Client<T>
 }
 
-type ReducerAction = {
-  type: ActionType
-  post?: Post
-  posts?: Post[]
-  deleteID?: string
+const omitPost = (post: Post) => {
+  const { codes: _, comments: __, ...omitPost } = post
+  return omitPost
 }
 
-const reducer = (state: Post[], action: ReducerAction) => {
-  switch (action.type) {
-    case ActionType.InitialQuery:
-      return action.posts
-    case ActionType.AdditionalQuery:
-      return [...state, ...action.posts]
-    case ActionType.Subscription:
-      return [action.post, ...state]
-    case ActionType.Delete:
-      return state.filter((post) => post.id !== action.deleteID)
-    default:
-      return state
-  }
+const omitCode = (code: Code) => {
+  const { post: _, ...omitCode } = code
+  return omitCode
 }
 
+type QueryType = 'INIT' | 'APPEND'
 export const PostList: React.FC = () => {
   const { authenticated, user, authMode, isInit } = useAuth()
   const rPost = useRecoilValue(connectedPostsState)
@@ -81,13 +77,12 @@ export const PostList: React.FC = () => {
     createCode: setCreateCode,
   } = useCodesSettor()
 
-  const [posts, dispatch] = useReducer(reducer, [])
   const [nextToken, setNextToken] = useState<string | null>(null)
   const [typingID, setTypingID] = useState<string>('')
 
   const classes = useStyle()
 
-  const handleGetPosts = async (type: ActionType, nextToken = null) => {
+  const handleGetPosts = async (type: QueryType, nextToken = null) => {
     const queryVariables: ListPostsByDateQueryVariables = {
       type: 'post',
       sortDirection: ModelSortDirection.DESC,
@@ -102,26 +97,32 @@ export const PostList: React.FC = () => {
 
     const posts = res.data.listPostsByDate.items
 
-    const omitPosts = posts.map((post) => {
-      const { codes: _codes, comments: _comments, ...omitPost } = post
-      return omitPost
-    })
-
+    const omitPosts = posts.map((post) => omitPost(post))
     const omitCodes = posts.map((post) => post.codes.items).flat()
 
     switch (type) {
-      case ActionType.InitialQuery:
+      case 'INIT':
         initPosts(omitPosts)
         initCodes(omitCodes)
         break
-      case ActionType.AdditionalQuery:
+      case 'APPEND':
         appendPosts(omitPosts)
         appendCodes(omitCodes)
         break
     }
-    dispatch({ type: type, posts: res.data.listPostsByDate.items })
     setNextToken(res.data.listPostsByDate.nextToken)
   }
+
+  const handleGetAdditionalPosts = () => {
+    if (nextToken === null) return
+    if (!isInit) return
+    handleGetPosts('APPEND', nextToken)
+  }
+
+  useEffect(() => {
+    if (!isInit) return
+    handleGetPosts('INIT')
+  }, [isInit])
 
   const handleDeletePost = async (postId: string) => {
     const deletePostVariables: DeletePostMutationVariables = {
@@ -153,47 +154,47 @@ export const PostList: React.FC = () => {
     })
   }
 
-  const handleGetAdditionalPosts = () => {
-    if (nextToken === null) return
-    if (!isInit) return
-    handleGetPosts(ActionType.AdditionalQuery, nextToken)
-  }
-
   useEffect(() => {
     if (!isInit) return
-    handleGetPosts(ActionType.InitialQuery)
 
-    type CreateCodeClient = Observable<{
-      value: GraphQLResult<OnCreateCodeSubscription>
-    }>
-    const createCodeClient = API.graphql({
-      ...graphqlOperation(onCreateCode),
-      authMode,
-    }) as CreateCodeClient
-    const createCodeSubscription = createCodeClient.subscribe({
+    const createPostSubscription = getClient<OnCreatePostSubscription>(
+      onCreatePost,
+      authMode
+    ).subscribe({
       next: (msg) => {
-        const post = msg.value.data.onCreateCode.post
-        dispatch({ type: ActionType.Subscription, post: post })
+        setCreatePost(omitPost(msg.value.data.onCreatePost))
       },
     })
-
-    type DeletePostClient = Observable<{
-      value: GraphQLResult<OnDeletePostSubscription>
-    }>
-    const deletePostClient = API.graphql({
-      ...graphqlOperation(onDeletePost),
-      authMode,
-    }) as DeletePostClient
-    const deletePostSubscription = deletePostClient.subscribe({
+    const deletePostSubscription = getClient<OnDeletePostSubscription>(
+      onDeletePost,
+      authMode
+    ).subscribe({
       next: (msg) => {
-        const deleteID = msg.value.data.onDeletePost.id
-        dispatch({ type: ActionType.Delete, deleteID })
+        setDeletePost(omitPost(msg.value.data.onDeletePost))
+      },
+    })
+    const createCodeSubscription = getClient<OnCreateCodeSubscription>(
+      onCreateCode,
+      authMode
+    ).subscribe({
+      next: (msg) => {
+        setCreateCode(omitCode(msg.value.data.onCreateCode))
+      },
+    })
+    const deleteCodeSubscription = getClient<OnDeleteCodeSubscription>(
+      onDeleteCode,
+      authMode
+    ).subscribe({
+      next: (msg) => {
+        setDeleteCode(omitCode(msg.value.data.onDeleteCode))
       },
     })
 
     return () => {
-      createCodeSubscription.unsubscribe()
+      createPostSubscription.unsubscribe()
       deletePostSubscription.unsubscribe()
+      createCodeSubscription.unsubscribe()
+      deleteCodeSubscription.unsubscribe()
     }
   }, [isInit])
 
