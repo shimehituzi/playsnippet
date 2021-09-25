@@ -5,31 +5,29 @@ import {
   ListPostsByDateQueryVariables,
   ModelSortDirection,
   ListPostsByDateQuery,
-  OnCreateCodeSubscription,
-  OnDeletePostSubscription,
   DeletePostMutationVariables,
   DeletePostMutation,
   DeleteCodeMutationVariables,
-  OnCreatePostSubscription,
-  OnDeleteCodeSubscription,
   Post,
   Code,
 } from '../../API'
 import { listPostsByDate } from '../../graphql/queries'
-import { deletePost, deleteCode } from '../../graphql/mutations'
 import {
-  onCreateCode,
-  onCreatePost,
-  onDeleteCode,
-  onDeletePost,
-} from '../../graphql/subscriptions'
-import { Observable } from '../../../node_modules/zen-observable-ts'
+  deletePost as deletePostQuery,
+  deleteCode as deleteCodeQuery,
+} from '../../graphql/mutations'
 import { PostListItem } from '../component/PostListItem'
 import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
 import { PostForm } from './PostForm'
 import { useRecoilValue } from 'recoil'
 import { connectedPostsState, usePostsSettor } from '../../state/postsState'
 import { useCodesSettor } from '../../state/codesState'
+import {
+  subscribeCreateCode,
+  subscribeCreatePost,
+  subscribeDeleteCode,
+  subscribeDeletePost,
+} from '../../utils/subscribe'
 
 const useStyle = makeStyles({
   card: {
@@ -43,11 +41,6 @@ const useStyle = makeStyles({
     padding: '2%',
   },
 })
-
-type Client<T> = Observable<{ value: GraphQLResult<T> }>
-function getClient<T>(query: any) {
-  return API.graphql(graphqlOperation(query)) as Client<T>
-}
 
 const omitPost = (post: Post) => {
   const { codes: _, comments: __, ...omitPost } = post
@@ -63,18 +56,8 @@ type QueryType = 'INIT' | 'APPEND'
 export const PostList: React.FC = () => {
   const { authenticated, user, isInit } = useAuth()
   const rPost = useRecoilValue(connectedPostsState)
-  const {
-    initPosts,
-    appendPosts,
-    deletePost: setDeletePost,
-    createPost: setCreatePost,
-  } = usePostsSettor()
-  const {
-    initCodes,
-    appendCodes,
-    deleteCode: setDeleteCode,
-    createCode: setCreateCode,
-  } = useCodesSettor()
+  const { initPosts, appendPosts, deletePost, createPost } = usePostsSettor()
+  const { initCodes, appendCodes, deleteCode, createCode } = useCodesSettor()
 
   const [nextToken, setNextToken] = useState<string | null>(null)
   const [typingID, setTypingID] = useState<string>('')
@@ -130,7 +113,7 @@ export const PostList: React.FC = () => {
     }
 
     const deletePostResult = (await API.graphql(
-      graphqlOperation(deletePost, deletePostVariables)
+      graphqlOperation(deletePostQuery, deletePostVariables)
     )) as GraphQLResult<DeletePostMutation>
 
     const codeIds = deletePostResult.data.deletePost.codes.items.map(
@@ -144,39 +127,33 @@ export const PostList: React.FC = () => {
         },
       }
 
-      await API.graphql(graphqlOperation(deleteCode, deleteCodeVariables))
+      await API.graphql(graphqlOperation(deleteCodeQuery, deleteCodeVariables))
     })
   }
 
   useEffect(() => {
     if (!isInit) return
 
-    const createPostSubscription = getClient<OnCreatePostSubscription>(
-      onCreatePost
-    ).subscribe({
+    const createPostSubscription = subscribeCreatePost({
       next: (msg) => {
-        setCreatePost(omitPost(msg.value.data.onCreatePost))
+        createPost(omitPost(msg.value.data.onCreatePost))
       },
     })
-    const deletePostSubscription = getClient<OnDeletePostSubscription>(
-      onDeletePost
-    ).subscribe({
+
+    const deletePostSubscription = subscribeDeletePost({
       next: (msg) => {
-        setDeletePost(omitPost(msg.value.data.onDeletePost))
+        deletePost(omitPost(msg.value.data.onDeletePost))
       },
     })
-    const createCodeSubscription = getClient<OnCreateCodeSubscription>(
-      onCreateCode
-    ).subscribe({
+
+    const createCodeSubscription = subscribeCreateCode({
       next: (msg) => {
-        setCreateCode(omitCode(msg.value.data.onCreateCode))
+        createCode(omitCode(msg.value.data.onCreateCode))
       },
     })
-    const deleteCodeSubscription = getClient<OnDeleteCodeSubscription>(
-      onDeleteCode
-    ).subscribe({
+    const deleteCodeSubscription = subscribeDeleteCode({
       next: (msg) => {
-        setDeleteCode(omitCode(msg.value.data.onDeleteCode))
+        deleteCode(omitCode(msg.value.data.onDeleteCode))
       },
     })
 
