@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createCode, createPost } from '../graphql/mutations'
+import { createCode, createPost } from '../../graphql/mutations'
 import {
   CreatePostMutationVariables,
   CreatePostMutation,
   CreateCodeMutationVariables,
-} from '../API'
+} from '../../API'
 import { Button, Grid, makeStyles, TextField } from '@material-ui/core'
 
 const useStyle = makeStyles({

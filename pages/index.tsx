@@ -2,7 +2,7 @@ import React from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
-import { useAuth } from '../src/hooks'
+import { useAuth } from '../src/hooks/auth'
 import {
   Button,
   Grid,
@@ -10,7 +10,7 @@ import {
   makeStyles,
   Container,
 } from '@material-ui/core'
-import { PostList } from '../src/container/PostList'
+import { PostList } from '../src/view/container/PostList'
 
 const useStyle = makeStyles({
   header: {

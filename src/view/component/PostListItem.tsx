@@ -1,5 +1,4 @@
 import React from 'react'
-import { Post } from '../API'
 import ReactMarkdown from 'react-markdown'
 import { Button, Grid, makeStyles, Typography } from '@material-ui/core'
 import {
@@ -7,8 +6,9 @@ import {
   PlayArrow as PlayIcon,
   Stop as StopIcon,
 } from '@material-ui/icons'
-import { TypingCode } from './TypingCode'
+import { CodeTyping } from './CodeTyping'
 import { Code } from './Code'
+import { ConnectedPost } from '../../state/postsState'
 
 const useStyle = makeStyles({
   button: {
@@ -17,7 +17,7 @@ const useStyle = makeStyles({
 })
 
 type Props = {
-  post: Post
+  post: ConnectedPost
   isOwner: boolean
   handleDeletePost: (postId: string) => Promise<void>
   typingID: string
@@ -50,8 +50,8 @@ export const PostListItem: React.FC<Props> = ({
   return (
     <React.Fragment>
       <ReactMarkdown>{post.content}</ReactMarkdown>
-      {post.codes.items &&
-        post.codes.items.map((code, key) => (
+      {post.codes &&
+        post.codes.map((code, key) => (
           <React.Fragment key={key}>
             <Grid
               container
@@ -93,7 +93,7 @@ export const PostListItem: React.FC<Props> = ({
               )}
             </Grid>
             {typingID === code.id ? (
-              <TypingCode code={code.code} lang={code.lang} stop={stop} />
+              <CodeTyping code={code.code} lang={code.lang} stop={stop} />
             ) : (
               <Code code={code.code} lang={code.lang} />
             )}
