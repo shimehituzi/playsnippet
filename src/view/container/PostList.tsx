@@ -44,10 +44,9 @@ const useStyle = makeStyles({
   },
 })
 
-type AuthMode = 'API_KEY' | 'AMAZON_COGNITO_USER_POOLS'
 type Client<T> = Observable<{ value: GraphQLResult<T> }>
-function getClient<T>(query: any, authMode: AuthMode) {
-  return API.graphql({ ...graphqlOperation(query), authMode }) as Client<T>
+function getClient<T>(query: any) {
+  return API.graphql(graphqlOperation(query)) as Client<T>
 }
 
 const omitPost = (post: Post) => {
@@ -62,7 +61,7 @@ const omitCode = (code: Code) => {
 
 type QueryType = 'INIT' | 'APPEND'
 export const PostList: React.FC = () => {
-  const { authenticated, user, authMode, isInit } = useAuth()
+  const { authenticated, user, isInit } = useAuth()
   const rPost = useRecoilValue(connectedPostsState)
   const {
     initPosts,
@@ -90,10 +89,9 @@ export const PostList: React.FC = () => {
       nextToken: nextToken,
     }
 
-    const res = (await API.graphql({
-      ...graphqlOperation(listPostsByDate, queryVariables),
-      authMode,
-    })) as GraphQLResult<ListPostsByDateQuery>
+    const res = (await API.graphql(
+      graphqlOperation(listPostsByDate, queryVariables)
+    )) as GraphQLResult<ListPostsByDateQuery>
 
     const posts = res.data.listPostsByDate.items
 
@@ -131,10 +129,9 @@ export const PostList: React.FC = () => {
       },
     }
 
-    const deletePostResult = (await API.graphql({
-      ...graphqlOperation(deletePost, deletePostVariables),
-      authMode,
-    })) as GraphQLResult<DeletePostMutation>
+    const deletePostResult = (await API.graphql(
+      graphqlOperation(deletePost, deletePostVariables)
+    )) as GraphQLResult<DeletePostMutation>
 
     const codeIds = deletePostResult.data.deletePost.codes.items.map(
       (code) => code.id
@@ -147,10 +144,7 @@ export const PostList: React.FC = () => {
         },
       }
 
-      await API.graphql({
-        ...graphqlOperation(deleteCode, deleteCodeVariables),
-        authMode,
-      })
+      await API.graphql(graphqlOperation(deleteCode, deleteCodeVariables))
     })
   }
 
@@ -158,32 +152,28 @@ export const PostList: React.FC = () => {
     if (!isInit) return
 
     const createPostSubscription = getClient<OnCreatePostSubscription>(
-      onCreatePost,
-      authMode
+      onCreatePost
     ).subscribe({
       next: (msg) => {
         setCreatePost(omitPost(msg.value.data.onCreatePost))
       },
     })
     const deletePostSubscription = getClient<OnDeletePostSubscription>(
-      onDeletePost,
-      authMode
+      onDeletePost
     ).subscribe({
       next: (msg) => {
         setDeletePost(omitPost(msg.value.data.onDeletePost))
       },
     })
     const createCodeSubscription = getClient<OnCreateCodeSubscription>(
-      onCreateCode,
-      authMode
+      onCreateCode
     ).subscribe({
       next: (msg) => {
         setCreateCode(omitCode(msg.value.data.onCreateCode))
       },
     })
     const deleteCodeSubscription = getClient<OnDeleteCodeSubscription>(
-      onDeleteCode,
-      authMode
+      onDeleteCode
     ).subscribe({
       next: (msg) => {
         setDeleteCode(omitCode(msg.value.data.onDeleteCode))
