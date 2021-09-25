@@ -12,6 +12,7 @@ type Post
 {
   id: ID!
   owner: String
+  title: String!
   content: String!
   codes: [Code] @connection(keyName: "byPost", fields: ["id"])
   comments: [Comment] @connection(keyName: "byPost", fields: ["id"])
@@ -36,9 +37,9 @@ type Code
   owner: String
   postID: ID!
   post: Post @connection(fields: ["postID"])
-  name: String!
+  title: String!
+  content: String!
   lang: String!
-  code: String!
   skipline: String!
   type: String!
   createdAt: String!
@@ -60,6 +61,6 @@ type Comment
   owner: String
   postID: ID!
   post: Post @connection(fields: ["postID"])
-  comment: String!
+  content: String!
   createdAt: String!
 }

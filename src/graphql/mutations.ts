@@ -10,6 +10,7 @@ export const createPost = /* GraphQL */ `
     createPost(input: $input, condition: $condition) {
       id
       owner
+      title
       content
       type
       createdAt
@@ -19,9 +20,9 @@ export const createPost = /* GraphQL */ `
           id
           owner
           postID
-          name
+          title
+          content
           lang
-          code
           skipline
           type
           createdAt
@@ -29,6 +30,7 @@ export const createPost = /* GraphQL */ `
           post {
             id
             owner
+            title
             content
             type
             createdAt
@@ -42,12 +44,13 @@ export const createPost = /* GraphQL */ `
           id
           owner
           postID
-          comment
+          content
           createdAt
           updatedAt
           post {
             id
             owner
+            title
             content
             type
             createdAt
@@ -67,6 +70,7 @@ export const updatePost = /* GraphQL */ `
     updatePost(input: $input, condition: $condition) {
       id
       owner
+      title
       content
       type
       createdAt
@@ -76,9 +80,9 @@ export const updatePost = /* GraphQL */ `
           id
           owner
           postID
-          name
+          title
+          content
           lang
-          code
           skipline
           type
           createdAt
@@ -86,6 +90,7 @@ export const updatePost = /* GraphQL */ `
           post {
             id
             owner
+            title
             content
             type
             createdAt
@@ -99,12 +104,13 @@ export const updatePost = /* GraphQL */ `
           id
           owner
           postID
-          comment
+          content
           createdAt
           updatedAt
           post {
             id
             owner
+            title
             content
             type
             createdAt
@@ -124,6 +130,7 @@ export const deletePost = /* GraphQL */ `
     deletePost(input: $input, condition: $condition) {
       id
       owner
+      title
       content
       type
       createdAt
@@ -133,9 +140,9 @@ export const deletePost = /* GraphQL */ `
           id
           owner
           postID
-          name
+          title
+          content
           lang
-          code
           skipline
           type
           createdAt
@@ -143,6 +150,7 @@ export const deletePost = /* GraphQL */ `
           post {
             id
             owner
+            title
             content
             type
             createdAt
@@ -156,12 +164,13 @@ export const deletePost = /* GraphQL */ `
           id
           owner
           postID
-          comment
+          content
           createdAt
           updatedAt
           post {
             id
             owner
+            title
             content
             type
             createdAt
@@ -182,9 +191,9 @@ export const createCode = /* GraphQL */ `
       id
       owner
       postID
-      name
+      title
+      content
       lang
-      code
       skipline
       type
       createdAt
@@ -192,6 +201,7 @@ export const createCode = /* GraphQL */ `
       post {
         id
         owner
+        title
         content
         type
         createdAt
@@ -201,9 +211,9 @@ export const createCode = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -216,7 +226,7 @@ export const createCode = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -235,9 +245,9 @@ export const updateCode = /* GraphQL */ `
       id
       owner
       postID
-      name
+      title
+      content
       lang
-      code
       skipline
       type
       createdAt
@@ -245,6 +255,7 @@ export const updateCode = /* GraphQL */ `
       post {
         id
         owner
+        title
         content
         type
         createdAt
@@ -254,9 +265,9 @@ export const updateCode = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -269,7 +280,7 @@ export const updateCode = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -288,9 +299,9 @@ export const deleteCode = /* GraphQL */ `
       id
       owner
       postID
-      name
+      title
+      content
       lang
-      code
       skipline
       type
       createdAt
@@ -298,6 +309,7 @@ export const deleteCode = /* GraphQL */ `
       post {
         id
         owner
+        title
         content
         type
         createdAt
@@ -307,9 +319,9 @@ export const deleteCode = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -322,7 +334,7 @@ export const deleteCode = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -341,12 +353,13 @@ export const createComment = /* GraphQL */ `
       id
       owner
       postID
-      comment
+      content
       createdAt
       updatedAt
       post {
         id
         owner
+        title
         content
         type
         createdAt
@@ -356,9 +369,9 @@ export const createComment = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -371,7 +384,7 @@ export const createComment = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -390,12 +403,13 @@ export const updateComment = /* GraphQL */ `
       id
       owner
       postID
-      comment
+      content
       createdAt
       updatedAt
       post {
         id
         owner
+        title
         content
         type
         createdAt
@@ -405,9 +419,9 @@ export const updateComment = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -420,7 +434,7 @@ export const updateComment = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -439,12 +453,13 @@ export const deleteComment = /* GraphQL */ `
       id
       owner
       postID
-      comment
+      content
       createdAt
       updatedAt
       post {
         id
         owner
+        title
         content
         type
         createdAt
@@ -454,9 +469,9 @@ export const deleteComment = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -469,7 +484,7 @@ export const deleteComment = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }

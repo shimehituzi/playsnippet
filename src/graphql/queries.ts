@@ -7,6 +7,7 @@ export const getPost = /* GraphQL */ `
     getPost(id: $id) {
       id
       owner
+      title
       content
       type
       createdAt
@@ -16,9 +17,9 @@ export const getPost = /* GraphQL */ `
           id
           owner
           postID
-          name
+          title
+          content
           lang
-          code
           skipline
           type
           createdAt
@@ -26,6 +27,7 @@ export const getPost = /* GraphQL */ `
           post {
             id
             owner
+            title
             content
             type
             createdAt
@@ -39,12 +41,13 @@ export const getPost = /* GraphQL */ `
           id
           owner
           postID
-          comment
+          content
           createdAt
           updatedAt
           post {
             id
             owner
+            title
             content
             type
             createdAt
@@ -66,6 +69,7 @@ export const listPosts = /* GraphQL */ `
       items {
         id
         owner
+        title
         content
         type
         createdAt
@@ -75,9 +79,9 @@ export const listPosts = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -90,7 +94,7 @@ export const listPosts = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -121,6 +125,7 @@ export const listPostsByDate = /* GraphQL */ `
       items {
         id
         owner
+        title
         content
         type
         createdAt
@@ -130,9 +135,9 @@ export const listPostsByDate = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -145,7 +150,7 @@ export const listPostsByDate = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -176,6 +181,7 @@ export const listPostsByOwner = /* GraphQL */ `
       items {
         id
         owner
+        title
         content
         type
         createdAt
@@ -185,9 +191,9 @@ export const listPostsByOwner = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -200,7 +206,7 @@ export const listPostsByOwner = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -217,9 +223,9 @@ export const getCode = /* GraphQL */ `
       id
       owner
       postID
-      name
+      title
+      content
       lang
-      code
       skipline
       type
       createdAt
@@ -227,6 +233,7 @@ export const getCode = /* GraphQL */ `
       post {
         id
         owner
+        title
         content
         type
         createdAt
@@ -236,9 +243,9 @@ export const getCode = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -251,7 +258,7 @@ export const getCode = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -272,9 +279,9 @@ export const listCodes = /* GraphQL */ `
         id
         owner
         postID
-        name
+        title
+        content
         lang
-        code
         skipline
         type
         createdAt
@@ -282,6 +289,7 @@ export const listCodes = /* GraphQL */ `
         post {
           id
           owner
+          title
           content
           type
           createdAt
@@ -319,9 +327,9 @@ export const listCodesByDate = /* GraphQL */ `
         id
         owner
         postID
-        name
+        title
+        content
         lang
-        code
         skipline
         type
         createdAt
@@ -329,6 +337,7 @@ export const listCodesByDate = /* GraphQL */ `
         post {
           id
           owner
+          title
           content
           type
           createdAt
@@ -366,9 +375,9 @@ export const listCodesByOwner = /* GraphQL */ `
         id
         owner
         postID
-        name
+        title
+        content
         lang
-        code
         skipline
         type
         createdAt
@@ -376,6 +385,7 @@ export const listCodesByOwner = /* GraphQL */ `
         post {
           id
           owner
+          title
           content
           type
           createdAt
@@ -398,12 +408,13 @@ export const getComment = /* GraphQL */ `
       id
       owner
       postID
-      comment
+      content
       createdAt
       updatedAt
       post {
         id
         owner
+        title
         content
         type
         createdAt
@@ -413,9 +424,9 @@ export const getComment = /* GraphQL */ `
             id
             owner
             postID
-            name
+            title
+            content
             lang
-            code
             skipline
             type
             createdAt
@@ -428,7 +439,7 @@ export const getComment = /* GraphQL */ `
             id
             owner
             postID
-            comment
+            content
             createdAt
             updatedAt
           }
@@ -449,12 +460,13 @@ export const listComments = /* GraphQL */ `
         id
         owner
         postID
-        comment
+        content
         createdAt
         updatedAt
         post {
           id
           owner
+          title
           content
           type
           createdAt
@@ -492,12 +504,13 @@ export const listCommentsByOwner = /* GraphQL */ `
         id
         owner
         postID
-        comment
+        content
         createdAt
         updatedAt
         post {
           id
           owner
+          title
           content
           type
           createdAt
@@ -535,12 +548,13 @@ export const listCommentsByPost = /* GraphQL */ `
         id
         owner
         postID
-        comment
+        content
         createdAt
         updatedAt
         post {
           id
           owner
+          title
           content
           type
           createdAt
