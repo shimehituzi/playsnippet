@@ -29,7 +29,7 @@ export const usePostsSettor = (): {
   }
 }
 
-type ConnectedPost = OmittedPost & {
+export type ConnectedPost = OmittedPost & {
   codes: OmittedCode[]
   comments: OmittedComment[]
 }

@@ -19,6 +19,9 @@ import { Observable } from '../../../node_modules/zen-observable-ts'
 import { PostListItem } from '../component/PostListItem'
 import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
 import { PostForm } from './PostForm'
+import { useRecoilValue } from 'recoil'
+import { connectedPostsState, usePostsSettor } from '../../state/postsState'
+import { useCodesSettor } from '../../state/codesState'
 
 const useStyle = makeStyles({
   card: {
@@ -64,6 +67,19 @@ const reducer = (state: Post[], action: ReducerAction) => {
 
 export const PostList: React.FC = () => {
   const { authenticated, user, authMode, isInit } = useAuth()
+  const rPost = useRecoilValue(connectedPostsState)
+  const {
+    initPosts,
+    appendPosts,
+    deletePost: setDeletePost,
+    createPost: setCreatePost,
+  } = usePostsSettor()
+  const {
+    initCodes,
+    appendCodes,
+    deleteCode: setDeleteCode,
+    createCode: setCreateCode,
+  } = useCodesSettor()
 
   const [posts, dispatch] = useReducer(reducer, [])
   const [nextToken, setNextToken] = useState<string | null>(null)
@@ -84,6 +100,25 @@ export const PostList: React.FC = () => {
       authMode,
     })) as GraphQLResult<ListPostsByDateQuery>
 
+    const posts = res.data.listPostsByDate.items
+
+    const omitPosts = posts.map((post) => {
+      const { codes: _codes, comments: _comments, ...omitPost } = post
+      return omitPost
+    })
+
+    const omitCodes = posts.map((post) => post.codes.items).flat()
+
+    switch (type) {
+      case ActionType.InitialQuery:
+        initPosts(omitPosts)
+        initCodes(omitCodes)
+        break
+      case ActionType.AdditionalQuery:
+        appendPosts(omitPosts)
+        appendCodes(omitCodes)
+        break
+    }
     dispatch({ type: type, posts: res.data.listPostsByDate.items })
     setNextToken(res.data.listPostsByDate.nextToken)
   }
@@ -142,14 +177,14 @@ export const PostList: React.FC = () => {
       },
     })
 
-    type DeleteCodeClient = Observable<{
+    type DeletePostClient = Observable<{
       value: GraphQLResult<OnDeletePostSubscription>
     }>
-    const deleteCodeClient = API.graphql({
+    const deletePostClient = API.graphql({
       ...graphqlOperation(onDeletePost),
       authMode,
-    }) as DeleteCodeClient
-    const deleteCodeSubscription = deleteCodeClient.subscribe({
+    }) as DeletePostClient
+    const deletePostSubscription = deletePostClient.subscribe({
       next: (msg) => {
         const deleteID = msg.value.data.onDeletePost.id
         dispatch({ type: ActionType.Delete, deleteID })
@@ -158,7 +193,7 @@ export const PostList: React.FC = () => {
 
     return () => {
       createCodeSubscription.unsubscribe()
-      deleteCodeSubscription.unsubscribe()
+      deletePostSubscription.unsubscribe()
     }
   }, [isInit])
 
@@ -166,7 +201,7 @@ export const PostList: React.FC = () => {
     <React.Fragment>
       {authenticated && <PostForm />}
       <Grid container alignItems="center" justifyContent="center">
-        {posts.map((post, key) => (
+        {rPost.map((post, key) => (
           <Grid item xs={12} className={classes.grid} key={key}>
             <Card className={classes.card}>
               <PostListItem
