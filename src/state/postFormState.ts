@@ -1,9 +1,9 @@
 import { atom } from 'recoil'
 import { CreatePostInput } from '../API'
 
-type PostForm = Pick<CreatePostInput, 'title' | 'content'>
+export type PostForm = Pick<CreatePostInput, 'title' | 'content'>
 
-export const PostFormState = atom<PostForm>({
+export const postFormState = atom<PostForm>({
   key: 'PostFormFormState',
   default: {
     title: '',

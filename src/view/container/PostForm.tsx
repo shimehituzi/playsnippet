@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useRecoilState } from 'recoil'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import { createCode, createPost } from '../../graphql/mutations'
 import {
   CreatePostMutationVariables,
   CreatePostMutation,
-  CreateCodeInput,
   CreateCodeMutationVariables,
 } from '../../API'
 import { Button, Grid, makeStyles, TextField } from '@material-ui/core'
+import { postFormState } from '../../state/postFormState'
+import { CodeForm, codesFormState } from '../../state/codesFormState'
 
 const useStyle = makeStyles({
   form: {
@@ -15,39 +17,16 @@ const useStyle = makeStyles({
   },
 })
 
-type CodeInput = Pick<CreateCodeInput, 'title' | 'content' | 'lang'>
-
 export const PostForm: React.FC = () => {
   const classes = useStyle()
 
-  const [content, setContent] = useState('')
-  const [code, setCode] = useState<CodeInput>({
-    title: '',
-    content: '',
-    lang: '',
-  })
-
-  const onChangeContent = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setContent(e.target.value)
-  }
-
-  const onChangeCode = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCode({
-      ...code,
-      [e.target.id]: e.target.value,
-    })
-  }
+  const [post, setPost] = useRecoilState(postFormState)
+  const [codes, setCodes] = useRecoilState(codesFormState)
 
   const handleSubmit = async () => {
-    if (code.title === '') return
-    if (code.content === '') return
-    if (code.lang === '') return
-    if (content === '') return
-
     const createPostMutationVariables: CreatePostMutationVariables = {
       input: {
-        title: '',
-        content: content,
+        ...post,
         type: 'post',
       },
     }
@@ -55,65 +34,68 @@ export const PostForm: React.FC = () => {
       graphqlOperation(createPost, createPostMutationVariables)
     )) as GraphQLResult<CreatePostMutation>
 
-    const createCodeMutationVariables: CreateCodeMutationVariables = {
-      input: {
-        ...code,
-        skipline: '',
-        postID: res.data.createPost.id,
-        type: 'code',
-      },
-    }
-    await API.graphql(graphqlOperation(createCode, createCodeMutationVariables))
+    codes.forEach(async (code) => {
+      const createCodeMutationVariables: CreateCodeMutationVariables = {
+        input: {
+          ...code,
+          skipline: '',
+          postID: res.data.createPost.id,
+          type: 'code',
+        },
+      }
+      await API.graphql(
+        graphqlOperation(createCode, createCodeMutationVariables)
+      )
+    })
 
-    setContent('')
-    setCode({
+    setPost({
       title: '',
       content: '',
-      lang: '',
     })
+    setCodes([])
   }
+
+  const onChangePost = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPost((post) => ({
+      ...post,
+      [e.target.name]: e.target.value,
+    }))
+  }
+
+  const onChangeCode =
+    (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setCodes((codes) => {
+        const prevCode = codes[index]
+        const newItem: CodeForm = {
+          ...prevCode,
+          [e.target.name]: e.target.value,
+        }
+
+        return [...codes.slice(0, index), newItem, ...codes.slice(index + 1)]
+      })
+    }
 
   return (
     <Grid container justifyContent="center" alignItems="center">
+      <Grid item xs={5} className={classes.form}>
+        <TextField
+          fullWidth
+          variant="standard"
+          label="Post Title"
+          value={post.title}
+          onChange={onChangePost}
+          name="title"
+        />
+      </Grid>
       <Grid item xs={12} className={classes.form}>
         <TextField
           fullWidth
           variant="outlined"
           label="Post"
           multiline
-          value={content}
-          onChange={onChangeContent}
-        />
-      </Grid>
-      <Grid item xs={5} className={classes.form}>
-        <TextField
-          fullWidth
-          variant="standard"
-          label="Code Title"
-          value={code.title}
-          onChange={onChangeCode}
-          id="title"
-        />
-      </Grid>
-      <Grid item xs={3} className={classes.form}>
-        <TextField
-          fullWidth
-          variant="standard"
-          label="Code Language"
-          value={code.lang}
-          onChange={onChangeCode}
-          id="lang"
-        />
-      </Grid>
-      <Grid item xs={12} className={classes.form}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          label="Code"
-          multiline
-          value={code.content}
-          onChange={onChangeCode}
-          id="content"
+          value={post.content}
+          onChange={onChangePost}
+          name="content"
         />
       </Grid>
       <Grid item>
