@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '../../hooks/auth'
+import { useAuth } from '../../utils/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import {
   ListPostsByDateQueryVariables,
@@ -19,25 +19,18 @@ import {
 import { useRecoilValue } from 'recoil'
 import { PostListItem } from '../component/PostListItem'
 import { PostForm } from './PostForm'
-import { Button, Card, colors, Grid, makeStyles } from '@material-ui/core'
+import { Button, Grid, makeStyles } from '@material-ui/core'
 import {
   subscribeCreateCode,
   subscribeCreatePost,
   subscribeDeleteCode,
   subscribeDeletePost,
 } from '../../utils/subscribe'
-import { useArraySettor } from '../../state/utils'
+import { useArraySettor } from '../../utils/recoilArraySettor'
 import { connectedPostsState, postsState } from '../../state/postsState'
 import { codesState } from '../../state/codesState'
 
 const useStyle = makeStyles({
-  card: {
-    backgroundColor: colors.grey[500],
-    padding: '1%',
-    paddingLeft: '5%',
-    paddingRight: '5%',
-    minWidth: 726,
-  },
   grid: {
     padding: '2%',
   },
@@ -167,30 +160,28 @@ export const PostList: React.FC = () => {
   }, [isInit])
 
   return (
-    <React.Fragment>
-      {authenticated && <PostForm />}
-      <Grid container alignItems="center" justifyContent="center">
-        {posts.map((post, key) => (
-          <Grid item xs={12} className={classes.grid} key={key}>
-            <Card className={classes.card}>
-              <PostListItem
-                post={post}
-                typingID={typingID}
-                setTypingID={setTypingID}
-                handleDeletePost={handleDeletePost}
-                isOwner={user ? user.username === post.owner : false}
-              />
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-      <Grid container alignItems="center" justifyContent="center">
-        <Grid item>
-          <Button onClick={handleGetAdditionalPosts} variant="outlined">
-            Read more
-          </Button>
+    <Grid container alignItems="center" justifyContent="center">
+      {authenticated && (
+        <Grid item xs={12} className={classes.grid}>
+          <PostForm />
         </Grid>
+      )}
+      {posts.map((post, key) => (
+        <Grid item xs={12} className={classes.grid} key={key}>
+          <PostListItem
+            post={post}
+            typingID={typingID}
+            setTypingID={setTypingID}
+            handleDeletePost={handleDeletePost}
+            isOwner={user ? user.username === post.owner : false}
+          />
+        </Grid>
+      ))}
+      <Grid item>
+        <Button onClick={handleGetAdditionalPosts} variant="outlined">
+          Read more
+        </Button>
       </Grid>
-    </React.Fragment>
+    </Grid>
   )
 }
