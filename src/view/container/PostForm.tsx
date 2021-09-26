@@ -121,6 +121,7 @@ export const PostForm: React.FC = () => {
       lang: '',
     }
     setCodes((codes) => [...codes, emptyItem])
+    setTab(0)
   }
 
   const removeCode = (index: number) => () => {
