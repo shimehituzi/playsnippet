@@ -8,13 +8,11 @@ import {
   CardHeader,
   colors,
   Grid,
-  IconButton,
   makeStyles,
   Typography,
 } from '@material-ui/core'
 import {
   Delete as DeleteIcon,
-  MoreVert as MoreVertIcon,
   PlayArrow as PlayIcon,
   Stop as StopIcon,
 } from '@material-ui/icons'

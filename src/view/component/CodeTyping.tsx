@@ -116,6 +116,10 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
 
   const judge = useCallback(
     (e: KeyboardEvent) => {
+      e.preventDefault()
+      if (e.key === 'Escape') {
+        stop()
+      }
       if (gameOver) return
       const current = charMap[cursor]?.character
       if (e.key === current || (e.key === 'Enter' && current === '\n')) {
