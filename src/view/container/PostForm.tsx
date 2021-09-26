@@ -8,11 +8,8 @@ import {
   CreateCodeMutationVariables,
 } from '../../API'
 import {
-  Box,
   Button,
   Card,
-  CardActions,
-  CardContent,
   colors,
   Grid,
   IconButton,
@@ -23,7 +20,11 @@ import {
 } from '@material-ui/core'
 import { postFormState } from '../../state/postFormState'
 import { CodeForm, codesFormState } from '../../state/codesFormState'
-import { Add as AddIcon, Close as CloseIcon } from '@material-ui/icons'
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Send as SendIcon,
+} from '@material-ui/icons'
 
 const useStyle = makeStyles({
   card: {
@@ -33,13 +34,17 @@ const useStyle = makeStyles({
     paddingRight: '5%',
   },
   form: {
-    margin: '2%',
+    padding: '2%',
   },
   tab: {
     textTransform: 'none',
   },
+  button: {
+    textTransform: 'none',
+  },
   cord: {
     backgroundColor: colors.grey[900],
+    padding: '2%',
   },
   close: {
     marginLeft: 'auto',
@@ -120,7 +125,9 @@ export const PostForm: React.FC = () => {
 
   const removeCode = (index: number) => () => {
     if (window.confirm('Are you sure you want to delete code?')) {
-      setTab(0)
+      setTab((prev) =>
+        prev === codes.length - 1 && prev !== 0 ? prev - 1 : prev
+      )
       setCodes((codes) => [...codes.slice(0, index), ...codes.slice(index + 1)])
     }
   }
@@ -149,85 +156,83 @@ export const PostForm: React.FC = () => {
             name="content"
           />
         </Grid>
-        {codes.length > 0 ? (
+        {codes.length > 0 && (
           <Grid item xs={12}>
-            <Box sx={{ width: '100%' }}>
-              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs
-                  value={tab}
-                  onChange={handleTabChange}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                >
-                  {codes.map((code, index) => {
-                    const label =
-                      code.title === '' ? `Code ${index + 1}` : code.title
-                    return (
-                      <Tab key={index} label={label} className={classes.tab} />
-                    )
-                  })}
-                  <IconButton onClick={addCode}>
-                    <AddIcon />
-                  </IconButton>
-                </Tabs>
-              </Box>
-              <Card className={classes.cord}>
-                <CardActions>
+            <Tabs
+              value={tab}
+              onChange={handleTabChange}
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              {codes.map((code, index) => {
+                const label =
+                  code.title === '' ? `Code ${index + 1}` : code.title
+                return <Tab key={index} label={label} className={classes.tab} />
+              })}
+            </Tabs>
+            <Card className={classes.cord}>
+              <Grid container justifyContent="center" alignItems="center">
+                <Grid item xs={7} className={classes.form}>
+                  <TextField
+                    fullWidth
+                    variant="standard"
+                    label="Code Title"
+                    value={codes[tab].title}
+                    onChange={onChangeCode(tab)}
+                    name="title"
+                  />
+                </Grid>
+                <Grid item xs={4} className={classes.form}>
+                  <TextField
+                    fullWidth
+                    variant="standard"
+                    label="Code Language"
+                    value={codes[tab].lang}
+                    onChange={onChangeCode(tab)}
+                    name="lang"
+                  />
+                </Grid>
+                <Grid item xs={1}>
                   <IconButton
                     onClick={removeCode(tab)}
                     className={classes.close}
+                    tabIndex={-1}
                   >
-                    <CloseIcon />
+                    <DeleteIcon />
                   </IconButton>
-                </CardActions>
-                <CardContent>
-                  <Grid container justifyContent="center" alignItems="center">
-                    <Grid item xs={5} className={classes.form}>
-                      <TextField
-                        fullWidth
-                        variant="standard"
-                        label="Code Title"
-                        value={codes[tab].title}
-                        onChange={onChangeCode(tab)}
-                        name="title"
-                      />
-                    </Grid>
-                    <Grid item xs={3} className={classes.form}>
-                      <TextField
-                        fullWidth
-                        variant="standard"
-                        label="Code Language"
-                        value={codes[tab].lang}
-                        onChange={onChangeCode(tab)}
-                        name="lang"
-                      />
-                    </Grid>
-                    <Grid item xs={12} className={classes.form}>
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        label="Code"
-                        multiline
-                        value={codes[tab].content}
-                        onChange={onChangeCode(tab)}
-                        name="content"
-                      />
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Box>
-          </Grid>
-        ) : (
-          <Grid item>
-            <Button variant="outlined" onClick={addCode}>
-              Add Code
-            </Button>
+                </Grid>
+                <Grid item xs={12} className={classes.form}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    label="Code"
+                    multiline
+                    value={codes[tab].content}
+                    onChange={onChangeCode(tab)}
+                    name="content"
+                  />
+                </Grid>
+              </Grid>
+            </Card>
           </Grid>
         )}
         <Grid item>
-          <Button variant="contained" onClick={handleSubmit}>
-            create post
+          <Button
+            variant="outlined"
+            onClick={addCode}
+            className={classes.button}
+            startIcon={<AddIcon />}
+          >
+            Code
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            startIcon={<SendIcon />}
+          >
+            Create
           </Button>
         </Grid>
       </Grid>
