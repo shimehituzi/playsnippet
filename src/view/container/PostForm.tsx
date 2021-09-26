@@ -75,7 +75,7 @@ export const PostForm: React.FC = () => {
 
   return (
     <Grid container justifyContent="center" alignItems="center">
-      <Grid item xs={10} className={classes.form}>
+      <Grid item xs={12} className={classes.form}>
         <TextField
           fullWidth
           variant="outlined"
@@ -105,7 +105,7 @@ export const PostForm: React.FC = () => {
           id="lang"
         />
       </Grid>
-      <Grid item xs={10} className={classes.form}>
+      <Grid item xs={12} className={classes.form}>
         <TextField
           fullWidth
           variant="outlined"

@@ -31,12 +31,17 @@ import { connectedPostsState, postsState } from '../../state/postsState'
 import { codesState } from '../../state/codesState'
 
 const useStyle = makeStyles({
-  card: {
+  list: {
     backgroundColor: colors.grey[500],
     padding: '1%',
     paddingLeft: '5%',
     paddingRight: '5%',
-    minWidth: 726,
+  },
+  form: {
+    backgroundColor: colors.grey[700],
+    padding: '3%',
+    paddingLeft: '5%',
+    paddingRight: '5%',
   },
   grid: {
     padding: '2%',
@@ -168,11 +173,17 @@ export const PostList: React.FC = () => {
 
   return (
     <React.Fragment>
-      {authenticated && <PostForm />}
       <Grid container alignItems="center" justifyContent="center">
+        {authenticated && (
+          <Grid item xs={12} className={classes.grid}>
+            <Card className={classes.form}>
+              <PostForm />
+            </Card>
+          </Grid>
+        )}
         {posts.map((post, key) => (
           <Grid item xs={12} className={classes.grid} key={key}>
-            <Card className={classes.card}>
+            <Card className={classes.list}>
               <PostListItem
                 post={post}
                 typingID={typingID}
