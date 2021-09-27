@@ -71,7 +71,13 @@ export const PostListItem: React.FC<Props> = ({
       {post.owner.charAt(0).toUpperCase()}
     </Avatar>
   )
-  const subheader = `@${post.owner} - ${post.createdAt}`
+
+  const calcTime = (createdAt: string) => {
+    const date = new Date(createdAt)
+    return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
+  }
+
+  const subheader = `@${post.owner} - ${calcTime(post.createdAt)}`
 
   return (
     <Card className={classes.card}>
