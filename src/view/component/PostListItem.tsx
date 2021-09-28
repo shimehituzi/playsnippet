@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   Avatar,
@@ -19,6 +19,7 @@ import {
 import { CodeTyping } from './CodeTyping'
 import { Code } from './Code'
 import { ConnectedPost } from '../../state/postsState'
+import dayjs, { OpUnitType } from 'dayjs'
 
 const useStyle = makeStyles({
   avatar: {
@@ -72,19 +73,12 @@ export const PostListItem: React.FC<Props> = ({
     </Avatar>
   )
 
-  const calcTime = (createdAt: string) => {
-    const date = new Date(createdAt)
-    return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
-  }
-
-  const subheader = `@${post.owner} - ${calcTime(post.createdAt)}`
-
   return (
     <Card className={classes.card}>
       <CardHeader
         title={<Typography variant="h5">{post.title}</Typography>}
         avatar={avatar}
-        subheader={subheader}
+        subheader={<SubHeader createdAt={post.createdAt} owner={post.owner} />}
       />
       <CardContent>
         <ReactMarkdown>{post.content}</ReactMarkdown>
@@ -150,5 +144,54 @@ export const PostListItem: React.FC<Props> = ({
         )}
       </CardContent>
     </Card>
+  )
+}
+
+type SubHeaderProps = {
+  createdAt: string
+  owner: string
+}
+
+const SubHeader: React.FC<SubHeaderProps> = ({ createdAt, owner }) => {
+  const calcDiff = (timestamp: string) => {
+    const now = dayjs()
+    const time = dayjs(timestamp)
+
+    const scales: OpUnitType[] = ['y', 'M', 'w', 'd', 'h', 'm', 's']
+
+    for (const scale of scales) {
+      const diff = now.diff(time, scale)
+      if (diff > 0) return diff + scale
+    }
+
+    return '0s'
+  }
+
+  const calcTime = (timestamp: string) => {
+    const date = new Date(timestamp)
+    return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
+  }
+
+  const diffTimeHeader = calcDiff(createdAt)
+  const timeHeader = calcTime(createdAt)
+  const [timestamp, setTimeStamp] = useState<string>(diffTimeHeader)
+
+  const hoverTimeStamp = () => {
+    setTimeStamp(timeHeader)
+  }
+
+  const leaveTimeStame = () => {
+    setTimeStamp(diffTimeHeader)
+  }
+
+  const ownerString = `@${owner} - `
+
+  return (
+    <Typography variant="body2" color="textSecondary">
+      {ownerString}
+      <span onMouseEnter={hoverTimeStamp} onMouseLeave={leaveTimeStame}>
+        {timestamp}
+      </span>
+    </Typography>
   )
 }
