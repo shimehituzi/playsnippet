@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   Avatar,
@@ -8,17 +8,22 @@ import {
   CardHeader,
   colors,
   Grid,
+  IconButton,
   makeStyles,
+  Menu,
+  MenuItem,
   Typography,
 } from '@material-ui/core'
 import {
   Delete as DeleteIcon,
+  MoreVert as MoreVertIcon,
   PlayArrow as PlayIcon,
   Stop as StopIcon,
 } from '@material-ui/icons'
 import { CodeTyping } from './CodeTyping'
 import { Code } from './Code'
 import { ConnectedPost } from '../../state/postsState'
+import dayjs, { OpUnitType } from 'dayjs'
 
 const useStyle = makeStyles({
   avatar: {
@@ -66,19 +71,47 @@ export const PostListItem: React.FC<Props> = ({
     setTypingID('')
   }
 
-  const avatar = (
-    <Avatar className={classes.avatar}>
-      {post.owner.charAt(0).toUpperCase()}
-    </Avatar>
-  )
-  const subheader = `@${post.owner} - ${post.createdAt}`
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const openMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget)
+  }
+  const closeMenu = () => {
+    setAnchorEl(null)
+  }
 
   return (
     <Card className={classes.card}>
       <CardHeader
         title={<Typography variant="h5">{post.title}</Typography>}
-        avatar={avatar}
-        subheader={subheader}
+        subheader={<SubHeader createdAt={post.createdAt} owner={post.owner} />}
+        avatar={
+          <Avatar className={classes.avatar}>
+            {post.owner.charAt(0).toUpperCase()}
+          </Avatar>
+        }
+        action={
+          isOwner ? (
+            <React.Fragment>
+              <IconButton onClick={openMenu}>
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClick={closeMenu}
+                onClose={closeMenu}
+              >
+                <MenuItem onClick={onDelete}>
+                  <DeleteIcon />
+                  DELETE
+                </MenuItem>
+              </Menu>
+            </React.Fragment>
+          ) : (
+            <React.Fragment />
+          )
+        }
       />
       <CardContent>
         <ReactMarkdown>{post.content}</ReactMarkdown>
@@ -131,18 +164,56 @@ export const PostListItem: React.FC<Props> = ({
               )}
             </React.Fragment>
           ))}
-        {isOwner && (
-          <Button
-            onClick={onDelete}
-            size="small"
-            color="default"
-            variant="contained"
-            startIcon={<DeleteIcon />}
-          >
-            Delete
-          </Button>
-        )}
       </CardContent>
     </Card>
+  )
+}
+
+type SubHeaderProps = {
+  createdAt: string
+  owner: string
+}
+
+const SubHeader: React.FC<SubHeaderProps> = ({ createdAt, owner }) => {
+  const calcDiff = (timestamp: string) => {
+    const now = dayjs()
+    const time = dayjs(timestamp)
+
+    const scales: OpUnitType[] = ['y', 'M', 'w', 'd', 'h', 'm', 's']
+
+    for (const scale of scales) {
+      const diff = now.diff(time, scale)
+      if (diff > 0) return diff + scale
+    }
+
+    return '0s'
+  }
+
+  const calcTime = (timestamp: string) => {
+    const date = new Date(timestamp)
+    return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
+  }
+
+  const diffTimeHeader = calcDiff(createdAt)
+  const timeHeader = calcTime(createdAt)
+  const [timestamp, setTimeStamp] = useState<string>(diffTimeHeader)
+
+  const hoverTimeStamp = () => {
+    setTimeStamp(timeHeader)
+  }
+
+  const leaveTimeStame = () => {
+    setTimeStamp(diffTimeHeader)
+  }
+
+  const ownerString = `@${owner} - `
+
+  return (
+    <Typography variant="body2" color="textSecondary">
+      {ownerString}
+      <span onMouseEnter={hoverTimeStamp} onMouseLeave={leaveTimeStame}>
+        {timestamp}
+      </span>
+    </Typography>
   )
 }
