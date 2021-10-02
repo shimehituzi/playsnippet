@@ -8,11 +8,15 @@ import {
   CardHeader,
   colors,
   Grid,
+  IconButton,
   makeStyles,
+  Menu,
+  MenuItem,
   Typography,
 } from '@material-ui/core'
 import {
   Delete as DeleteIcon,
+  MoreVert as MoreVertIcon,
   PlayArrow as PlayIcon,
   Stop as StopIcon,
 } from '@material-ui/icons'
@@ -67,18 +71,47 @@ export const PostListItem: React.FC<Props> = ({
     setTypingID('')
   }
 
-  const avatar = (
-    <Avatar className={classes.avatar}>
-      {post.owner.charAt(0).toUpperCase()}
-    </Avatar>
-  )
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const openMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget)
+  }
+  const closeMenu = () => {
+    setAnchorEl(null)
+  }
 
   return (
     <Card className={classes.card}>
       <CardHeader
         title={<Typography variant="h5">{post.title}</Typography>}
-        avatar={avatar}
         subheader={<SubHeader createdAt={post.createdAt} owner={post.owner} />}
+        avatar={
+          <Avatar className={classes.avatar}>
+            {post.owner.charAt(0).toUpperCase()}
+          </Avatar>
+        }
+        action={
+          isOwner ? (
+            <React.Fragment>
+              <IconButton onClick={openMenu}>
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClick={closeMenu}
+                onClose={closeMenu}
+              >
+                <MenuItem onClick={onDelete}>
+                  <DeleteIcon />
+                  DELETE
+                </MenuItem>
+              </Menu>
+            </React.Fragment>
+          ) : (
+            <React.Fragment />
+          )
+        }
       />
       <CardContent>
         <ReactMarkdown>{post.content}</ReactMarkdown>
@@ -131,17 +164,6 @@ export const PostListItem: React.FC<Props> = ({
               )}
             </React.Fragment>
           ))}
-        {isOwner && (
-          <Button
-            onClick={onDelete}
-            size="small"
-            color="default"
-            variant="contained"
-            startIcon={<DeleteIcon />}
-          >
-            Delete
-          </Button>
-        )}
       </CardContent>
     </Card>
   )
