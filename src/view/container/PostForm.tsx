@@ -13,18 +13,18 @@ import {
   colors,
   Grid,
   IconButton,
-  makeStyles,
   Tab,
   Tabs,
   TextField,
-} from '@material-ui/core'
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import { postFormState } from '../../state/postFormState'
 import { CodeForm, codesFormState } from '../../state/codesFormState'
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Send as SendIcon,
-} from '@material-ui/icons'
+} from '@mui/icons-material'
 
 const useStyle = makeStyles({
   card: {

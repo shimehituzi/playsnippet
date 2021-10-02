@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
-import { CssBaseline } from '@material-ui/core'
-import { ThemeProvider } from '@material-ui/core'
+import { CssBaseline, ThemeProvider } from '@mui/material'
 import { RecoilRoot } from 'recoil'
 import { theme } from '../src/etc/theme'
 

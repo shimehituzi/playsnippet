@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Highlight, { defaultProps, Language } from 'prism-react-renderer'
 import theme from 'prism-react-renderer/themes/vsDark'
-import { makeStyles } from '@material-ui/core'
+import { makeStyles } from '@mui/styles'
 
 const useStyle = makeStyles({
   pre: {

@@ -1,7 +1,7 @@
 import React from 'react'
 import Highlight, { defaultProps, Language } from 'prism-react-renderer'
 import theme from 'prism-react-renderer/themes/vsDark'
-import { makeStyles } from '@material-ui/core'
+import { makeStyles } from '@mui/styles'
 
 type Props = {
   code: string

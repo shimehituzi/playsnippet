@@ -1,10 +1,9 @@
-import { colors } from '@material-ui/core'
-import { createTheme } from '@material-ui/core/styles'
+import { colors, createTheme } from '@mui/material'
 
 export const theme = createTheme({
   palette: {
     primary: colors.lightBlue,
     secondary: colors.yellow,
-    type: 'dark',
+    mode: 'dark',
   },
 })

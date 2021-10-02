@@ -9,17 +9,17 @@ import {
   colors,
   Grid,
   IconButton,
-  makeStyles,
   Menu,
   MenuItem,
   Typography,
-} from '@material-ui/core'
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import {
   Delete as DeleteIcon,
   MoreVert as MoreVertIcon,
   PlayArrow as PlayIcon,
   Stop as StopIcon,
-} from '@material-ui/icons'
+} from '@mui/icons-material'
 import { CodeTyping } from './CodeTyping'
 import { Code } from './Code'
 import { ConnectedPost } from '../../state/postsState'
