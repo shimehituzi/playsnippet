@@ -19,7 +19,8 @@ import {
 import { useRecoilValue } from 'recoil'
 import { PostListItem } from '../component/PostListItem'
 import { PostForm } from './PostForm'
-import { Button, Grid, makeStyles } from '@material-ui/core'
+import { Button, Grid } from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import {
   subscribeCreateCode,
   subscribeCreatePost,

@@ -3,13 +3,8 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
 import { useAuth } from '../src/utils/auth'
-import {
-  Button,
-  Grid,
-  Typography,
-  makeStyles,
-  Container,
-} from '@material-ui/core'
+import { Button, Grid, Typography, Container } from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import { PostList } from '../src/view/container/PostList'
 
 const useStyle = makeStyles({
