@@ -4,8 +4,10 @@ import {
   Avatar,
   Button,
   Card,
+  CardActions,
   CardContent,
   CardHeader,
+  Collapse,
   colors,
   Grid,
   IconButton,
@@ -16,6 +18,8 @@ import {
 import { makeStyles } from '@mui/styles'
 import {
   Delete as DeleteIcon,
+  ExpandLess,
+  ExpandMore,
   MoreVert as MoreVertIcon,
   PlayArrow as PlayIcon,
   Stop as StopIcon,
@@ -24,11 +28,11 @@ import { CodeTyping } from './CodeTyping'
 import { Code } from './Code'
 import { ConnectedPost } from '../../state/postsState'
 import dayjs, { OpUnitType } from 'dayjs'
+import { useAuth } from '../../utils/auth'
+import { CommentForm } from '../container/CommentForm'
+import { CommentList } from './CommentList'
 
 const useStyle = makeStyles({
-  avatar: {
-    backgroundColor: colors.grey[300],
-  },
   card: {
     backgroundColor: colors.grey[500],
     padding: '1%',
@@ -37,6 +41,9 @@ const useStyle = makeStyles({
   },
   button: {
     textTransform: 'none',
+  },
+  expand: {
+    marginLeft: 'auto',
   },
 })
 
@@ -56,6 +63,8 @@ export const PostListItem: React.FC<Props> = ({
   setTypingID,
 }) => {
   const classes = useStyle()
+
+  const { authenticated } = useAuth()
 
   const onDelete = () => {
     if (window.confirm('Are you sure you want to delete it?')) {
@@ -80,13 +89,19 @@ export const PostListItem: React.FC<Props> = ({
     setAnchorEl(null)
   }
 
+  const [expandComment, setExpandComment] = useState<boolean>(false)
+
+  const handleExpandCommnet = () => {
+    setExpandComment((prev) => !prev)
+  }
+
   return (
     <Card className={classes.card}>
       <CardHeader
         title={<Typography variant="h5">{post.title}</Typography>}
         subheader={<SubHeader createdAt={post.createdAt} owner={post.owner} />}
         avatar={
-          <Avatar className={classes.avatar}>
+          <Avatar sx={{ bgcolor: colors.grey[300] }}>
             {post.owner.charAt(0).toUpperCase()}
           </Avatar>
         }
@@ -165,6 +180,20 @@ export const PostListItem: React.FC<Props> = ({
             </React.Fragment>
           ))}
       </CardContent>
+      <CardActions>
+        <div className={classes.expand}>
+          {expandComment ? 'Close' : 'Comment'}
+          <IconButton onClick={handleExpandCommnet}>
+            {expandComment ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+        </div>
+      </CardActions>
+      <Collapse in={expandComment} timeout="auto" unmountOnExit>
+        <CardContent>
+          <CommentList comments={post.comments} />
+          {authenticated && <CommentForm postID={post.id} />}
+        </CardContent>
+      </Collapse>
     </Card>
   )
 }
