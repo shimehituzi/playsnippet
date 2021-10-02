@@ -10,6 +10,7 @@ import {
   ModelSortDirection,
   Post,
   Code,
+  Comment,
 } from '../../API'
 import { listPostsByDate } from '../../graphql/queries'
 import {
@@ -22,14 +23,17 @@ import { PostForm } from './PostForm'
 import { Button, Grid } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import {
-  subscribeCreateCode,
   subscribeCreatePost,
-  subscribeDeleteCode,
+  subscribeCreateCode,
+  subscribeCreateComment,
   subscribeDeletePost,
+  subscribeDeleteCode,
+  subscribeDeleteComment,
 } from '../../utils/subscribe'
 import { useArraySettor } from '../../utils/recoilArraySettor'
 import { connectedPostsState, postsState } from '../../state/postsState'
 import { codesState } from '../../state/codesState'
+import { commentsState } from '../../state/commentsState'
 
 const useStyle = makeStyles({
   grid: {
@@ -47,12 +51,18 @@ const omitCode = (code: Code) => {
   return omitCode
 }
 
+const omitComment = (comment: Comment) => {
+  const { post: _, ...omitComment } = comment
+  return omitComment
+}
+
 type QueryType = 'INIT' | 'APPEND'
 export const PostList: React.FC = () => {
   const { authenticated, user, isInit } = useAuth()
   const posts = useRecoilValue(connectedPostsState)
   const setPosts = useArraySettor(postsState, 'DESC')
   const setCodes = useArraySettor(codesState, 'ASC')
+  const setComments = useArraySettor(commentsState, 'ASC')
 
   const [nextToken, setNextToken] = useState<string | null>(null)
   const [typingID, setTypingID] = useState<string>('')
@@ -75,15 +85,18 @@ export const PostList: React.FC = () => {
 
     const omitPosts = posts.map((post) => omitPost(post))
     const omitCodes = posts.map((post) => post.codes.items).flat()
+    const omitComment = posts.map((post) => post.comments.items).flat()
 
     switch (type) {
       case 'INIT':
         setPosts.initItems(omitPosts)
         setCodes.initItems(omitCodes)
+        setComments.initItems(omitComment)
         break
       case 'APPEND':
         setPosts.appendItems(omitPosts)
         setCodes.appendItems(omitCodes)
+        setComments.initItems(omitComment)
         break
     }
     setNextToken(res.data.listPostsByDate.nextToken)
@@ -152,11 +165,24 @@ export const PostList: React.FC = () => {
       },
     })
 
+    const createCommentSubscription = subscribeCreateComment({
+      next: (msg) => {
+        setComments.createItem(omitComment(msg.value.data.onCreateComment))
+      },
+    })
+    const deleteCommentSubscription = subscribeDeleteComment({
+      next: (msg) => {
+        setComments.deleteItem(omitComment(msg.value.data.onDeleteComment))
+      },
+    })
+
     return () => {
       createPostSubscription.unsubscribe()
       deletePostSubscription.unsubscribe()
       createCodeSubscription.unsubscribe()
       deleteCodeSubscription.unsubscribe()
+      createCommentSubscription.unsubscribe()
+      deleteCommentSubscription.unsubscribe()
     }
   }, [isInit])
 
