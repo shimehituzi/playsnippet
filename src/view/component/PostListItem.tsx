@@ -111,12 +111,7 @@ export const PostListItem: React.FC<Props> = ({
               <IconButton onClick={openMenu}>
                 <MoreVertIcon />
               </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClick={closeMenu}
-                onClose={closeMenu}
-              >
+              <Menu anchorEl={anchorEl} open={open} onClose={closeMenu}>
                 <MenuItem onClick={onDelete}>
                   <DeleteIcon />
                   DELETE
