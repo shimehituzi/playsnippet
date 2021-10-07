@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { AuthState } from '@aws-amplify/ui-components'
 import { Authenticator } from '../src/view/component/Autenticator'
 
-const SignIn: NextPage = () => {
+const SignUp: NextPage = () => {
   const { authenticated } = useAuth()
 
   const router = useRouter()
@@ -16,7 +16,7 @@ const SignIn: NextPage = () => {
     }
   }, [authenticated])
 
-  return <Authenticator authState={AuthState.SignIn} />
+  return <Authenticator authState={AuthState.SignUp} />
 }
 
-export default SignIn
+export default SignUp
