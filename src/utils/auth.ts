@@ -30,7 +30,7 @@ export const useAuth = (): AmplifyAuth => {
       })
       .catch(() => {
         Amplify.configure({
-          aws_appsync_authenticationType: 'API_KEY',
+          aws_appsync_authenticationType: 'AWS_IAM',
         })
         setUser(undefined)
         setAuthenticated(false)

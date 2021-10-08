@@ -1,6 +1,6 @@
 {
     "identityPoolName": "playsnippetcb8cab0c_identitypool_cb8cab0c",
-    "allowUnauthenticatedIdentities": false,
+    "allowUnauthenticatedIdentities": true,
     "resourceNameTruncated": "playsncb8cab0c",
     "userPoolName": "playsnippetcb8cab0c_userpool_cb8cab0c",
     "autoVerifiedAttributes": [
@@ -48,9 +48,20 @@
             "Arn"
         ]
     },
-    "useDefault": "default",
+    "useDefault": "manual",
     "userPoolGroupList": [],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,
-    "dependsOn": []
+    "dependsOn": [],
+    "thirdPartyAuth": false,
+    "userPoolGroups": false,
+    "adminQueries": false,
+    "triggers": "{}",
+    "hostedUI": false,
+    "parentStack": {
+        "Ref": "AWS::StackId"
+    },
+    "breakCircularDependency": true,
+    "permissions": [],
+    "authProviders": []
 }
