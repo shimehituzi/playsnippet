@@ -3,8 +3,8 @@ type Post
   @auth (
     rules: [
       { allow: owner },
-      { allow: private, operations: [read] },
-      { allow: public, operations: [read] }
+      { allow: private, provider: userPools, operations: [read] },
+      { allow: public, provider: iam, operations: [read] }
     ]
   )
   @key(name: "postsByDate", fields: ["type", "createdAt"], queryField: "listPostsByDate")
@@ -25,8 +25,8 @@ type Code
   @auth (
     rules: [
       { allow: owner },
-      { allow: private, operations: [read] },
-      { allow: public, operations: [read] }
+      { allow: private, provider: userPools, operations: [read] },
+      { allow: public, provider: iam, operations: [read] }
     ]
   )
   @key(name: "codesByDate", fields: ["type", "createdAt"], queryField: "listCodesByDate")
@@ -50,8 +50,8 @@ type Comment
   @auth (
     rules: [
       { allow: owner },
-      { allow: private, operations: [read] },
-      { allow: public, operations: [read] }
+      { allow: private, provider: userPools, operations: [read] },
+      { allow: public, provider: iam, operations: [read] }
     ]
   )
   @key(name: "commentsByOwner", fields: ["owner", "createdAt"], queryField: "listCommentsByOwner")
