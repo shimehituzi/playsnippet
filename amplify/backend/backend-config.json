@@ -53,11 +53,5 @@
         }
       }
     }
-  },
-  "storage": {
-    "playsnippetAccountIcon": {
-      "service": "S3",
-      "providerPlugin": "awscloudformation"
-    }
   }
 }
