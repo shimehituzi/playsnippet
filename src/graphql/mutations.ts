@@ -494,3 +494,42 @@ export const deleteComment = /* GraphQL */ `
     }
   }
 `;
+export const createAvatar = /* GraphQL */ `
+  mutation CreateAvatar(
+    $input: CreateAvatarInput!
+    $condition: ModelAvatarConditionInput
+  ) {
+    createAvatar(input: $input, condition: $condition) {
+      owner
+      avatar
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateAvatar = /* GraphQL */ `
+  mutation UpdateAvatar(
+    $input: UpdateAvatarInput!
+    $condition: ModelAvatarConditionInput
+  ) {
+    updateAvatar(input: $input, condition: $condition) {
+      owner
+      avatar
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteAvatar = /* GraphQL */ `
+  mutation DeleteAvatar(
+    $input: DeleteAvatarInput!
+    $condition: ModelAvatarConditionInput
+  ) {
+    deleteAvatar(input: $input, condition: $condition) {
+      owner
+      avatar
+      createdAt
+      updatedAt
+    }
+  }
+`;

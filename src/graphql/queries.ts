@@ -571,3 +571,38 @@ export const listCommentsByPost = /* GraphQL */ `
     }
   }
 `;
+export const getAvatar = /* GraphQL */ `
+  query GetAvatar($owner: String!) {
+    getAvatar(owner: $owner) {
+      owner
+      avatar
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const listAvatars = /* GraphQL */ `
+  query ListAvatars(
+    $owner: String
+    $filter: ModelAvatarFilterInput
+    $limit: Int
+    $nextToken: String
+    $sortDirection: ModelSortDirection
+  ) {
+    listAvatars(
+      owner: $owner
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      sortDirection: $sortDirection
+    ) {
+      items {
+        owner
+        avatar
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;

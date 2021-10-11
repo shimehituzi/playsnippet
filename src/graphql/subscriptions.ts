@@ -467,3 +467,33 @@ export const onDeleteComment = /* GraphQL */ `
     }
   }
 `;
+export const onCreateAvatar = /* GraphQL */ `
+  subscription OnCreateAvatar {
+    onCreateAvatar {
+      owner
+      avatar
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateAvatar = /* GraphQL */ `
+  subscription OnUpdateAvatar {
+    onUpdateAvatar {
+      owner
+      avatar
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteAvatar = /* GraphQL */ `
+  subscription OnDeleteAvatar {
+    onDeleteAvatar {
+      owner
+      avatar
+      createdAt
+      updatedAt
+    }
+  }
+`;

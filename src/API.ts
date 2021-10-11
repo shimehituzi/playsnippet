@@ -211,6 +211,35 @@ export type DeleteCommentInput = {
   id: string,
 };
 
+export type CreateAvatarInput = {
+  owner: string,
+  avatar: string,
+};
+
+export type ModelAvatarConditionInput = {
+  avatar?: ModelStringInput | null,
+  and?: Array< ModelAvatarConditionInput | null > | null,
+  or?: Array< ModelAvatarConditionInput | null > | null,
+  not?: ModelAvatarConditionInput | null,
+};
+
+export type Avatar = {
+  __typename: "Avatar",
+  owner: string,
+  avatar: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateAvatarInput = {
+  owner: string,
+  avatar?: string | null,
+};
+
+export type DeleteAvatarInput = {
+  owner: string,
+};
+
 export type ModelPostFilterInput = {
   id?: ModelIDInput | null,
   owner?: ModelStringInput | null,
@@ -269,6 +298,20 @@ export type ModelCommentFilterInput = {
   and?: Array< ModelCommentFilterInput | null > | null,
   or?: Array< ModelCommentFilterInput | null > | null,
   not?: ModelCommentFilterInput | null,
+};
+
+export type ModelAvatarFilterInput = {
+  owner?: ModelStringInput | null,
+  avatar?: ModelStringInput | null,
+  and?: Array< ModelAvatarFilterInput | null > | null,
+  or?: Array< ModelAvatarFilterInput | null > | null,
+  not?: ModelAvatarFilterInput | null,
+};
+
+export type ModelAvatarConnection = {
+  __typename: "ModelAvatarConnection",
+  items?:  Array<Avatar | null > | null,
+  nextToken?: string | null,
 };
 
 export type CreatePostMutationVariables = {
@@ -826,6 +869,51 @@ export type DeleteCommentMutation = {
         nextToken?: string | null,
       } | null,
     } | null,
+  } | null,
+};
+
+export type CreateAvatarMutationVariables = {
+  input: CreateAvatarInput,
+  condition?: ModelAvatarConditionInput | null,
+};
+
+export type CreateAvatarMutation = {
+  createAvatar?:  {
+    __typename: "Avatar",
+    owner: string,
+    avatar: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateAvatarMutationVariables = {
+  input: UpdateAvatarInput,
+  condition?: ModelAvatarConditionInput | null,
+};
+
+export type UpdateAvatarMutation = {
+  updateAvatar?:  {
+    __typename: "Avatar",
+    owner: string,
+    avatar: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteAvatarMutationVariables = {
+  input: DeleteAvatarInput,
+  condition?: ModelAvatarConditionInput | null,
+};
+
+export type DeleteAvatarMutation = {
+  deleteAvatar?:  {
+    __typename: "Avatar",
+    owner: string,
+    avatar: string,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
@@ -1441,6 +1529,42 @@ export type ListCommentsByPostQuery = {
   } | null,
 };
 
+export type GetAvatarQueryVariables = {
+  owner: string,
+};
+
+export type GetAvatarQuery = {
+  getAvatar?:  {
+    __typename: "Avatar",
+    owner: string,
+    avatar: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListAvatarsQueryVariables = {
+  owner?: string | null,
+  filter?: ModelAvatarFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+  sortDirection?: ModelSortDirection | null,
+};
+
+export type ListAvatarsQuery = {
+  listAvatars?:  {
+    __typename: "ModelAvatarConnection",
+    items?:  Array< {
+      __typename: "Avatar",
+      owner: string,
+      avatar: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null > | null,
+    nextToken?: string | null,
+  } | null,
+};
+
 export type OnCreatePostSubscription = {
   onCreatePost?:  {
     __typename: "Post",
@@ -1951,5 +2075,35 @@ export type OnDeleteCommentSubscription = {
         nextToken?: string | null,
       } | null,
     } | null,
+  } | null,
+};
+
+export type OnCreateAvatarSubscription = {
+  onCreateAvatar?:  {
+    __typename: "Avatar",
+    owner: string,
+    avatar: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateAvatarSubscription = {
+  onUpdateAvatar?:  {
+    __typename: "Avatar",
+    owner: string,
+    avatar: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteAvatarSubscription = {
+  onDeleteAvatar?:  {
+    __typename: "Avatar",
+    owner: string,
+    avatar: string,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
