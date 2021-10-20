@@ -10,6 +10,11 @@ import {
   useSetRecoilState,
 } from 'recoil'
 
+const forceAvatarUpdate = atom<number>({
+  key: 'forceAvatarUpdate',
+  default: 0,
+})
+
 const displayedOwnersState = atom<string[]>({
   key: 'displayedOwnersState',
   default: [],
@@ -27,16 +32,19 @@ const avatarsState = selector<Avatar[]>({
 
 const avatarQuery = selectorFamily<Avatar | null, string>({
   key: 'avatarQuery',
-  get: (owner) => async () => {
-    if (owner === '') return null
-    const getAvatarQueryVariables: GetAvatarQueryVariables = {
-      owner: owner,
-    }
-    const res = (await API.graphql(
-      graphqlOperation(getAvatar, getAvatarQueryVariables)
-    )) as GraphQLResult<GetAvatarQuery>
-    return res.data?.getAvatar
-  },
+  get:
+    (owner) =>
+    async ({ get }) => {
+      get(forceAvatarUpdate)
+      if (owner === '') return null
+      const getAvatarQueryVariables: GetAvatarQueryVariables = {
+        owner: owner,
+      }
+      const res = (await API.graphql(
+        graphqlOperation(getAvatar, getAvatarQueryVariables)
+      )) as GraphQLResult<GetAvatarQuery>
+      return res.data?.getAvatar
+    },
 })
 
 const avatarState = selectorFamily<Avatar | null, string>({
@@ -49,6 +57,12 @@ const avatarState = selectorFamily<Avatar | null, string>({
       return avatar ? avatar : null
     },
 })
+
+export const useAvatarUpdate = (): (() => void) => {
+  const setForceAvatarUpdate = useSetRecoilState(forceAvatarUpdate)
+  const forceUpdate = () => setForceAvatarUpdate((n) => n + 1)
+  return forceUpdate
+}
 
 export const useAvatar = (username: string): Avatar | null => {
   const setOwner = useSetRecoilState(displayedOwnersState)
