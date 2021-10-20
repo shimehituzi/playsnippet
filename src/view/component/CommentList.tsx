@@ -1,7 +1,5 @@
 import React from 'react'
 import {
-  Avatar,
-  colors,
   List,
   ListItem,
   ListItemAvatar,
@@ -9,6 +7,7 @@ import {
   Typography,
 } from '@mui/material'
 import { OmittedComment } from '../../state/commentsState'
+import { Avatar } from './Avatar'
 
 type Props = {
   comments: OmittedComment[]
@@ -20,9 +19,7 @@ export const CommentList: React.FC<Props> = ({ comments }) => {
       {comments.map((comment, key) => (
         <ListItem key={key}>
           <ListItemAvatar>
-            <Avatar sx={{ bgcolor: colors.grey[300] }}>
-              {comment.owner.charAt(0).toUpperCase()}
-            </Avatar>
+            <Avatar username={comment.owner} size={40} />
           </ListItemAvatar>
           <ListItemText
             primary={comment.owner}

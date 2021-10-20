@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
-  Avatar,
   Button,
   Card,
   CardActions,
@@ -31,6 +30,7 @@ import dayjs, { OpUnitType } from 'dayjs'
 import { useAuth } from '../../utils/auth'
 import { CommentForm } from '../container/CommentForm'
 import { CommentList } from './CommentList'
+import { Avatar } from './Avatar'
 
 const useStyle = makeStyles({
   card: {
@@ -100,11 +100,7 @@ export const PostListItem: React.FC<Props> = ({
       <CardHeader
         title={<Typography variant="h5">{post.title}</Typography>}
         subheader={<SubHeader createdAt={post.createdAt} owner={post.owner} />}
-        avatar={
-          <Avatar sx={{ bgcolor: colors.grey[300] }}>
-            {post.owner.charAt(0).toUpperCase()}
-          </Avatar>
-        }
+        avatar={<Avatar username={post.owner} size={50} />}
         action={
           isOwner ? (
             <React.Fragment>

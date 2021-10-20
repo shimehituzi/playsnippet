@@ -64,3 +64,18 @@ type Comment
   content: String!
   createdAt: String!
 }
+
+type Avatar
+  @model
+  @auth (
+    rules: [
+      { allow: owner },
+      { allow: private, provider: userPools, operations: [read] },
+      { allow: public, provider: iam, operations: [read] }
+    ]
+  )
+  @key(fields: ["owner"])
+{
+  owner: String!
+  avatar: String!
+}
