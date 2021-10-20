@@ -32,9 +32,9 @@ const avatarsState = selector<Avatar[]>({
 const avatarQuery = selectorFamily<Avatar | null, string>({
   key: 'avatarQuery',
   get: (owner) => async () => {
-    const input = owner ? owner : 'dummy'
+    if (owner === '') return null
     const getAvatarQueryVariables: GetAvatarQueryVariables = {
-      owner: input,
+      owner: owner,
     }
     const res = (await API.graphql(
       graphqlOperation(getAvatar, getAvatarQueryVariables)
@@ -43,40 +43,36 @@ const avatarQuery = selectorFamily<Avatar | null, string>({
   },
 })
 
-const ShowAvatar: React.FC<{ username: string }> = ({ username }) => {
-  const avatars = useRecoilValueLoadable(avatarsState)
+const avatarState = selectorFamily<Avatar | null, string>({
+  key: 'avatarState',
+  get:
+    (owner) =>
+    ({ get }) => {
+      const avatars = get(avatarsState)
+      const avatar = avatars.find((v) => v.owner === owner)
+      return avatar ? avatar : null
+    },
+})
+
+const useAvatar = (username: string): Avatar | null => {
   const setOwner = useSetRecoilState(displayedOwnersState)
-  const [avatar, setAvatar] = useState<Avatar | null>(null)
+  const avatar = useRecoilValueLoadable(avatarState(username))
 
   useEffect(() => {
-    setOwner((prev) => {
-      if (prev.includes(username)) {
-        return prev
-      } else {
-        return [...prev, username]
-      }
-    })
+    setOwner((prev) => Array.from(new Set([...prev, username])))
   }, [username])
 
-  useEffect(() => {
-    if (avatars.state === 'hasValue') {
-      const avatar = avatars.contents.find((v) => v?.owner === username)
-      setAvatar(avatar ? avatar : null)
-    }
-  }, [avatars])
+  return avatar.state === 'hasValue' ? avatar.contents : null
+}
 
-  switch (avatars.state) {
-    case 'loading':
-      return <MuiAvatar>{username.charAt(0).toUpperCase()}</MuiAvatar>
-    case 'hasValue':
-      if (avatar) {
-        return <MuiAvatar src={avatar.avatar} />
-      } else {
-        return <MuiAvatar>{username.charAt(0).toUpperCase()}</MuiAvatar>
-      }
-    case 'hasError':
-      throw avatars.contents
-  }
+const ShowAvatar: React.FC<{ username: string }> = ({ username }) => {
+  const avatar = useAvatar(username)
+
+  return avatar ? (
+    <MuiAvatar src={avatar.avatar} />
+  ) : (
+    <MuiAvatar>{username.charAt(0).toUpperCase()}</MuiAvatar>
+  )
 }
 
 const Avatars: NextPage = () => {
