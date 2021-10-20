@@ -7,6 +7,7 @@ import { getAvatar } from '../src/graphql/queries'
 import {
   atom,
   selector,
+  selectorFamily,
   useRecoilValueLoadable,
   useSetRecoilState,
 } from 'recoil'
@@ -19,22 +20,26 @@ const displayedOwnersState = atom<string[]>({
 })
 
 const avatarsState = selector<Avatar[]>({
-  key: 'AvatarsState',
-  get: async ({ get }) => {
+  key: 'avatarsState',
+  get: ({ get }) => {
     const owners = get(displayedOwnersState)
-    const avatars = Promise.all(
-      owners.map(async (owner) => {
-        const input = owner ? owner : 'seed'
-        const getAvatarQueryVariables: GetAvatarQueryVariables = {
-          owner: input,
-        }
-        const res = (await API.graphql(
-          graphqlOperation(getAvatar, getAvatarQueryVariables)
-        )) as GraphQLResult<GetAvatarQuery>
-        return res.data?.getAvatar
-      })
-    )
-    return avatars
+    return owners
+      .map((owner) => get(avatarQuery(owner)))
+      .filter((value) => value)
+  },
+})
+
+const avatarQuery = selectorFamily<Avatar | null, string>({
+  key: 'avatarQuery',
+  get: (owner) => async () => {
+    const input = owner ? owner : 'dummy'
+    const getAvatarQueryVariables: GetAvatarQueryVariables = {
+      owner: input,
+    }
+    const res = (await API.graphql(
+      graphqlOperation(getAvatar, getAvatarQueryVariables)
+    )) as GraphQLResult<GetAvatarQuery>
+    return res.data?.getAvatar
   },
 })
 
@@ -76,6 +81,7 @@ const ShowAvatar: React.FC<{ username: string }> = ({ username }) => {
 
 const Avatars: NextPage = () => {
   const { isInit } = useAuth()
+  const [text, setText] = useState('')
 
   return (
     <React.Fragment>
@@ -83,11 +89,14 @@ const Avatars: NextPage = () => {
       <Container>
         {isInit && (
           <React.Fragment>
-            <ShowAvatar username="shimehituzi" />
-            <ShowAvatar username="shimehituzi" />
-            <ShowAvatar username="shimehituzi" />
-            <ShowAvatar username="arakida" />
-            <ShowAvatar username="test" />
+            <input
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <ShowAvatar username={text} />
+            <ShowAvatar username={text} />
+            <ShowAvatar username={text} />
           </React.Fragment>
         )}
       </Container>
