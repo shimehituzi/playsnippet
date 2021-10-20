@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import {
   AppBar,
-  Avatar,
   Button,
   IconButton,
   ListItemButton,
@@ -21,6 +20,8 @@ import {
   ManageAccounts as ManageAccountsIcon,
 } from '@mui/icons-material'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
+import { useAvatar } from '../../state/avatarsState'
+import { Avatar } from '../component/Avatar'
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   paddingTop: theme.spacing(1),
@@ -31,7 +32,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }))
 
 export const Appbar: React.FC = () => {
-  const { authenticated } = useAuth()
+  const { authenticated, user } = useAuth()
 
   return (
     <AppBar position="static">
@@ -44,13 +45,21 @@ export const Appbar: React.FC = () => {
         >
           Play Snippet
         </Typography>
-        {authenticated ? <Account /> : <Sign />}
+        {authenticated ? (
+          <Account username={user ? user.username : ''} />
+        ) : (
+          <Sign />
+        )}
       </StyledToolbar>
     </AppBar>
   )
 }
 
-const Account: React.FC = () => {
+type AccountProps = {
+  username: string
+}
+
+const Account: React.FC<AccountProps> = ({ username }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const openMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -63,7 +72,7 @@ const Account: React.FC = () => {
   return (
     <React.Fragment>
       <IconButton onClick={openMenu}>
-        <Avatar sx={{ width: 60, height: 60 }}></Avatar>
+        <Avatar username={username} size={75} />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={closeMenu} keepMounted>
         <MenuItem disableRipple style={{ backgroundColor: 'transparent' }}>

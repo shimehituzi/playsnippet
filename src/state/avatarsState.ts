@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import { NextPage } from 'next'
-import { Avatar as MuiAvatar, Container } from '@mui/material'
+import { useEffect } from 'react'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { GetAvatarQueryVariables, GetAvatarQuery, Avatar } from '../src/API'
-import { getAvatar } from '../src/graphql/queries'
+import { GetAvatarQueryVariables, GetAvatarQuery, Avatar } from '../API'
+import { getAvatar } from '../graphql/queries'
 import {
   atom,
   selector,
@@ -11,8 +9,6 @@ import {
   useRecoilValueLoadable,
   useSetRecoilState,
 } from 'recoil'
-import { Appbar } from '../src/view/container/Appbar'
-import { useAuth } from '../src/utils/auth'
 
 const displayedOwnersState = atom<string[]>({
   key: 'displayedOwnersState',
@@ -54,7 +50,7 @@ const avatarState = selectorFamily<Avatar | null, string>({
     },
 })
 
-const useAvatar = (username: string): Avatar | null => {
+export const useAvatar = (username: string): Avatar | null => {
   const setOwner = useSetRecoilState(displayedOwnersState)
   const avatar = useRecoilValueLoadable(avatarState(username))
 
@@ -64,40 +60,3 @@ const useAvatar = (username: string): Avatar | null => {
 
   return avatar.state === 'hasValue' ? avatar.contents : null
 }
-
-const ShowAvatar: React.FC<{ username: string }> = ({ username }) => {
-  const avatar = useAvatar(username)
-
-  return avatar ? (
-    <MuiAvatar src={avatar.avatar} />
-  ) : (
-    <MuiAvatar>{username.charAt(0).toUpperCase()}</MuiAvatar>
-  )
-}
-
-const Avatars: NextPage = () => {
-  const { isInit } = useAuth()
-  const [text, setText] = useState('')
-
-  return (
-    <React.Fragment>
-      <Appbar />
-      <Container>
-        {isInit && (
-          <React.Fragment>
-            <input
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-            <ShowAvatar username={text} />
-            <ShowAvatar username={text} />
-            <ShowAvatar username={text} />
-          </React.Fragment>
-        )}
-      </Container>
-    </React.Fragment>
-  )
-}
-
-export default Avatars
