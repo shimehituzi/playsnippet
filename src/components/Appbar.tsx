@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { makeStyles } from '@mui/styles'
-import { useAuth } from '../../utils/auth'
+import { useAuth } from '../utils/auth'
 import {
   PersonRemoveOutlined as PersonRemoveOutlinedIcon,
   Logout as SignOutIcon,
@@ -25,15 +25,11 @@ import {
   CreateAvatarMutationVariables,
   UpdateAvatarMutationVariables,
   DeleteAvatarMutationVariables,
-} from '../../API'
-import {
-  createAvatar,
-  deleteAvatar,
-  updateAvatar,
-} from '../../graphql/mutations'
+} from '../API'
+import { createAvatar, deleteAvatar, updateAvatar } from '../graphql/mutations'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
-import { useAvatar, useAvatarUpdate } from '../../state/avatarsState'
-import { Avatar } from '../component/Avatar'
+import { useAvatar, useAvatarUpdate } from '../state/avatarsState'
+import { Avatar } from './Avatar'
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   paddingTop: theme.spacing(1),

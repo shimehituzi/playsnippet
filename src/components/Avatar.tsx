@@ -1,6 +1,6 @@
 import React from 'react'
 import { Avatar as MuiAvatar, colors } from '@mui/material'
-import { useAvatar } from '../../state/avatarsState'
+import { useAvatar } from '../state/avatarsState'
 
 type Props = {
   username: string

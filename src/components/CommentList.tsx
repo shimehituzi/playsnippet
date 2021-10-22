@@ -6,7 +6,7 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material'
-import { OmittedComment } from '../../state/commentsState'
+import { OmittedComment } from '../state/commentsState'
 import { Avatar } from './Avatar'
 
 type Props = {

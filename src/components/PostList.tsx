@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '../../utils/auth'
+import { useAuth } from '../utils/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import {
   ListPostsByDateQueryVariables,
@@ -11,14 +11,14 @@ import {
   Post,
   Code,
   Comment,
-} from '../../API'
-import { listPostsByDate } from '../../graphql/queries'
+} from '../API'
+import { listPostsByDate } from '../graphql/queries'
 import {
   deletePost as deletePostQuery,
   deleteCode as deleteCodeQuery,
-} from '../../graphql/mutations'
+} from '../graphql/mutations'
 import { useRecoilValue } from 'recoil'
-import { PostListItem } from '../component/PostListItem'
+import { PostListItem } from './PostListItem'
 import { PostForm } from './PostForm'
 import { Button, Grid } from '@mui/material'
 import { makeStyles } from '@mui/styles'
@@ -29,11 +29,11 @@ import {
   subscribeDeletePost,
   subscribeDeleteCode,
   subscribeDeleteComment,
-} from '../../utils/subscribe'
-import { useArraySettor } from '../../utils/recoilArraySettor'
-import { connectedPostsState, postsState } from '../../state/postsState'
-import { codesState } from '../../state/codesState'
-import { commentsState } from '../../state/commentsState'
+} from '../utils/subscribe'
+import { useArraySettor } from '../utils/recoilArraySettor'
+import { connectedPostsState, postsState } from '../state/postsState'
+import { codesState } from '../state/codesState'
+import { commentsState } from '../state/commentsState'
 
 const useStyle = makeStyles({
   grid: {

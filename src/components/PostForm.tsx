@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { useRecoilState } from 'recoil'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createCode, createPost } from '../../graphql/mutations'
+import { createCode, createPost } from '../graphql/mutations'
 import {
   CreatePostMutationVariables,
   CreatePostMutation,
   CreateCodeMutationVariables,
-} from '../../API'
+} from '../API'
 import {
   Button,
   Card,
@@ -18,8 +18,8 @@ import {
   TextField,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { postFormState } from '../../state/postFormState'
-import { CodeForm, codesFormState } from '../../state/codesFormState'
+import { postFormState } from '../state/postFormState'
+import { CodeForm, codesFormState } from '../state/codesFormState'
 import {
   Add as AddIcon,
   Delete as DeleteIcon,

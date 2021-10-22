@@ -3,9 +3,9 @@ import API, { graphqlOperation } from '@aws-amplify/api'
 import { Send as SendIcon } from '@mui/icons-material'
 import { Grid, IconButton, TextField } from '@mui/material'
 import { useRecoilState } from 'recoil'
-import { CreateCommentMutationVariables } from '../../API'
-import { createComment } from '../../graphql/mutations'
-import { commentFormState } from '../../state/commentFormState'
+import { CreateCommentMutationVariables } from '../API'
+import { createComment } from '../graphql/mutations'
+import { commentFormState } from '../state/commentFormState'
 
 type Props = {
   postID: string

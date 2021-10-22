@@ -1,8 +1,8 @@
 import React from 'react'
 import { NextPage } from 'next'
 import { Container } from '@mui/material'
-import { PostList } from '../src/view/container/PostList'
-import { Appbar } from '../src/view/container/Appbar'
+import { PostList } from '../src/components/PostList'
+import { Appbar } from '../src/components/Appbar'
 
 const Home: NextPage = () => {
   return (

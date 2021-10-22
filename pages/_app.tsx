@@ -3,7 +3,7 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { RecoilRoot } from 'recoil'
-import { theme } from '../src/etc/theme'
+import { theme } from '../src/utils/theme'
 
 import Amplify from 'aws-amplify'
 import awsconfig from '../src/aws-exports'

@@ -25,10 +25,10 @@ import {
 } from '@mui/icons-material'
 import { CodeTyping } from './CodeTyping'
 import { Code } from './Code'
-import { ConnectedPost } from '../../state/postsState'
+import { ConnectedPost } from '../state/postsState'
 import dayjs, { OpUnitType } from 'dayjs'
-import { useAuth } from '../../utils/auth'
-import { CommentForm } from '../container/CommentForm'
+import { useAuth } from '../utils/auth'
+import { CommentForm } from './CommentForm'
 import { CommentList } from './CommentList'
 import { Avatar } from './Avatar'
 
