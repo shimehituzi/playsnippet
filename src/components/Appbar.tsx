@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { makeStyles } from '@mui/styles'
-import { useAuth } from '../../utils/auth'
+import { useAuth } from '../utils/auth'
 import {
   PersonRemoveOutlined as PersonRemoveOutlinedIcon,
   Logout as SignOutIcon,
@@ -25,15 +25,11 @@ import {
   CreateAvatarMutationVariables,
   UpdateAvatarMutationVariables,
   DeleteAvatarMutationVariables,
-} from '../../API'
-import {
-  createAvatar,
-  deleteAvatar,
-  updateAvatar,
-} from '../../graphql/mutations'
+} from '../API'
+import { createAvatar, deleteAvatar, updateAvatar } from '../graphql/mutations'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
-import { useAvatar, useAvatarUpdate } from '../../state/avatarsState'
-import { Avatar } from '../component/Avatar'
+import { useAvatar, useAvatarUpdate } from '../state/avatarsState'
+import { Avatar } from './Avatar'
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   paddingTop: theme.spacing(1),
@@ -57,8 +53,8 @@ export const Appbar: React.FC = () => {
         >
           Play Snippet
         </Typography>
-        {authenticated ? (
-          <Account username={user ? user.username : ''} />
+        {authenticated && user?.username ? (
+          <Account username={user.username} />
         ) : (
           <Sign />
         )}
@@ -110,8 +106,8 @@ const Account: React.FC<AccountProps> = ({ username }) => {
     const reader = new FileReader()
 
     reader.onload = async () => {
-      if (!user || !user.username) return
-      const imageURL = reader.result.toString()
+      const imageURL = reader.result?.toString()
+      if (!imageURL) return
       const size = Buffer.from(imageURL).length / 1e3
       if (size <= 400) {
         if (avatar) {
@@ -126,7 +122,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
 
     if (file) {
       reader.readAsDataURL(file)
-      e.target.value = null
+      e.target.value = ''
     }
   }
 

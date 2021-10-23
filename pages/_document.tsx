@@ -8,7 +8,7 @@ import Document, {
   NextScript,
 } from 'next/document'
 import { ServerStyleSheets } from '@mui/styles'
-import { theme } from '../src/etc/theme'
+import { theme } from '../src/utils/theme'
 
 export default class MyDocument extends Document {
   static getInitialProps = async (

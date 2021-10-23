@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { useRecoilState } from 'recoil'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createCode, createPost } from '../../graphql/mutations'
+import { createCode, createPost } from '../graphql/mutations'
 import {
   CreatePostMutationVariables,
   CreatePostMutation,
   CreateCodeMutationVariables,
-} from '../../API'
+} from '../API'
 import {
   Button,
   Card,
@@ -18,8 +18,8 @@ import {
   TextField,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { postFormState } from '../../state/postFormState'
-import { CodeForm, codesFormState } from '../../state/codesFormState'
+import { postFormState } from '../state/postFormState'
+import { CodeForm, codesFormState } from '../state/codesFormState'
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -68,20 +68,23 @@ export const PostForm: React.FC = () => {
     const res = (await API.graphql(
       graphqlOperation(createPost, createPostMutationVariables)
     )) as GraphQLResult<CreatePostMutation>
+    const postID = res.data?.createPost?.id
 
-    codes.forEach(async (code) => {
-      const createCodeMutationVariables: CreateCodeMutationVariables = {
-        input: {
-          ...code,
-          skipline: '',
-          postID: res.data.createPost.id,
-          type: 'code',
-        },
-      }
-      await API.graphql(
-        graphqlOperation(createCode, createCodeMutationVariables)
-      )
-    })
+    if (postID) {
+      codes.forEach(async (code) => {
+        const createCodeMutationVariables: CreateCodeMutationVariables = {
+          input: {
+            ...code,
+            skipline: '',
+            postID: postID,
+            type: 'code',
+          },
+        }
+        await API.graphql(
+          graphqlOperation(createCode, createCodeMutationVariables)
+        )
+      })
+    }
 
     setPost({
       title: '',

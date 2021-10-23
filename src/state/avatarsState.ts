@@ -9,6 +9,7 @@ import {
   useRecoilValueLoadable,
   useSetRecoilState,
 } from 'recoil'
+import { notNull, Nullable } from '../utils/nullable'
 
 const forceAvatarUpdate = atom<number>({
   key: 'forceAvatarUpdate',
@@ -24,13 +25,11 @@ const avatarsState = selector<Avatar[]>({
   key: 'avatarsState',
   get: ({ get }) => {
     const owners = get(displayedOwnersState)
-    return owners
-      .map((owner) => get(avatarQuery(owner)))
-      .filter((value) => value)
+    return owners.map((owner) => get(avatarQuery(owner))).filter(notNull)
   },
 })
 
-const avatarQuery = selectorFamily<Avatar | null, string>({
+const avatarQuery = selectorFamily<Nullable<Avatar>, string>({
   key: 'avatarQuery',
   get:
     (owner) =>

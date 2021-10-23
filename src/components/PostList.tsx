@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '../../utils/auth'
+import { useAuth } from '../utils/auth'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import {
   ListPostsByDateQueryVariables,
@@ -11,14 +11,14 @@ import {
   Post,
   Code,
   Comment,
-} from '../../API'
-import { listPostsByDate } from '../../graphql/queries'
+} from '../API'
+import { listPostsByDate } from '../graphql/queries'
 import {
   deletePost as deletePostQuery,
   deleteCode as deleteCodeQuery,
-} from '../../graphql/mutations'
+} from '../graphql/mutations'
 import { useRecoilValue } from 'recoil'
-import { PostListItem } from '../component/PostListItem'
+import { PostListItem } from './PostListItem'
 import { PostForm } from './PostForm'
 import { Button, Grid } from '@mui/material'
 import { makeStyles } from '@mui/styles'
@@ -29,11 +29,12 @@ import {
   subscribeDeletePost,
   subscribeDeleteCode,
   subscribeDeleteComment,
-} from '../../utils/subscribe'
-import { useArraySettor } from '../../utils/recoilArraySettor'
-import { connectedPostsState, postsState } from '../../state/postsState'
-import { codesState } from '../../state/codesState'
-import { commentsState } from '../../state/commentsState'
+} from '../utils/subscribe'
+import { useArraySettor } from '../utils/recoilArraySettor'
+import { connectedPostsState, postsState } from '../state/postsState'
+import { codesState } from '../state/codesState'
+import { commentsState } from '../state/commentsState'
+import { notNull, Nullable } from '../utils/nullable'
 
 const useStyle = makeStyles({
   grid: {
@@ -64,12 +65,12 @@ export const PostList: React.FC = () => {
   const setCodes = useArraySettor(codesState, 'ASC')
   const setComments = useArraySettor(commentsState, 'ASC')
 
-  const [nextToken, setNextToken] = useState<string | null>(null)
+  const [nextToken, setNextToken] = useState<Nullable<string>>()
   const [typingID, setTypingID] = useState<string>('')
 
   const classes = useStyle()
 
-  const handleGetPosts = async (type: QueryType, nextToken = null) => {
+  const handleGetPosts = async (type: QueryType) => {
     const queryVariables: ListPostsByDateQueryVariables = {
       type: 'post',
       sortDirection: ModelSortDirection.DESC,
@@ -81,11 +82,17 @@ export const PostList: React.FC = () => {
       graphqlOperation(listPostsByDate, queryVariables)
     )) as GraphQLResult<ListPostsByDateQuery>
 
-    const posts = res.data.listPostsByDate.items
+    const posts = res.data?.listPostsByDate?.items?.filter(notNull) ?? []
 
     const omitPosts = posts.map((post) => omitPost(post))
-    const omitCodes = posts.map((post) => post.codes.items).flat()
-    const omitComment = posts.map((post) => post.comments.items).flat()
+    const omitCodes = posts
+      .map((post) => post.codes?.items)
+      .flat()
+      .filter(notNull)
+    const omitComment = posts
+      .map((post) => post.comments?.items)
+      .flat()
+      .filter(notNull)
 
     switch (type) {
       case 'INIT':
@@ -99,13 +106,12 @@ export const PostList: React.FC = () => {
         setComments.initItems(omitComment)
         break
     }
-    setNextToken(res.data.listPostsByDate.nextToken)
+    setNextToken(res.data?.listPostsByDate?.nextToken)
   }
 
   const handleGetAdditionalPosts = () => {
-    if (nextToken === null) return
     if (!isInit) return
-    handleGetPosts('APPEND', nextToken)
+    nextToken && handleGetPosts('APPEND')
   }
 
   useEffect(() => {
@@ -124,11 +130,11 @@ export const PostList: React.FC = () => {
       graphqlOperation(deletePostQuery, deletePostVariables)
     )) as GraphQLResult<DeletePostMutation>
 
-    const codeIds = deletePostResult.data.deletePost.codes.items.map(
-      (code) => code.id
-    )
+    const codeIds = deletePostResult.data?.deletePost?.codes?.items
+      ?.filter(notNull)
+      .map((code) => code.id)
 
-    codeIds.forEach(async (id) => {
+    codeIds?.forEach(async (id) => {
       const deleteCodeVariables: DeleteCodeMutationVariables = {
         input: {
           id: id,
@@ -144,35 +150,41 @@ export const PostList: React.FC = () => {
 
     const createPostSubscription = subscribeCreatePost({
       next: (msg) => {
-        setPosts.createItem(omitPost(msg.value.data.onCreatePost))
+        const post = msg.value.data?.onCreatePost
+        post && setPosts.createItem(omitPost(post))
       },
     })
 
     const deletePostSubscription = subscribeDeletePost({
       next: (msg) => {
-        setPosts.deleteItem(omitPost(msg.value.data.onDeletePost))
+        const post = msg.value.data?.onDeletePost
+        post && setPosts.deleteItem(omitPost(post))
       },
     })
 
     const createCodeSubscription = subscribeCreateCode({
       next: (msg) => {
-        setCodes.createItem(omitCode(msg.value.data.onCreateCode))
+        const code = msg.value.data?.onCreateCode
+        code && setCodes.createItem(omitCode(code))
       },
     })
     const deleteCodeSubscription = subscribeDeleteCode({
       next: (msg) => {
-        setCodes.deleteItem(omitCode(msg.value.data.onDeleteCode))
+        const code = msg.value.data?.onDeleteCode
+        code && setCodes.deleteItem(omitCode(code))
       },
     })
 
     const createCommentSubscription = subscribeCreateComment({
       next: (msg) => {
-        setComments.createItem(omitComment(msg.value.data.onCreateComment))
+        const comment = msg.value.data?.onCreateComment
+        comment && setComments.createItem(omitComment(comment))
       },
     })
     const deleteCommentSubscription = subscribeDeleteComment({
       next: (msg) => {
-        setComments.deleteItem(omitComment(msg.value.data.onDeleteComment))
+        const comment = msg.value.data?.onDeleteComment
+        comment && setComments.deleteItem(omitComment(comment))
       },
     })
 

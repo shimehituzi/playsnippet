@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
-import { CssBaseline, ThemeProvider } from '@mui/material'
+import { Container, CssBaseline, ThemeProvider } from '@mui/material'
 import { RecoilRoot } from 'recoil'
-import { theme } from '../src/etc/theme'
+import { Appbar } from '../src/components/Appbar'
+import { theme } from '../src/utils/theme'
 
 import Amplify from 'aws-amplify'
 import awsconfig from '../src/aws-exports'
@@ -27,7 +28,10 @@ const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <RecoilRoot>
-          <Component {...pageProps} />
+          <Appbar />
+          <Container>
+            <Component {...pageProps} />
+          </Container>
         </RecoilRoot>
       </ThemeProvider>
     </React.Fragment>

@@ -25,10 +25,10 @@ import {
 } from '@mui/icons-material'
 import { CodeTyping } from './CodeTyping'
 import { Code } from './Code'
-import { ConnectedPost } from '../../state/postsState'
+import { ConnectedPost } from '../state/postsState'
 import dayjs, { OpUnitType } from 'dayjs'
-import { useAuth } from '../../utils/auth'
-import { CommentForm } from '../container/CommentForm'
+import { useAuth } from '../utils/auth'
+import { CommentForm } from './CommentForm'
 import { CommentList } from './CommentList'
 import { Avatar } from './Avatar'
 
@@ -99,8 +99,10 @@ export const PostListItem: React.FC<Props> = ({
     <Card className={classes.card}>
       <CardHeader
         title={<Typography variant="h5">{post.title}</Typography>}
-        subheader={<SubHeader createdAt={post.createdAt} owner={post.owner} />}
-        avatar={<Avatar username={post.owner} size={50} />}
+        subheader={
+          <SubHeader createdAt={post.createdAt} owner={post.owner ?? ''} />
+        }
+        avatar={<Avatar username={post.owner ?? ''} size={50} />}
         action={
           isOwner ? (
             <React.Fragment>
