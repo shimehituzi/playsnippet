@@ -99,8 +99,10 @@ export const PostListItem: React.FC<Props> = ({
     <Card className={classes.card}>
       <CardHeader
         title={<Typography variant="h5">{post.title}</Typography>}
-        subheader={<SubHeader createdAt={post.createdAt} owner={post.owner} />}
-        avatar={<Avatar username={post.owner} size={50} />}
+        subheader={
+          <SubHeader createdAt={post.createdAt} owner={post.owner ?? ''} />
+        }
+        avatar={<Avatar username={post.owner ?? ''} size={50} />}
         action={
           isOwner ? (
             <React.Fragment>

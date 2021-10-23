@@ -53,8 +53,8 @@ export const Appbar: React.FC = () => {
         >
           Play Snippet
         </Typography>
-        {authenticated ? (
-          <Account username={user ? user.username : ''} />
+        {authenticated && user?.username ? (
+          <Account username={user.username} />
         ) : (
           <Sign />
         )}
@@ -106,8 +106,8 @@ const Account: React.FC<AccountProps> = ({ username }) => {
     const reader = new FileReader()
 
     reader.onload = async () => {
-      if (!user || !user.username) return
-      const imageURL = reader.result.toString()
+      const imageURL = reader.result?.toString()
+      if (!imageURL) return
       const size = Buffer.from(imageURL).length / 1e3
       if (size <= 400) {
         if (avatar) {
@@ -122,7 +122,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
 
     if (file) {
       reader.readAsDataURL(file)
-      e.target.value = null
+      e.target.value = ''
     }
   }
 

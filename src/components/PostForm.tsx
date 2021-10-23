@@ -68,20 +68,23 @@ export const PostForm: React.FC = () => {
     const res = (await API.graphql(
       graphqlOperation(createPost, createPostMutationVariables)
     )) as GraphQLResult<CreatePostMutation>
+    const postID = res.data?.createPost?.id
 
-    codes.forEach(async (code) => {
-      const createCodeMutationVariables: CreateCodeMutationVariables = {
-        input: {
-          ...code,
-          skipline: '',
-          postID: res.data.createPost.id,
-          type: 'code',
-        },
-      }
-      await API.graphql(
-        graphqlOperation(createCode, createCodeMutationVariables)
-      )
-    })
+    if (postID) {
+      codes.forEach(async (code) => {
+        const createCodeMutationVariables: CreateCodeMutationVariables = {
+          input: {
+            ...code,
+            skipline: '',
+            postID: postID,
+            type: 'code',
+          },
+        }
+        await API.graphql(
+          graphqlOperation(createCode, createCodeMutationVariables)
+        )
+      })
+    }
 
     setPost({
       title: '',
