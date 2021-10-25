@@ -28,7 +28,7 @@ const UserPost: NextPage<Props> = ({ posts }) => {
     <React.Fragment>
       <Appbar />
       <Container>
-        {posts?.map((v, i) => (
+        {posts.map((v, i) => (
           <Card key={i}>
             <h1>{v.title}</h1>
             <h2>{v.owner}</h2>
@@ -43,7 +43,7 @@ const UserPost: NextPage<Props> = ({ posts }) => {
 export const getStaticPaths: GetStaticPaths = () => {
   return {
     paths: [],
-    fallback: true,
+    fallback: 'blocking',
   }
 }
 
