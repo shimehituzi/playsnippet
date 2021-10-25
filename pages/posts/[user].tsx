@@ -2,11 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { ParsedUrlQuery } from 'querystring'
-import { withSSRContext } from 'aws-amplify'
-import { GraphQLResult } from '@aws-amplify/api'
-import { GraphQLAPIClass } from '@aws-amplify/api-graphql'
-import { Appbar } from '../../src/components/Appbar'
-import { Card, Container } from '@mui/material'
+import { servergql } from '../../src/utils/gqlutils'
 import {
   ListPostsByOwnerQuery,
   ListPostsByOwnerQueryVariables,
@@ -15,6 +11,8 @@ import {
 } from '../../src/API'
 import { listPostsByOwner } from '../../src/graphql/queries'
 import { notNull } from '../../src/utils/nullable'
+import { Appbar } from '../../src/components/Appbar'
+import { Card, Container } from '@mui/material'
 
 type Props = {
   posts: Post[]
@@ -22,6 +20,46 @@ type Props = {
 
 type Params = ParsedUrlQuery & {
   user: string
+}
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: 'blocking',
+  }
+}
+
+export const getStaticProps: GetStaticProps<Props, Params> = async ({
+  params,
+}) => {
+  const owner = params?.user
+  if (!owner) return { notFound: true }
+
+  const res = await servergql<
+    ListPostsByOwnerQuery,
+    ListPostsByOwnerQueryVariables
+  >({
+    query: listPostsByOwner,
+    variables: {
+      owner: owner,
+      sortDirection: ModelSortDirection.DESC,
+      limit: 20,
+    },
+  })
+
+  const posts = res.data?.listPostsByOwner?.items?.filter(notNull) ?? []
+
+  if (posts.length > 0) {
+    return {
+      props: {
+        posts: posts,
+      },
+      revalidate: 5,
+      notFound: false,
+    }
+  } else {
+    return { notFound: true }
+  }
 }
 
 const UserPosts: NextPage<Props> = ({ posts }) => {
@@ -42,48 +80,6 @@ const UserPosts: NextPage<Props> = ({ posts }) => {
       </Container>
     </React.Fragment>
   )
-}
-
-export const getStaticPaths: GetStaticPaths = () => {
-  return {
-    paths: [],
-    fallback: 'blocking',
-  }
-}
-
-export const getStaticProps: GetStaticProps<Props, Params> = async ({
-  params,
-}) => {
-  const owner = params?.user
-  if (!owner) return { notFound: true }
-
-  const queryVariables: ListPostsByOwnerQueryVariables = {
-    owner: owner,
-    sortDirection: ModelSortDirection.DESC,
-    limit: 20,
-  }
-
-  const API: GraphQLAPIClass = withSSRContext().API
-
-  const res = (await API.graphql({
-    query: listPostsByOwner,
-    variables: queryVariables,
-    authMode: 'AWS_IAM',
-  })) as GraphQLResult<ListPostsByOwnerQuery>
-
-  const posts = res.data?.listPostsByOwner?.items?.filter(notNull) ?? []
-
-  if (posts.length > 0) {
-    return {
-      props: {
-        posts: posts,
-      },
-      revalidate: 5,
-      notFound: false,
-    }
-  } else {
-    return { notFound: true }
-  }
 }
 
 export default UserPosts
