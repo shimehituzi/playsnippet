@@ -29,7 +29,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
 }) => {
   const owner = params?.user
   const postID = params?.post
-  if (!owner || !postID) return { notFound: true }
+  if (owner === undefined || postID === undefined) return { notFound: true }
 
   const res = await servergql<GetPostQuery, GetPostQueryVariables>({
     query: getPost,
@@ -62,8 +62,24 @@ const UserPost: NextPage<Props> = ({ post }) => {
           <h1>{post.title}</h1>
           <h2>{post.owner}</h2>
           <p>{post.content}</p>
+          {post.codes && (
+            <li>
+              {post.codes?.items?.map((code, i) =>
+                code ? (
+                  <ul key={i}>
+                    {code.title}
+                    <Link href={`/codes/${code.owner}/${code.id}`}>
+                      <a>コード詳細</a>
+                    </Link>
+                  </ul>
+                ) : (
+                  <React.Fragment key={i} />
+                )
+              )}
+            </li>
+          )}
           <Link href={`/posts/${post.owner}`}>
-            <a>戻る</a>
+            <a>投稿一覧</a>
           </Link>
         </Card>
       </Container>

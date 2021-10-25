@@ -1,21 +1,21 @@
 import React from 'react'
 import Link from 'next/link'
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import { NextPage, GetStaticPaths, GetStaticProps } from 'next'
 import { ParsedUrlQuery } from 'querystring'
 import { servergql } from '../../src/utils/gqlutils'
 import {
-  ListPostsByOwnerQuery,
-  ListPostsByOwnerQueryVariables,
+  Code,
+  ListCodesByOwnerQuery,
+  ListCodesByOwnerQueryVariables,
   ModelSortDirection,
-  Post,
 } from '../../src/API'
-import { listPostsByOwner } from '../../src/graphql/queries'
+import { listCodesByOwner } from '../../src/graphql/queries'
 import { notNull } from '../../src/utils/nullable'
 import { Appbar } from '../../src/components/Appbar'
 import { Card, Container } from '@mui/material'
 
 type Props = {
-  posts: Post[]
+  codes: Code[]
 }
 
 type Params = ParsedUrlQuery & {
@@ -36,10 +36,10 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   if (owner === undefined) return { notFound: true }
 
   const res = await servergql<
-    ListPostsByOwnerQuery,
-    ListPostsByOwnerQueryVariables
+    ListCodesByOwnerQuery,
+    ListCodesByOwnerQueryVariables
   >({
-    query: listPostsByOwner,
+    query: listCodesByOwner,
     variables: {
       owner: owner,
       sortDirection: ModelSortDirection.DESC,
@@ -47,12 +47,12 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
     },
   })
 
-  const posts = res.data?.listPostsByOwner?.items?.filter(notNull) ?? []
+  const codes = res.data?.listCodesByOwner?.items?.filter(notNull) ?? []
 
-  if (posts.length > 0) {
+  if (codes.length > 0) {
     return {
       props: {
-        posts: posts,
+        codes: codes,
       },
       revalidate: 5,
       notFound: false,
@@ -62,34 +62,21 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   }
 }
 
-const UserPosts: NextPage<Props> = ({ posts }) => {
+const UserCodes: NextPage<Props> = ({ codes }) => {
   return (
     <React.Fragment>
       <Appbar />
       <Container>
-        {posts.map((post, i) => (
+        {codes.map((code, i) => (
           <Card key={i}>
-            <h1>{post.title}</h1>
-            <h2>{post.owner}</h2>
-            <p>{post.content}</p>
-            {post.codes && (
-              <li>
-                {post.codes?.items?.map((code, j) =>
-                  code ? (
-                    <ul key={j}>
-                      {code.title}
-                      <Link href={`/codes/${code.owner}/${code.id}`}>
-                        <a>コード詳細</a>
-                      </Link>
-                    </ul>
-                  ) : (
-                    <React.Fragment key={j} />
-                  )
-                )}
-              </li>
-            )}
-            <Link href={`/posts/${post.owner}/${post.id}`}>
+            <h1>{code.title}</h1>
+            <h2>{code.owner}</h2>
+            <p>{code.lang}</p>
+            <Link href={`/codes/${code.owner}/${code.id}`}>
               <a>詳細</a>
+            </Link>
+            <Link href={`/posts/${code.owner}/${code.postID}`}>
+              <a>投稿詳細</a>
             </Link>
           </Card>
         ))}
@@ -98,4 +85,4 @@ const UserPosts: NextPage<Props> = ({ posts }) => {
   )
 }
 
-export default UserPosts
+export default UserCodes
