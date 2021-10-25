@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { ParsedUrlQuery } from 'querystring'
 import { withSSRContext } from 'aws-amplify'
@@ -20,10 +21,10 @@ type Props = {
 }
 
 type Params = ParsedUrlQuery & {
-  id: string
+  user: string
 }
 
-const UserPost: NextPage<Props> = ({ posts }) => {
+const UserPosts: NextPage<Props> = ({ posts }) => {
   return (
     <React.Fragment>
       <Appbar />
@@ -33,6 +34,9 @@ const UserPost: NextPage<Props> = ({ posts }) => {
             <h1>{v.title}</h1>
             <h2>{v.owner}</h2>
             <p>{v.content}</p>
+            <Link href={`/posts/${v.owner}/${v.id}`}>
+              <a>詳細</a>
+            </Link>
           </Card>
         ))}
       </Container>
@@ -50,7 +54,7 @@ export const getStaticPaths: GetStaticPaths = () => {
 export const getStaticProps: GetStaticProps<Props, Params> = async ({
   params,
 }) => {
-  const owner = params?.id
+  const owner = params?.user
   if (!owner) return { notFound: true }
 
   const queryVariables: ListPostsByOwnerQueryVariables = {
@@ -82,4 +86,4 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   }
 }
 
-export default UserPost
+export default UserPosts
