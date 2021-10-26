@@ -1,24 +1,28 @@
-import { useEffect } from 'react'
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import { GetAvatarQueryVariables, GetAvatarQuery, Avatar } from '../API'
 import { getAvatar } from '../graphql/queries'
-import {
-  atom,
-  selector,
-  selectorFamily,
-  useRecoilValueLoadable,
-  useSetRecoilState,
-} from 'recoil'
+import { atom, selector, selectorFamily } from 'recoil'
 import { notNull, Nullable } from '../utils/nullable'
 
-const forceAvatarUpdate = atom<number>({
+export const forceAvatarUpdate = atom<number>({
   key: 'forceAvatarUpdate',
   default: 0,
 })
 
-const displayedOwnersState = atom<string[]>({
+export const displayedOwnersState = atom<string[]>({
   key: 'displayedOwnersState',
   default: [],
+})
+
+export const avatarState = selectorFamily<Avatar | null, string>({
+  key: 'avatarState',
+  get:
+    (owner) =>
+    ({ get }) => {
+      const avatars = get(avatarsState)
+      const avatar = avatars.find((v) => v.owner === owner)
+      return avatar ? avatar : null
+    },
 })
 
 const avatarsState = selector<Avatar[]>({
@@ -45,31 +49,3 @@ const avatarQuery = selectorFamily<Nullable<Avatar>, string>({
       return res.data?.getAvatar
     },
 })
-
-const avatarState = selectorFamily<Avatar | null, string>({
-  key: 'avatarState',
-  get:
-    (owner) =>
-    ({ get }) => {
-      const avatars = get(avatarsState)
-      const avatar = avatars.find((v) => v.owner === owner)
-      return avatar ? avatar : null
-    },
-})
-
-export const useAvatarUpdate = (): (() => void) => {
-  const setForceAvatarUpdate = useSetRecoilState(forceAvatarUpdate)
-  const forceUpdate = () => setForceAvatarUpdate((n) => n + 1)
-  return forceUpdate
-}
-
-export const useAvatar = (username: string): Avatar | null => {
-  const setOwner = useSetRecoilState(displayedOwnersState)
-  const avatar = useRecoilValueLoadable(avatarState(username))
-
-  useEffect(() => {
-    setOwner((prev) => Array.from(new Set([...prev, username])))
-  }, [username])
-
-  return avatar.state === 'hasValue' ? avatar.contents : null
-}

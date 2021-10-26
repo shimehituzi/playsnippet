@@ -28,7 +28,7 @@ import {
 } from '../API'
 import { createAvatar, deleteAvatar, updateAvatar } from '../graphql/mutations'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
-import { useAvatar, useAvatarUpdate } from '../state/avatarsState'
+import { useAvatar, useAvatarUpdate } from '../utils/avatar'
 import { Avatar } from './Avatar'
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
