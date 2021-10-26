@@ -5,7 +5,7 @@ import { Grid, IconButton, TextField } from '@mui/material'
 import { useRecoilState } from 'recoil'
 import { CreateCommentMutationVariables } from '../API'
 import { createComment } from '../graphql/mutations'
-import { commentFormState } from '../state/commentFormState'
+import { commentFormState } from '../state/formState'
 
 type Props = {
   postID: string

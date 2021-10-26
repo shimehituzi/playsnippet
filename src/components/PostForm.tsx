@@ -18,8 +18,7 @@ import {
   TextField,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { postFormState } from '../state/postFormState'
-import { CodeForm, codesFormState } from '../state/codesFormState'
+import { postFormState, codesFormState, CodeForm } from '../state/formState'
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
