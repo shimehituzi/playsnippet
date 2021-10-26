@@ -2,7 +2,7 @@ import { NextPage, GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
 import { ParsedUrlQuery } from 'querystring'
-import { servergql } from '../../../src/utils/gqlutils'
+import { serverQuery } from '../../../src/utils/graphql'
 import { GetPostQuery, GetPostQueryVariables, Post } from '../../../src/API'
 import { getPost } from '../../../src/graphql/queries'
 import { Card } from '@mui/material'
@@ -31,7 +31,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   const postID = params?.post
   if (owner === undefined || postID === undefined) return { notFound: true }
 
-  const res = await servergql<GetPostQuery, GetPostQueryVariables>({
+  const res = await serverQuery<GetPostQueryVariables, GetPostQuery>({
     query: getPost,
     variables: {
       id: postID,

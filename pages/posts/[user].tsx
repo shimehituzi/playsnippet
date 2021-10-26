@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import { ParsedUrlQuery } from 'querystring'
-import { servergql } from '../../src/utils/gqlutils'
+import { serverQuery } from '../../src/utils/graphql'
 import {
   ListPostsByOwnerQuery,
   ListPostsByOwnerQueryVariables,
@@ -35,9 +35,9 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   const owner = params?.user
   if (owner === undefined) return { notFound: true }
 
-  const res = await servergql<
-    ListPostsByOwnerQuery,
-    ListPostsByOwnerQueryVariables
+  const res = await serverQuery<
+    ListPostsByOwnerQueryVariables,
+    ListPostsByOwnerQuery
   >({
     query: listPostsByOwner,
     variables: {
