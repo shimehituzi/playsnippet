@@ -1,4 +1,6 @@
 import { NextPage, GetStaticPaths, GetStaticProps } from 'next'
+import { useRouter } from 'next/router'
+import Head from 'next/head'
 import Link from 'next/link'
 import { ParsedUrlQuery } from 'querystring'
 import { servergql } from '../../src/utils/gqlutils'
@@ -61,8 +63,14 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
 }
 
 const UserCodes: NextPage<Props> = ({ codes }) => {
+  const router = useRouter()
+  const { user } = router.query
+
   return (
     <>
+      <Head>
+        <title>{`${user}'s codes - PlaySnippet`}</title>
+      </Head>
       {codes.map((code, i) => (
         <Card key={i}>
           <h1>{code.title}</h1>

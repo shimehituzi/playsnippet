@@ -1,4 +1,5 @@
 import { NextPage } from 'next'
+import Head from 'next/head'
 import { useAuth } from '../src/utils/auth'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
@@ -16,7 +17,14 @@ const SignUp: NextPage = () => {
     }
   }, [authenticated])
 
-  return <Authenticator authState={AuthState.SignUp} />
+  return (
+    <>
+      <Head>
+        <title>Sign Up</title>
+      </Head>
+      <Authenticator authState={AuthState.SignUp} />
+    </>
+  )
 }
 
 export default SignUp
