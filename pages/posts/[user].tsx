@@ -1,6 +1,5 @@
-import React from 'react'
-import Link from 'next/link'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import Link from 'next/link'
 import { ParsedUrlQuery } from 'querystring'
 import { servergql } from '../../src/utils/gqlutils'
 import {
@@ -11,8 +10,7 @@ import {
 } from '../../src/API'
 import { listPostsByOwner } from '../../src/graphql/queries'
 import { notNull } from '../../src/utils/nullable'
-import { Appbar } from '../../src/components/Appbar'
-import { Card, Container } from '@mui/material'
+import { Card } from '@mui/material'
 
 type Props = {
   posts: Post[]
@@ -64,37 +62,30 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
 
 const UserPosts: NextPage<Props> = ({ posts }) => {
   return (
-    <React.Fragment>
-      <Appbar />
-      <Container>
-        {posts.map((post, i) => (
-          <Card key={i}>
-            <h1>{post.title}</h1>
-            <h2>{post.owner}</h2>
-            <p>{post.content}</p>
-            {post.codes && (
-              <li>
-                {post.codes?.items?.map((code, j) =>
-                  code ? (
-                    <ul key={j}>
-                      {code.title}
-                      <Link href={`/codes/${code.owner}/${code.id}`}>
-                        <a>コード詳細</a>
-                      </Link>
-                    </ul>
-                  ) : (
-                    <React.Fragment key={j} />
-                  )
-                )}
-              </li>
-            )}
-            <Link href={`/posts/${post.owner}/${post.id}`}>
-              <a>詳細</a>
-            </Link>
-          </Card>
-        ))}
-      </Container>
-    </React.Fragment>
+    <>
+      {posts.map((post, i) => (
+        <Card key={i}>
+          <h1>{post.title}</h1>
+          <h2>{post.owner}</h2>
+          <p>{post.content}</p>
+          {post.codes && (
+            <li>
+              {post.codes?.items?.filter(notNull).map((code, j) => (
+                <ul key={j}>
+                  {code.title}
+                  <Link href={`/codes/${code.owner}/${code.id}`}>
+                    <a>コード詳細</a>
+                  </Link>
+                </ul>
+              ))}
+            </li>
+          )}
+          <Link href={`/posts/${post.owner}/${post.id}`}>
+            <a>詳細</a>
+          </Link>
+        </Card>
+      ))}
+    </>
   )
 }
 

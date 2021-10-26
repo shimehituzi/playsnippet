@@ -1,6 +1,5 @@
-import React from 'react'
-import Link from 'next/link'
 import { NextPage, GetStaticPaths, GetStaticProps } from 'next'
+import Link from 'next/link'
 import { ParsedUrlQuery } from 'querystring'
 import { servergql } from '../../src/utils/gqlutils'
 import {
@@ -11,8 +10,7 @@ import {
 } from '../../src/API'
 import { listCodesByOwner } from '../../src/graphql/queries'
 import { notNull } from '../../src/utils/nullable'
-import { Appbar } from '../../src/components/Appbar'
-import { Card, Container } from '@mui/material'
+import { Card } from '@mui/material'
 
 type Props = {
   codes: Code[]
@@ -64,24 +62,21 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
 
 const UserCodes: NextPage<Props> = ({ codes }) => {
   return (
-    <React.Fragment>
-      <Appbar />
-      <Container>
-        {codes.map((code, i) => (
-          <Card key={i}>
-            <h1>{code.title}</h1>
-            <h2>{code.owner}</h2>
-            <p>{code.lang}</p>
-            <Link href={`/codes/${code.owner}/${code.id}`}>
-              <a>詳細</a>
-            </Link>
-            <Link href={`/posts/${code.owner}/${code.postID}`}>
-              <a>投稿詳細</a>
-            </Link>
-          </Card>
-        ))}
-      </Container>
-    </React.Fragment>
+    <>
+      {codes.map((code, i) => (
+        <Card key={i}>
+          <h1>{code.title}</h1>
+          <h2>{code.owner}</h2>
+          <p>{code.lang}</p>
+          <Link href={`/codes/${code.owner}/${code.id}`}>
+            <a>詳細</a>
+          </Link>
+          <Link href={`/posts/${code.owner}/${code.postID}`}>
+            <a>投稿詳細</a>
+          </Link>
+        </Card>
+      ))}
+    </>
   )
 }
 

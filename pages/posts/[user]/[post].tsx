@@ -1,12 +1,11 @@
-import React from 'react'
-import Link from 'next/link'
 import { NextPage, GetStaticPaths, GetStaticProps } from 'next'
+import Link from 'next/link'
 import { ParsedUrlQuery } from 'querystring'
 import { servergql } from '../../../src/utils/gqlutils'
 import { GetPostQuery, GetPostQueryVariables, Post } from '../../../src/API'
 import { getPost } from '../../../src/graphql/queries'
-import { Appbar } from '../../../src/components/Appbar'
-import { Card, Container } from '@mui/material'
+import { Card } from '@mui/material'
+import { notNull } from '../../../src/utils/nullable'
 
 type Props = {
   post: Post
@@ -55,35 +54,28 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
 
 const UserPost: NextPage<Props> = ({ post }) => {
   return (
-    <React.Fragment>
-      <Appbar />
-      <Container>
-        <Card>
-          <h1>{post.title}</h1>
-          <h2>{post.owner}</h2>
-          <p>{post.content}</p>
-          {post.codes && (
-            <li>
-              {post.codes?.items?.map((code, i) =>
-                code ? (
-                  <ul key={i}>
-                    {code.title}
-                    <Link href={`/codes/${code.owner}/${code.id}`}>
-                      <a>コード詳細</a>
-                    </Link>
-                  </ul>
-                ) : (
-                  <React.Fragment key={i} />
-                )
-              )}
-            </li>
-          )}
-          <Link href={`/posts/${post.owner}`}>
-            <a>投稿一覧</a>
-          </Link>
-        </Card>
-      </Container>
-    </React.Fragment>
+    <>
+      <Card>
+        <h1>{post.title}</h1>
+        <h2>{post.owner}</h2>
+        <p>{post.content}</p>
+        {post.codes && (
+          <li>
+            {post.codes?.items?.filter(notNull).map((code, i) => (
+              <ul key={i}>
+                {code.title}
+                <Link href={`/codes/${code.owner}/${code.id}`}>
+                  <a>コード詳細</a>
+                </Link>
+              </ul>
+            ))}
+          </li>
+        )}
+        <Link href={`/posts/${post.owner}`}>
+          <a>投稿一覧</a>
+        </Link>
+      </Card>
+    </>
   )
 }
 

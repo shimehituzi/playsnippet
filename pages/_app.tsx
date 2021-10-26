@@ -3,6 +3,7 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { RecoilRoot } from 'recoil'
+import { Layout } from '../src/components/Layout'
 import { theme } from '../src/utils/theme'
 
 import Amplify from 'aws-amplify'
@@ -27,7 +28,9 @@ const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <RecoilRoot>
-          <Component {...pageProps} />
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
         </RecoilRoot>
       </ThemeProvider>
     </React.Fragment>
