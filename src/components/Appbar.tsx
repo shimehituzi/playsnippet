@@ -39,20 +39,32 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   },
 }))
 
+const useStyle = makeStyles({
+  logo: {
+    flexGrow: 1,
+  },
+  button: {
+    textTransform: 'none',
+    margin: '1%',
+  },
+})
+
 export const Appbar: React.FC = () => {
   const { authenticated, user } = useAuth()
+  const classes = useStyle()
 
   return (
     <AppBar position="static">
       <StyledToolbar>
-        <Typography
-          variant="h4"
-          color="primary"
-          component="div"
-          sx={{ flexGrow: 1 }}
-        >
-          Play Snippet
-        </Typography>
+        <Link href="/">
+          <div className={classes.logo}>
+            <Button className={classes.button}>
+              <Typography variant="h4" color="primary">
+                Play Snippet
+              </Typography>
+            </Button>
+          </div>
+        </Link>
         {authenticated && user?.username ? (
           <Account username={user.username} />
         ) : (
@@ -197,13 +209,6 @@ const Account: React.FC<AccountProps> = ({ username }) => {
     </React.Fragment>
   )
 }
-
-const useStyle = makeStyles({
-  button: {
-    textTransform: 'none',
-    margin: '1%',
-  },
-})
 
 const Sign: React.FC = () => {
   const classes = useStyle()
