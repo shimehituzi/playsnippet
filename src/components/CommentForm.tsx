@@ -1,7 +1,5 @@
-import React from 'react'
-import { useRecoilState } from 'recoil'
-import { commentFormState } from '../state/formState'
-import { CreateCommentMutationVariables } from '../API'
+import React, { useState } from 'react'
+import { CreateCommentMutationVariables, CreateCommentInput } from '../API'
 import { createComment } from '../graphql/mutations'
 import { gqlMutation } from '../utils/graphql'
 import { Grid, IconButton, TextField } from '@mui/material'
@@ -14,7 +12,9 @@ type Props = {
 
 export const CommentForm: React.FC<Props> = ({ postID }) => {
   const { authenticated } = useAuth()
-  const [comment, setComment] = useRecoilState(commentFormState)
+  const [comment, setComment] = useState<Pick<CreateCommentInput, 'content'>>({
+    content: '',
+  })
 
   const onChangeComment = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment((comment) => ({
