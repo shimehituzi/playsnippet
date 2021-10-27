@@ -164,7 +164,7 @@ const Home: NextPage<Props> = ({ data }) => {
   return (
     <Grid container alignItems="center" justifyContent="center">
       {authenticated && (
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{ padding: '2%' }}>
           <PostForm />
         </Grid>
       )}

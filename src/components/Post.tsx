@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { useRecoilValue } from 'recoil'
 import { postSelector } from '../state/apiState'
 import * as APIt from '../API'
@@ -115,11 +116,23 @@ export const Post: React.FC<Props> = ({ postID }) => {
   ) : (
     <Card className={classes.card}>
       <CardHeader
-        title={<Typography variant="h5">{post.title}</Typography>}
+        title={
+          <Link href={`/posts/${post.owner}/${post.id}`}>
+            <a>
+              <Typography variant="h5">{post.title}</Typography>
+            </a>
+          </Link>
+        }
         subheader={
           <SubHeader createdAt={post.createdAt} owner={post.owner ?? ''} />
         }
-        avatar={<Avatar username={post.owner ?? ''} size={50} />}
+        avatar={
+          <Link href={`/posts/${post.owner}`}>
+            <IconButton size="small">
+              <Avatar username={post.owner ?? ''} size={50} />
+            </IconButton>
+          </Link>
+        }
         action={
           user?.username === post.owner ? (
             <React.Fragment>

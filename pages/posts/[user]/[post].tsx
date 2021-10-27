@@ -1,15 +1,27 @@
-import { NextPage, GetStaticPaths, GetStaticProps } from 'next'
+import React, { useEffect } from 'react'
 import Head from 'next/head'
-import Link from 'next/link'
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { ParsedUrlQuery } from 'querystring'
-import { serverQuery } from '../../../src/utils/graphql'
-import { GetPostQuery, GetPostQueryVariables, Post } from '../../../src/API'
-import { getPost } from '../../../src/graphql/queries'
-import { Card } from '@mui/material'
-import { notNull } from '../../../src/utils/nullable'
+import { useRouter } from 'next/router'
+import {
+  codesState,
+  commentsState,
+  postSelector,
+  postsState,
+} from '../../../src/state/apiState'
+import * as APIt from '../../../src/API'
+import * as query from '../../../src/graphql/queries'
+import * as subscription from '../../../src/graphql/subscriptions'
+import { gqlSubscription, serverQuery } from '../../../src/utils/graphql'
+import { useAuth } from '../../../src/utils/auth'
+import { useArraySettor } from '../../../src/utils/recoilArraySettor'
+import { SeparatePosts, separatePosts } from '../../../src/utils/omit'
+import { Grid } from '@mui/material'
+import { Post } from '../../../src/components/Post'
+import { useRecoilValue } from 'recoil'
 
 type Props = {
-  post: Post
+  data: SeparatePosts
 }
 
 type Params = ParsedUrlQuery & {
@@ -31,8 +43,8 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   const postID = params?.post
   if (owner === undefined || postID === undefined) return { notFound: true }
 
-  const res = await serverQuery<GetPostQueryVariables, GetPostQuery>({
-    query: getPost,
+  const res = await serverQuery<APIt.GetPostQueryVariables, APIt.GetPostQuery>({
+    query: query.getPost,
     variables: {
       id: postID,
     },
@@ -43,7 +55,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   if (post && post.owner === owner) {
     return {
       props: {
-        post: post,
+        data: separatePosts([post]),
       },
       revalidate: 5,
       notFound: false,
@@ -53,33 +65,68 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   }
 }
 
-const UserPost: NextPage<Props> = ({ post }) => {
-  return (
+const UserPost: NextPage<Props> = ({ data }) => {
+  const { isInit } = useAuth()
+
+  const router = useRouter()
+  const { user, post: pid } = router.query
+
+  const setPosts = useArraySettor(postsState, 'DESC')
+  const setCodes = useArraySettor(codesState, 'ASC')
+  const setComments = useArraySettor(commentsState, 'ASC')
+
+  const post = useRecoilValue(postSelector(pid as string))
+
+  useEffect(() => {
+    setPosts.initItems(data.posts)
+    setCodes.initItems(data.codes)
+    setComments.initItems(data.comments)
+  }, [])
+
+  useEffect(() => {
+    if (!isInit) return
+    const onCComment = gqlSubscription<APIt.OnCreateCommentSubscription>({
+      query: subscription.onCreateComment,
+      callback: {
+        next: (msg) => {
+          const comment = msg.value.data?.onCreateComment
+          comment &&
+            comment.post?.owner === user &&
+            setComments.createItem(comment)
+        },
+      },
+    })
+    const onDComment = gqlSubscription<APIt.OnDeleteCommentSubscription>({
+      query: subscription.onDeleteComment,
+      callback: {
+        next: (msg) => {
+          const comment = msg.value.data?.onDeleteComment
+          comment &&
+            comment.post?.owner === user &&
+            setComments.deleteItem(comment)
+        },
+      },
+    })
+
+    return () => {
+      onCComment.unsubscribe()
+      onDComment.unsubscribe()
+    }
+  }, [isInit])
+
+  return post ? (
     <>
       <Head>
         <title>{`${post.title} - PlaySnippet`}</title>
       </Head>
-      <Card>
-        <h1>{post.title}</h1>
-        <h2>{post.owner}</h2>
-        <p>{post.content}</p>
-        {post.codes && (
-          <li>
-            {post.codes?.items?.filter(notNull).map((code, i) => (
-              <ul key={i}>
-                {code.title}
-                <Link href={`/codes/${code.owner}/${code.id}`}>
-                  <a>コード詳細</a>
-                </Link>
-              </ul>
-            ))}
-          </li>
-        )}
-        <Link href={`/posts/${post.owner}`}>
-          <a>投稿一覧</a>
-        </Link>
-      </Card>
+      <Grid container alignItems="center" justifyContent="center">
+        <Grid item xs={12} sx={{ padding: '2%' }}>
+          <Post postID={post.id} />
+        </Grid>
+      </Grid>
     </>
+  ) : (
+    <React.Fragment />
   )
 }
 
