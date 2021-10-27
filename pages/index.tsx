@@ -10,7 +10,6 @@ import {
 import * as APIt from '../src/API'
 import * as query from '../src/graphql/queries'
 import * as subscription from '../src/graphql/subscriptions'
-import { listPostsByDate } from '../src/graphql/queries'
 import { gqlQuery, gqlSubscription, serverQuery } from '../src/utils/graphql'
 import { notNull } from '../src/utils/nullable'
 import { useAuth } from '../src/utils/auth'
@@ -55,6 +54,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 }
 
 const Home: NextPage<Props> = ({ data }) => {
+  const { authenticated, isInit } = useAuth()
+
   const setPosts = useArraySettor(postsState, 'DESC')
   const setCodes = useArraySettor(codesState, 'ASC')
   const setComments = useArraySettor(commentsState, 'ASC')
@@ -67,8 +68,6 @@ const Home: NextPage<Props> = ({ data }) => {
     setNextToken(data.nextToken)
   }, [])
 
-  const { authenticated, isInit } = useAuth()
-
   const getAdditionalPosts = async () => {
     if (!nextToken) return
 
@@ -76,7 +75,7 @@ const Home: NextPage<Props> = ({ data }) => {
       APIt.ListPostsByDateQueryVariables,
       APIt.ListPostsByDateQuery
     >({
-      query: listPostsByDate,
+      query: query.listPostsByDate,
       variables: {
         type: 'post',
         sortDirection: APIt.ModelSortDirection.DESC,
