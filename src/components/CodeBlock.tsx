@@ -36,7 +36,7 @@ const useStyle = makeStyles({
   },
 })
 
-export const Code: React.FC<Props> = ({ code, lang }) => {
+export const CodeBlock: React.FC<Props> = ({ code, lang }) => {
   const classes = useStyle()
 
   return (

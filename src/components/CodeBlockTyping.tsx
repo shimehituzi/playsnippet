@@ -37,7 +37,7 @@ type Props = {
   stop: () => void
 }
 
-export const CodeTyping: React.FC<Props> = ({ code, lang, stop }) => {
+export const CodeBlockTyping: React.FC<Props> = ({ code, lang, stop }) => {
   return (
     <Highlight
       {...defaultProps}

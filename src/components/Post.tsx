@@ -1,14 +1,20 @@
 import React, { useState } from 'react'
+import { useRecoilValue } from 'recoil'
+import { postSelector } from '../state/apiState'
+import * as APIt from '../API'
+import * as query from '../graphql/queries'
+import * as mutation from '../graphql/mutations'
+import { gqlMutation, gqlQuery } from '../utils/graphql'
+import { useAuth } from '../utils/auth'
+import dayjs, { OpUnitType } from 'dayjs'
 import ReactMarkdown from 'react-markdown'
 import {
-  Button,
   Card,
   CardActions,
   CardContent,
   CardHeader,
   Collapse,
   colors,
-  Grid,
   IconButton,
   Menu,
   MenuItem,
@@ -20,17 +26,12 @@ import {
   ExpandLess,
   ExpandMore,
   MoreVert as MoreVertIcon,
-  PlayArrow as PlayIcon,
-  Stop as StopIcon,
 } from '@mui/icons-material'
-import { CodeTyping } from './CodeTyping'
-import { Code } from './Code'
-import { ConnectedPost } from '../state/postsState'
-import dayjs, { OpUnitType } from 'dayjs'
-import { useAuth } from '../utils/auth'
+import { Codes } from './Codes'
+import { Comments } from './Comments'
 import { CommentForm } from './CommentForm'
-import { CommentList } from './CommentList'
 import { Avatar } from './Avatar'
+import { notNull } from '../utils/nullable'
 
 const useStyle = makeStyles({
   card: {
@@ -39,45 +40,55 @@ const useStyle = makeStyles({
     paddingLeft: '5%',
     paddingRight: '5%',
   },
-  button: {
-    textTransform: 'none',
-  },
   expand: {
     marginLeft: 'auto',
   },
 })
 
 type Props = {
-  post: ConnectedPost
-  isOwner: boolean
-  handleDeletePost: (postId: string) => Promise<void>
-  typingID: string
-  setTypingID: React.Dispatch<React.SetStateAction<string>>
+  postID: string
 }
 
-export const PostListItem: React.FC<Props> = ({
-  post,
-  isOwner,
-  handleDeletePost,
-  typingID,
-  setTypingID,
-}) => {
-  const classes = useStyle()
+export const Post: React.FC<Props> = ({ postID }) => {
+  const post = useRecoilValue(postSelector(postID))
+  const { authenticated, user } = useAuth()
 
-  const { authenticated } = useAuth()
+  const deletePost = async () => {
+    const res = await gqlQuery<APIt.GetPostQueryVariables, APIt.GetPostQuery>({
+      query: query.getPost,
+      variables: {
+        id: postID,
+      },
+    })
 
-  const onDelete = () => {
+    const codeIds =
+      res.data?.getPost?.codes?.items?.filter(notNull).map((v) => v.id) ?? []
+
+    codeIds.forEach(async (id) => {
+      gqlMutation<APIt.DeleteCodeMutationVariables>({
+        query: mutation.deleteCode,
+        variables: {
+          input: {
+            id: id,
+          },
+        },
+      })
+    })
+
+    await gqlMutation<APIt.DeletePostMutationVariables>({
+      query: mutation.deletePost,
+      variables: {
+        input: {
+          id: postID,
+        },
+      },
+    })
+  }
+
+  const onClick = async () => {
     if (window.confirm('Are you sure you want to delete it?')) {
-      handleDeletePost(post.id)
+      deletePost()
     }
-  }
-
-  const play = (id: string) => () => {
-    setTypingID(id)
-  }
-
-  const stop = () => {
-    setTypingID('')
   }
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -95,7 +106,11 @@ export const PostListItem: React.FC<Props> = ({
     setExpandComment((prev) => !prev)
   }
 
-  return (
+  const classes = useStyle()
+
+  return !post ? (
+    <React.Fragment />
+  ) : (
     <Card className={classes.card}>
       <CardHeader
         title={<Typography variant="h5">{post.title}</Typography>}
@@ -104,13 +119,13 @@ export const PostListItem: React.FC<Props> = ({
         }
         avatar={<Avatar username={post.owner ?? ''} size={50} />}
         action={
-          isOwner ? (
+          user?.username === post.owner ? (
             <React.Fragment>
               <IconButton onClick={openMenu}>
                 <MoreVertIcon />
               </IconButton>
               <Menu anchorEl={anchorEl} open={open} onClose={closeMenu}>
-                <MenuItem onClick={onDelete}>
+                <MenuItem onClick={onClick}>
                   <DeleteIcon />
                   DELETE
                 </MenuItem>
@@ -123,55 +138,7 @@ export const PostListItem: React.FC<Props> = ({
       />
       <CardContent>
         <ReactMarkdown>{post.content}</ReactMarkdown>
-        {post.codes &&
-          post.codes.map((code, key) => (
-            <React.Fragment key={key}>
-              <Grid
-                container
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Grid item>
-                  <Typography variant="body2" color="secondary">
-                    {code.title}
-                  </Typography>
-                </Grid>
-                {typingID === code.id ? (
-                  <Grid item>
-                    <Button
-                      onClick={stop}
-                      size="small"
-                      color="secondary"
-                      variant="contained"
-                      startIcon={<StopIcon />}
-                      className={classes.button}
-                    >
-                      Stop Typing
-                    </Button>
-                  </Grid>
-                ) : (
-                  <Grid item>
-                    <Button
-                      onClick={play(code.id)}
-                      size="small"
-                      color="primary"
-                      variant="contained"
-                      startIcon={<PlayIcon />}
-                      className={classes.button}
-                    >
-                      Play Typing
-                    </Button>
-                  </Grid>
-                )}
-              </Grid>
-              {typingID === code.id ? (
-                <CodeTyping code={code.content} lang={code.lang} stop={stop} />
-              ) : (
-                <Code code={code.content} lang={code.lang} />
-              )}
-            </React.Fragment>
-          ))}
+        <Codes postID={post.id} />
       </CardContent>
       <CardActions>
         <div className={classes.expand}>
@@ -183,7 +150,7 @@ export const PostListItem: React.FC<Props> = ({
       </CardActions>
       <Collapse in={expandComment} timeout="auto" unmountOnExit>
         <CardContent>
-          <CommentList comments={post.comments} />
+          <Comments postID={post.id} />
           {authenticated && <CommentForm postID={post.id} />}
         </CardContent>
       </Collapse>
