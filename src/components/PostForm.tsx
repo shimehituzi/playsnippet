@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { useRecoilState } from 'recoil'
-import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createCode, createPost } from '../graphql/mutations'
+import { postFormState, codesFormState, CodeForm } from '../state/formState'
 import {
   CreatePostMutationVariables,
   CreatePostMutation,
   CreateCodeMutationVariables,
 } from '../API'
+import { createCode, createPost } from '../graphql/mutations'
+import { gqlMutation } from '../utils/graphql'
 import {
   Button,
   Card,
@@ -18,7 +19,6 @@ import {
   TextField,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { postFormState, codesFormState, CodeForm } from '../state/formState'
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -58,30 +58,33 @@ export const PostForm: React.FC = () => {
   const [tab, setTab] = useState<number>(0)
 
   const handleSubmit = async () => {
-    const createPostMutationVariables: CreatePostMutationVariables = {
-      input: {
-        ...post,
-        type: 'post',
+    const res = await gqlMutation<
+      CreatePostMutationVariables,
+      CreatePostMutation
+    >({
+      query: createPost,
+      variables: {
+        input: {
+          ...post,
+          type: 'post',
+        },
       },
-    }
-    const res = (await API.graphql(
-      graphqlOperation(createPost, createPostMutationVariables)
-    )) as GraphQLResult<CreatePostMutation>
-    const postID = res.data?.createPost?.id
+    })
+    const postID = res?.data?.createPost?.id
 
     if (postID) {
       codes.forEach(async (code) => {
-        const createCodeMutationVariables: CreateCodeMutationVariables = {
-          input: {
-            ...code,
-            skipline: '',
-            postID: postID,
-            type: 'code',
+        await gqlMutation<CreateCodeMutationVariables>({
+          query: createCode,
+          variables: {
+            input: {
+              ...code,
+              skipline: '',
+              postID: postID,
+              type: 'code',
+            },
           },
-        }
-        await API.graphql(
-          graphqlOperation(createCode, createCodeMutationVariables)
-        )
+        })
       })
     }
 

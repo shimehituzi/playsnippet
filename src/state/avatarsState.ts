@@ -1,8 +1,8 @@
-import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
 import { GetAvatarQueryVariables, GetAvatarQuery, Avatar } from '../API'
 import { getAvatar } from '../graphql/queries'
 import { atom, selector, selectorFamily } from 'recoil'
 import { notNull, Nullable } from '../utils/nullable'
+import { gqlQuery } from '../utils/graphql'
 
 export const forceAvatarUpdate = atom<number>({
   key: 'forceAvatarUpdate',
@@ -40,12 +40,10 @@ const avatarQuery = selectorFamily<Nullable<Avatar>, string>({
     async ({ get }) => {
       get(forceAvatarUpdate)
       if (owner === '') return null
-      const getAvatarQueryVariables: GetAvatarQueryVariables = {
-        owner: owner,
-      }
-      const res = (await API.graphql(
-        graphqlOperation(getAvatar, getAvatarQueryVariables)
-      )) as GraphQLResult<GetAvatarQuery>
+      const res = await gqlQuery<GetAvatarQueryVariables, GetAvatarQuery>({
+        query: getAvatar,
+        variables: { owner: owner },
+      })
       return res.data?.getAvatar
     },
 })

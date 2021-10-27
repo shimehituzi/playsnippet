@@ -1,11 +1,11 @@
 import React from 'react'
-import API, { graphqlOperation } from '@aws-amplify/api'
-import { Send as SendIcon } from '@mui/icons-material'
-import { Grid, IconButton, TextField } from '@mui/material'
 import { useRecoilState } from 'recoil'
+import { commentFormState } from '../state/formState'
 import { CreateCommentMutationVariables } from '../API'
 import { createComment } from '../graphql/mutations'
-import { commentFormState } from '../state/formState'
+import { gqlMutation } from '../utils/graphql'
+import { Grid, IconButton, TextField } from '@mui/material'
+import { Send as SendIcon } from '@mui/icons-material'
 
 type Props = {
   postID: string
@@ -22,15 +22,15 @@ export const CommentForm: React.FC<Props> = ({ postID }) => {
   }
 
   const handleSubmit = async () => {
-    const createCommentMutationVariables: CreateCommentMutationVariables = {
-      input: {
-        ...comment,
-        postID: postID,
+    await gqlMutation<CreateCommentMutationVariables>({
+      query: createComment,
+      variables: {
+        input: {
+          ...comment,
+          postID: postID,
+        },
       },
-    }
-    await API.graphql(
-      graphqlOperation(createComment, createCommentMutationVariables)
-    )
+    })
 
     setComment({ content: '' })
   }

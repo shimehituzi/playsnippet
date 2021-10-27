@@ -1,6 +1,15 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import {
+  CreateAvatarMutationVariables,
+  UpdateAvatarMutationVariables,
+  DeleteAvatarMutationVariables,
+} from '../API'
+import { createAvatar, deleteAvatar, updateAvatar } from '../graphql/mutations'
+import { useAuth } from '../utils/auth'
+import { useAvatar, useAvatarUpdate } from '../utils/avatar'
+import { gqlMutation } from '../utils/graphql'
+import {
   AppBar,
   Button,
   IconButton,
@@ -14,21 +23,12 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { makeStyles } from '@mui/styles'
-import { useAuth } from '../utils/auth'
 import {
   PersonRemoveOutlined as PersonRemoveOutlinedIcon,
   Logout as SignOutIcon,
   ManageAccounts as ManageAccountsIcon,
 } from '@mui/icons-material'
-import API, { graphqlOperation } from '@aws-amplify/api'
-import {
-  CreateAvatarMutationVariables,
-  UpdateAvatarMutationVariables,
-  DeleteAvatarMutationVariables,
-} from '../API'
-import { createAvatar, deleteAvatar, updateAvatar } from '../graphql/mutations'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
-import { useAvatar, useAvatarUpdate } from '../utils/avatar'
 import { Avatar } from './Avatar'
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
@@ -86,29 +86,29 @@ const Account: React.FC<AccountProps> = ({ username }) => {
 
   const handleCreateAvatar = async (imageURL: string) => {
     if (!user || !user.username) return
-    const createAvatarMutationVariables: CreateAvatarMutationVariables = {
-      input: {
-        owner: user.username,
-        avatar: imageURL,
+    await gqlMutation<CreateAvatarMutationVariables>({
+      query: createAvatar,
+      variables: {
+        input: {
+          owner: user.username,
+          avatar: imageURL,
+        },
       },
-    }
-    await API.graphql(
-      graphqlOperation(createAvatar, createAvatarMutationVariables)
-    )
+    })
     forceUpdate()
   }
 
   const handleUpdateAvatar = async (imageURL: string) => {
     if (!user || !user.username) return
-    const updateAvatarMutationVariables: UpdateAvatarMutationVariables = {
-      input: {
-        owner: user.username,
-        avatar: imageURL,
+    await gqlMutation<UpdateAvatarMutationVariables>({
+      query: updateAvatar,
+      variables: {
+        input: {
+          owner: user.username,
+          avatar: imageURL,
+        },
       },
-    }
-    await API.graphql(
-      graphqlOperation(updateAvatar, updateAvatarMutationVariables)
-    )
+    })
     forceUpdate()
   }
 
@@ -143,14 +143,14 @@ const Account: React.FC<AccountProps> = ({ username }) => {
     if (avatar) {
       if (!user || !user.username) return
       if (window.confirm('Are you sure you want to REMOVE Account Icon?')) {
-        const deleteAvatarMutationVariables: DeleteAvatarMutationVariables = {
-          input: {
-            owner: user.username,
+        await gqlMutation<DeleteAvatarMutationVariables>({
+          query: deleteAvatar,
+          variables: {
+            input: {
+              owner: user.username,
+            },
           },
-        }
-        await API.graphql(
-          graphqlOperation(deleteAvatar, deleteAvatarMutationVariables)
-        )
+        })
         forceUpdate()
       }
     } else {
