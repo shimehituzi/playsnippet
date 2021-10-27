@@ -1,4 +1,6 @@
 import React from 'react'
+import { useRecoilValue } from 'recoil'
+import { commentsSelector } from '../state/apiState'
 import {
   List,
   ListItem,
@@ -6,14 +8,15 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material'
-import { OmittedComment } from '../state/commentsState'
 import { Avatar } from './Avatar'
 
 type Props = {
-  comments: OmittedComment[]
+  postID: string
 }
 
-export const CommentList: React.FC<Props> = ({ comments }) => {
+export const Comments: React.FC<Props> = ({ postID }) => {
+  const comments = useRecoilValue(commentsSelector(postID))
+
   return (
     <List>
       {comments.map((comment, key) => (

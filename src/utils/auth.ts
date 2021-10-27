@@ -1,49 +1,42 @@
-import { useEffect, useState } from 'react'
-import Amplify, { Auth } from 'aws-amplify'
-import {
-  AuthState,
-  CognitoUserInterface,
-  onAuthUIStateChange,
-} from '@aws-amplify/ui-components'
+import { useEffect } from 'react'
+import { Auth } from 'aws-amplify'
+import { onAuthUIStateChange } from '@aws-amplify/ui-components'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { AuthState, authState, authUIState } from '../state/authState'
 
-type AmplifyAuth = {
-  user: CognitoUserInterface | undefined
-  authenticated: boolean
-  isInit: boolean
-}
-
-export const useAuth = (): AmplifyAuth => {
-  const [user, setUser] = useState<CognitoUserInterface>()
-  const [authenticated, setAuthenticated] = useState<boolean>(false)
-  const [authUIState, setAuthUIState] = useState<AuthState>()
-  const [isInit, setIsInit] = useState<boolean>(false)
+export const useAuthInit = (): void => {
+  const setAuth = useSetRecoilState(authState)
+  const [authUI, setAuthUI] = useRecoilState(authUIState)
 
   useEffect(() => {
     Auth.currentAuthenticatedUser()
       .then((user) => {
-        Amplify.configure({
-          aws_appsync_authenticationType: 'AMAZON_COGNITO_USER_POOLS',
+        setAuth({
+          user: user,
+          authenticated: true,
+          authMode: 'AMAZON_COGNITO_USER_POOLS',
+          isInit: true,
         })
-        setUser(user as CognitoUserInterface)
-        setAuthenticated(true)
-        setIsInit(true)
       })
       .catch(() => {
-        Amplify.configure({
-          aws_appsync_authenticationType: 'AWS_IAM',
+        setAuth({
+          user: null,
+          authenticated: false,
+          authMode: 'AWS_IAM',
+          isInit: true,
         })
-        setUser(undefined)
-        setAuthenticated(false)
-        setIsInit(true)
       })
-  }, [authUIState])
+  }, [authUI])
 
   useEffect(() => {
     const unsubscribe = onAuthUIStateChange((nextAuthUIState) => {
-      setAuthUIState(nextAuthUIState)
+      setAuthUI(nextAuthUIState)
     })
     return unsubscribe
   }, [])
+}
 
-  return { user, authenticated, isInit }
+export const useAuth = (): AuthState => {
+  const auth = useRecoilValue(authState)
+  return auth
 }

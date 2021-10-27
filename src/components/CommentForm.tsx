@@ -1,18 +1,20 @@
-import React from 'react'
-import API, { graphqlOperation } from '@aws-amplify/api'
-import { Send as SendIcon } from '@mui/icons-material'
-import { Grid, IconButton, TextField } from '@mui/material'
-import { useRecoilState } from 'recoil'
-import { CreateCommentMutationVariables } from '../API'
+import React, { useState } from 'react'
+import { CreateCommentMutationVariables, CreateCommentInput } from '../API'
 import { createComment } from '../graphql/mutations'
-import { commentFormState } from '../state/commentFormState'
+import { gqlMutation } from '../utils/graphql'
+import { Grid, IconButton, TextField } from '@mui/material'
+import { Send as SendIcon } from '@mui/icons-material'
+import { useAuth } from '../utils/auth'
 
 type Props = {
   postID: string
 }
 
 export const CommentForm: React.FC<Props> = ({ postID }) => {
-  const [comment, setComment] = useRecoilState(commentFormState)
+  const { authenticated } = useAuth()
+  const [comment, setComment] = useState<Pick<CreateCommentInput, 'content'>>({
+    content: '',
+  })
 
   const onChangeComment = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment((comment) => ({
@@ -22,15 +24,17 @@ export const CommentForm: React.FC<Props> = ({ postID }) => {
   }
 
   const handleSubmit = async () => {
-    const createCommentMutationVariables: CreateCommentMutationVariables = {
-      input: {
-        ...comment,
-        postID: postID,
+    if (!authenticated) return
+
+    await gqlMutation<CreateCommentMutationVariables>({
+      query: createComment,
+      variables: {
+        input: {
+          ...comment,
+          postID: postID,
+        },
       },
-    }
-    await API.graphql(
-      graphqlOperation(createComment, createCommentMutationVariables)
-    )
+    })
 
     setComment({ content: '' })
   }

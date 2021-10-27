@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { useRecoilState } from 'recoil'
-import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createCode, createPost } from '../graphql/mutations'
+import { postFormState, codesFormState, CodeForm } from '../state/formState'
 import {
   CreatePostMutationVariables,
   CreatePostMutation,
   CreateCodeMutationVariables,
 } from '../API'
+import { createCode, createPost } from '../graphql/mutations'
+import { gqlMutation } from '../utils/graphql'
 import {
   Button,
   Card,
@@ -18,13 +19,12 @@ import {
   TextField,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { postFormState } from '../state/postFormState'
-import { CodeForm, codesFormState } from '../state/codesFormState'
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Send as SendIcon,
 } from '@mui/icons-material'
+import { useAuth } from '../utils/auth'
 
 const useStyle = makeStyles({
   card: {
@@ -52,37 +52,42 @@ const useStyle = makeStyles({
 })
 
 export const PostForm: React.FC = () => {
-  const classes = useStyle()
+  const { authenticated } = useAuth()
 
   const [post, setPost] = useRecoilState(postFormState)
   const [codes, setCodes] = useRecoilState(codesFormState)
   const [tab, setTab] = useState<number>(0)
 
   const handleSubmit = async () => {
-    const createPostMutationVariables: CreatePostMutationVariables = {
-      input: {
-        ...post,
-        type: 'post',
+    if (!authenticated) return
+
+    const res = await gqlMutation<
+      CreatePostMutationVariables,
+      CreatePostMutation
+    >({
+      query: createPost,
+      variables: {
+        input: {
+          ...post,
+          type: 'post',
+        },
       },
-    }
-    const res = (await API.graphql(
-      graphqlOperation(createPost, createPostMutationVariables)
-    )) as GraphQLResult<CreatePostMutation>
-    const postID = res.data?.createPost?.id
+    })
+    const postID = res?.data?.createPost?.id
 
     if (postID) {
       codes.forEach(async (code) => {
-        const createCodeMutationVariables: CreateCodeMutationVariables = {
-          input: {
-            ...code,
-            skipline: '',
-            postID: postID,
-            type: 'code',
+        await gqlMutation<CreateCodeMutationVariables>({
+          query: createCode,
+          variables: {
+            input: {
+              ...code,
+              skipline: '',
+              postID: postID,
+              type: 'code',
+            },
           },
-        }
-        await API.graphql(
-          graphqlOperation(createCode, createCodeMutationVariables)
-        )
+        })
       })
     }
 
@@ -135,6 +140,8 @@ export const PostForm: React.FC = () => {
       setCodes((codes) => [...codes.slice(0, index), ...codes.slice(index + 1)])
     }
   }
+
+  const classes = useStyle()
 
   return (
     <Card className={classes.card}>
