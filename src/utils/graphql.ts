@@ -6,7 +6,6 @@ import {
   Observer,
   ZenObservable,
 } from '../../node_modules/zen-observable-ts'
-import { useAuth } from './auth'
 
 type GqlOptions<V extends Record<string, unknown>> = {
   query: GraphQLOptions['query']
@@ -32,12 +31,10 @@ export const gqlQuery = async <V extends Record<string, unknown>, Q>({
   query,
   variables,
 }: GqlOptions<V>): Promise<GraphQLResult<Q>> => {
-  const { authMode } = useAuth()
-
   const res = (await API.graphql({
     query: query,
     variables: variables,
-    authMode: authMode,
+    authMode: 'AWS_IAM',
   })) as GraphQLResult<Q>
 
   return res
@@ -47,13 +44,10 @@ export const gqlMutation = async <V extends Record<string, unknown>, M = void>({
   query,
   variables,
 }: GqlOptions<V>): Promise<GraphQLResult<M> | undefined> => {
-  const { authMode, isInit } = useAuth()
-  if (!isInit || authMode !== 'AMAZON_COGNITO_USER_POOLS') return
-
   const res = (await API.graphql({
     query: query,
     variables: variables,
-    authMode: authMode,
+    authMode: 'AMAZON_COGNITO_USER_POOLS',
   })) as GraphQLResult<M>
 
   return res
@@ -72,11 +66,9 @@ export const gqlSubscription = <T>({
   query,
   callback,
 }: SubScriptionOptions<T>): ZenObservable.Subscription => {
-  const { authMode } = useAuth()
-
   const client = API.graphql({
     query: query,
-    authMode: authMode,
+    authMode: 'AWS_IAM',
   }) as Client<T>
 
   const subscription = client.subscribe(callback)

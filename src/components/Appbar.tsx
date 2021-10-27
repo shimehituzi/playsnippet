@@ -86,6 +86,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
 
   const handleCreateAvatar = async (imageURL: string) => {
     if (!user || !user.username) return
+
     await gqlMutation<CreateAvatarMutationVariables>({
       query: createAvatar,
       variables: {
@@ -95,11 +96,13 @@ const Account: React.FC<AccountProps> = ({ username }) => {
         },
       },
     })
+
     forceUpdate()
   }
 
   const handleUpdateAvatar = async (imageURL: string) => {
     if (!user || !user.username) return
+
     await gqlMutation<UpdateAvatarMutationVariables>({
       query: updateAvatar,
       variables: {
@@ -109,6 +112,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
         },
       },
     })
+
     forceUpdate()
   }
 
@@ -140,6 +144,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
 
   const handleDeleteAvatar = async () => {
     if (!user || !user.username) return
+
     if (avatar) {
       if (!user || !user.username) return
       if (window.confirm('Are you sure you want to REMOVE Account Icon?')) {

@@ -54,6 +54,8 @@ export const Post: React.FC<Props> = ({ postID }) => {
   const { authenticated, user } = useAuth()
 
   const deletePost = async () => {
+    if (!authenticated) return
+
     const res = await gqlQuery<APIt.GetPostQueryVariables, APIt.GetPostQuery>({
       query: query.getPost,
       variables: {

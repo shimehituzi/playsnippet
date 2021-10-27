@@ -6,12 +6,14 @@ import { createComment } from '../graphql/mutations'
 import { gqlMutation } from '../utils/graphql'
 import { Grid, IconButton, TextField } from '@mui/material'
 import { Send as SendIcon } from '@mui/icons-material'
+import { useAuth } from '../utils/auth'
 
 type Props = {
   postID: string
 }
 
 export const CommentForm: React.FC<Props> = ({ postID }) => {
+  const { authenticated } = useAuth()
   const [comment, setComment] = useRecoilState(commentFormState)
 
   const onChangeComment = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,6 +24,8 @@ export const CommentForm: React.FC<Props> = ({ postID }) => {
   }
 
   const handleSubmit = async () => {
+    if (!authenticated) return
+
     await gqlMutation<CreateCommentMutationVariables>({
       query: createComment,
       variables: {

@@ -24,6 +24,7 @@ import {
   Delete as DeleteIcon,
   Send as SendIcon,
 } from '@mui/icons-material'
+import { useAuth } from '../utils/auth'
 
 const useStyle = makeStyles({
   card: {
@@ -51,13 +52,15 @@ const useStyle = makeStyles({
 })
 
 export const PostForm: React.FC = () => {
-  const classes = useStyle()
+  const { authenticated } = useAuth()
 
   const [post, setPost] = useRecoilState(postFormState)
   const [codes, setCodes] = useRecoilState(codesFormState)
   const [tab, setTab] = useState<number>(0)
 
   const handleSubmit = async () => {
+    if (!authenticated) return
+
     const res = await gqlMutation<
       CreatePostMutationVariables,
       CreatePostMutation
@@ -137,6 +140,8 @@ export const PostForm: React.FC = () => {
       setCodes((codes) => [...codes.slice(0, index), ...codes.slice(index + 1)])
     }
   }
+
+  const classes = useStyle()
 
   return (
     <Card className={classes.card}>

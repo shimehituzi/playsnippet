@@ -21,7 +21,10 @@ import { useArraySettor } from '../src/utils/recoilArraySettor'
 import { SeparatePosts, separatePosts } from '../src/utils/omit'
 
 type Props = {
-  data: SeparatePosts
+  data: {
+    items: SeparatePosts
+    nextToken: string | null
+  }
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
@@ -41,7 +44,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
   return {
     props: {
-      data: separatePosts(posts),
+      data: {
+        items: separatePosts(posts),
+        nextToken: res.data?.listPostsByDate?.nextToken ?? null,
+      },
     },
     revalidate: 5,
     notFound: false,
@@ -52,14 +58,15 @@ const Home: NextPage<Props> = ({ data }) => {
   const setPosts = useArraySettor(postsState, 'DESC')
   const setCodes = useArraySettor(codesState, 'ASC')
   const setComments = useArraySettor(commentsState, 'ASC')
+  const [nextToken, setNextToken] = useRecoilState(postNextTokenState)
 
   useEffect(() => {
-    setPosts.initItems(data.posts)
-    setCodes.initItems(data.codes)
-    setComments.initItems(data.comments)
+    setPosts.initItems(data.items.posts)
+    setCodes.initItems(data.items.codes)
+    setComments.initItems(data.items.comments)
+    setNextToken(data.nextToken)
   }, [])
 
-  const [nextToken, setNextToken] = useRecoilState(postNextTokenState)
   const { authenticated, isInit } = useAuth()
 
   const getAdditionalPosts = async () => {
