@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   CreateAvatarMutationVariables,
   UpdateAvatarMutationVariables,
@@ -28,6 +27,7 @@ import {
   PersonRemoveOutlined as PersonRemoveOutlinedIcon,
   Logout as SignOutIcon,
   ManageAccounts as ManageAccountsIcon,
+  GitHub as GitHubIcon,
 } from '@mui/icons-material'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
 import { Avatar } from './Avatar'
@@ -66,8 +66,8 @@ export const Appbar: React.FC = () => {
             </Button>
           </Link>
           <Link href="https://github.com/shimehituzi/playsnippet">
-            <IconButton>
-              <Image src="/GitHub-Mark-Light-64px.png" width="40" height="40" />
+            <IconButton size="small">
+              <GitHubIcon sx={{ width: 45, height: 45 }} />
             </IconButton>
           </Link>
         </div>
