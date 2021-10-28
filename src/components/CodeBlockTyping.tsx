@@ -105,7 +105,8 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
               isSpace(val.token.content) &&
               !(val.character === '\n')
             )
-        ),
+        )
+        .filter((val) => val.character.match(/[\n\x20-\x7e]/) !== null),
     [remapedTokens]
   )
 
