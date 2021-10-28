@@ -27,6 +27,7 @@ import {
   PersonRemoveOutlined as PersonRemoveOutlinedIcon,
   Logout as SignOutIcon,
   ManageAccounts as ManageAccountsIcon,
+  GitHub as GitHubIcon,
 } from '@mui/icons-material'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
 import { Avatar } from './Avatar'
@@ -56,15 +57,20 @@ export const Appbar: React.FC = () => {
   return (
     <AppBar position="static">
       <StyledToolbar>
-        <Link href="/">
-          <div className={classes.logo}>
+        <div className={classes.logo}>
+          <Link href="/">
             <Button className={classes.button}>
               <Typography variant="h4" color="primary">
                 Play Snippet
               </Typography>
             </Button>
-          </div>
-        </Link>
+          </Link>
+          <Link href="https://github.com/shimehituzi/playsnippet">
+            <IconButton size="small">
+              <GitHubIcon sx={{ width: 45, height: 45 }} />
+            </IconButton>
+          </Link>
+        </div>
         {authenticated && user?.username ? (
           <Account username={user.username} />
         ) : (
