@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   CreateAvatarMutationVariables,
   UpdateAvatarMutationVariables,
@@ -57,20 +56,15 @@ export const Appbar: React.FC = () => {
   return (
     <AppBar position="static">
       <StyledToolbar>
-        <div className={classes.logo}>
-          <Link href="/">
+        <Link href="/">
+          <div className={classes.logo}>
             <Button className={classes.button}>
               <Typography variant="h4" color="primary">
                 Play Snippet
               </Typography>
             </Button>
-          </Link>
-          <Link href="https://github.com/shimehituzi/playsnippet">
-            <IconButton>
-              <Image src="/GitHub-Mark-Light-64px.png" width="40" height="40" />
-            </IconButton>
-          </Link>
-        </div>
+          </div>
+        </Link>
         {authenticated && user?.username ? (
           <Account username={user.username} />
         ) : (
