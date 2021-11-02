@@ -2,6 +2,7 @@ import React from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { codesSelector } from '../state/apiState'
 import { typingIDState } from '../state/uiState'
+import * as APIt from '../API'
 import { Button, Grid, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { PlayArrow as PlayIcon, Stop as StopIcon } from '@mui/icons-material'
@@ -10,6 +11,12 @@ import { CodeBlock } from './CodeBlock'
 
 type Props = {
   postID: string
+  codes?: APIt.Code[]
+}
+
+export const Codes: React.FC<Props> = (props) => {
+  const codes = useRecoilValue(codesSelector(props.postID))
+  return <CodesRenderer codes={props.codes ? props.codes : codes} />
 }
 
 const useStyle = makeStyles({
@@ -18,9 +25,11 @@ const useStyle = makeStyles({
   },
 })
 
-export const Codes: React.FC<Props> = ({ postID }) => {
-  const codes = useRecoilValue(codesSelector(postID))
+type RendererProps = {
+  codes: APIt.Code[]
+}
 
+const CodesRenderer: React.FC<RendererProps> = ({ codes }) => {
   const [typingID, setTypingID] = useRecoilState(typingIDState)
 
   const play = (id: string) => () => {
