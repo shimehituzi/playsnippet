@@ -1,11 +1,7 @@
-import { useEffect } from 'react'
 import { Avatar } from '../API'
 import { useRecoilValueLoadable, useSetRecoilState } from 'recoil'
-import {
-  avatarState,
-  displayedOwnersState,
-  forceAvatarUpdate,
-} from '../state/avatarsState'
+import { avatarQuery, forceAvatarUpdate } from '../state/avatarsState'
+import { Nullable } from './nullable'
 
 export const useAvatarUpdate = (): (() => void) => {
   const setForceAvatarUpdate = useSetRecoilState(forceAvatarUpdate)
@@ -13,13 +9,8 @@ export const useAvatarUpdate = (): (() => void) => {
   return forceUpdate
 }
 
-export const useAvatar = (username: string): Avatar | null => {
-  const setOwner = useSetRecoilState(displayedOwnersState)
-  const avatar = useRecoilValueLoadable(avatarState(username))
-
-  useEffect(() => {
-    setOwner((prev) => Array.from(new Set([...prev, username])))
-  }, [username])
+export const useAvatar = (username: string): Nullable<Avatar> => {
+  const avatar = useRecoilValueLoadable(avatarQuery(username))
 
   return avatar.state === 'hasValue' ? avatar.contents : null
 }
