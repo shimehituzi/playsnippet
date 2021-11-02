@@ -1,12 +1,29 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Auth } from 'aws-amplify'
 import { onAuthUIStateChange } from '@aws-amplify/ui-components'
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
-import { AuthState, authState, authUIState } from '../state/authState'
+import {
+  AuthState as AuthUIState,
+  CognitoUserInterface,
+} from '@aws-amplify/ui-components'
+import { GRAPHQL_AUTH_MODE } from '@aws-amplify/api-graphql'
 
-export const useAuthInit = (): void => {
-  const setAuth = useSetRecoilState(authState)
-  const [authUI, setAuthUI] = useRecoilState(authUIState)
+type AuthMode = keyof typeof GRAPHQL_AUTH_MODE
+
+export type AuthState = {
+  user: CognitoUserInterface | null
+  authenticated: boolean
+  authMode: AuthMode
+  isInit: boolean
+}
+
+export const useAuth = (): AuthState => {
+  const [auth, setAuth] = useState<AuthState>({
+    user: null,
+    authenticated: false,
+    authMode: 'AWS_IAM',
+    isInit: false,
+  })
+  const [authUIState, setAuthUIState] = useState<AuthUIState | null>(null)
 
   useEffect(() => {
     Auth.currentAuthenticatedUser()
@@ -26,17 +43,14 @@ export const useAuthInit = (): void => {
           isInit: true,
         })
       })
-  }, [authUI])
+  }, [authUIState])
 
   useEffect(() => {
     const unsubscribe = onAuthUIStateChange((nextAuthUIState) => {
-      setAuthUI(nextAuthUIState)
+      setAuthUIState(nextAuthUIState)
     })
     return unsubscribe
   }, [])
-}
 
-export const useAuth = (): AuthState => {
-  const auth = useRecoilValue(authState)
   return auth
 }
