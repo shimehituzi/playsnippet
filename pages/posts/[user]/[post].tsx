@@ -15,13 +15,13 @@ import * as subscription from '../../../src/graphql/subscriptions'
 import { gqlSubscription, serverQuery } from '../../../src/utils/graphql'
 import { useAuth } from '../../../src/utils/auth'
 import { useArraySettor } from '../../../src/utils/recoilArraySettor'
-import { SeparatePosts, separatePosts } from '../../../src/utils/omit'
+import { separatePosts } from '../../../src/utils/omit'
 import { Grid } from '@mui/material'
 import { Post } from '../../../src/components/Post'
 import { useRecoilValue } from 'recoil'
 
 type Props = {
-  data: SeparatePosts
+  post: APIt.Post
 }
 
 type Params = ParsedUrlQuery & {
@@ -55,7 +55,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   if (post && post.owner === owner) {
     return {
       props: {
-        data: separatePosts([post]),
+        post: post,
       },
       revalidate: 5,
       notFound: false,
@@ -65,7 +65,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   }
 }
 
-const UserPost: NextPage<Props> = ({ data }) => {
+const UserPost: NextPage<Props> = (props) => {
   const { isInit } = useAuth()
 
   const router = useRouter()
@@ -78,6 +78,7 @@ const UserPost: NextPage<Props> = ({ data }) => {
   const post = useRecoilValue(postSelector(pid as string))
 
   useEffect(() => {
+    const data = separatePosts([props.post])
     setPosts.initItems(data.posts)
     setCodes.initItems(data.codes)
     setComments.initItems(data.comments)
@@ -114,14 +115,14 @@ const UserPost: NextPage<Props> = ({ data }) => {
     }
   }, [isInit])
 
-  return post ? (
+  return props.post ? (
     <>
       <Head>
-        <title>{`${post.title} - PlaySnippet`}</title>
+        <title>{`${props.post.title} - PlaySnippet`}</title>
       </Head>
       <Grid container alignItems="center" justifyContent="center">
         <Grid item xs={12} sx={{ padding: '2%' }}>
-          <Post postID={post.id} />
+          <Post postID={props.post.id} post={props.post} />
         </Grid>
       </Grid>
     </>

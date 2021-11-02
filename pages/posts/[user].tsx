@@ -20,13 +20,11 @@ import { Button, Grid } from '@mui/material'
 import { PostForm } from '../../src/components/PostForm'
 import { Posts } from '../../src/components/Posts'
 import { useArraySettor } from '../../src/utils/recoilArraySettor'
-import { SeparatePosts, separatePosts } from '../../src/utils/omit'
+import { separatePosts } from '../../src/utils/omit'
 
 type Props = {
-  data: {
-    items: SeparatePosts
-    nextToken: string | null
-  }
+  posts: APIt.Post[]
+  nextToken: string | null
 }
 
 type Params = ParsedUrlQuery & {
@@ -63,10 +61,8 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   if (posts.length > 0) {
     return {
       props: {
-        data: {
-          items: separatePosts(posts),
-          nextToken: res.data?.listPostsByOwner?.nextToken ?? null,
-        },
+        posts: posts,
+        nextToken: res.data?.listPostsByOwner?.nextToken ?? null,
       },
       revalidate: 5,
       notFound: false,
@@ -76,7 +72,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   }
 }
 
-const UserPosts: NextPage<Props> = ({ data }) => {
+const UserPosts: NextPage<Props> = (props) => {
   const { authenticated, isInit } = useAuth()
 
   const router = useRouter()
@@ -88,10 +84,11 @@ const UserPosts: NextPage<Props> = ({ data }) => {
   const [nextToken, setNextToken] = useRecoilState(postNextTokenState)
 
   useEffect(() => {
-    setPosts.initItems(data.items.posts)
-    setCodes.initItems(data.items.codes)
-    setComments.initItems(data.items.comments)
-    setNextToken(data.nextToken)
+    const data = separatePosts(props.posts)
+    setPosts.initItems(data.posts)
+    setCodes.initItems(data.codes)
+    setComments.initItems(data.comments)
+    setNextToken(props.nextToken)
   }, [])
 
   const getAdditionalPosts = async () => {
@@ -203,7 +200,7 @@ const UserPosts: NextPage<Props> = ({ data }) => {
           </Grid>
         )}
         <Grid item xs={12}>
-          <Posts />
+          <Posts posts={props.posts} />
         </Grid>
         <Grid item>
           <Button onClick={getAdditionalPosts} variant="outlined">

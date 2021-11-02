@@ -17,13 +17,11 @@ import { Button, Grid } from '@mui/material'
 import { PostForm } from '../src/components/PostForm'
 import { Posts } from '../src/components/Posts'
 import { useArraySettor } from '../src/utils/recoilArraySettor'
-import { SeparatePosts, separatePosts } from '../src/utils/omit'
+import { separatePosts } from '../src/utils/omit'
 
 type Props = {
-  data: {
-    items: SeparatePosts
-    nextToken: string | null
-  }
+  posts: APIt.Post[]
+  nextToken: string | null
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
@@ -43,17 +41,15 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
   return {
     props: {
-      data: {
-        items: separatePosts(posts),
-        nextToken: res.data?.listPostsByDate?.nextToken ?? null,
-      },
+      posts: posts,
+      nextToken: res.data?.listPostsByDate?.nextToken ?? null,
     },
     revalidate: 5,
     notFound: false,
   }
 }
 
-const Home: NextPage<Props> = ({ data }) => {
+const Home: NextPage<Props> = (props) => {
   const { authenticated, isInit } = useAuth()
 
   const setPosts = useArraySettor(postsState, 'DESC')
@@ -62,10 +58,11 @@ const Home: NextPage<Props> = ({ data }) => {
   const [nextToken, setNextToken] = useRecoilState(postNextTokenState)
 
   useEffect(() => {
-    setPosts.initItems(data.items.posts)
-    setCodes.initItems(data.items.codes)
-    setComments.initItems(data.items.comments)
-    setNextToken(data.nextToken)
+    const data = separatePosts(props.posts)
+    setPosts.initItems(data.posts)
+    setCodes.initItems(data.codes)
+    setComments.initItems(data.comments)
+    setNextToken(props.nextToken)
   }, [])
 
   const getAdditionalPosts = async () => {
@@ -169,7 +166,7 @@ const Home: NextPage<Props> = ({ data }) => {
         </Grid>
       )}
       <Grid item xs={12}>
-        <Posts />
+        <Posts posts={props.posts} />
       </Grid>
       <Grid item>
         <Button onClick={getAdditionalPosts} variant="outlined">
