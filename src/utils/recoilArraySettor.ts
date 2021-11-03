@@ -52,12 +52,8 @@ export const createArrayItem = <T>(
   }
 }
 
-export const updateArrayItem = <T extends StringID>(
-  arr: T[],
-  prevItem: T,
-  newItem: T
-): T[] => {
-  return replaceArrayItem(arr, getArrayIndex<T>(arr, prevItem), newItem)
+export const updateArrayItem = <T extends StringID>(arr: T[], item: T): T[] => {
+  return replaceArrayItem(arr, getArrayIndex<T>(arr, item), item)
 }
 
 export const deleteArrayItem = <T extends StringID>(arr: T[], item: T): T[] => {
@@ -71,7 +67,7 @@ export const useArraySettor = <T extends StringID>(
   initItems: (items: T[]) => void
   appendItems: (items: T[]) => void
   createItem: (item: T) => void
-  updateItem: (prevItem: T, newItem: T) => void
+  updateItem: (item: T) => void
   deleteItem: (item: T) => void
 } => {
   const setArr = useSetRecoilState(atom)
@@ -88,8 +84,8 @@ export const useArraySettor = <T extends StringID>(
     setArr((arr) => createArrayItem(arr, item, sd))
   }
 
-  const updateItem = (prevItem: T, newItem: T) => {
-    setArr((arr) => updateArrayItem(arr, prevItem, newItem))
+  const updateItem = (item: T) => {
+    setArr((arr) => updateArrayItem(arr, item))
   }
 
   const deleteItem = (item: T) => {
