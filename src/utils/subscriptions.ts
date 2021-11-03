@@ -3,6 +3,7 @@ import * as subscription from '../graphql/subscriptions'
 import { gqlSubscription } from '../utils/graphql'
 import { GraphQLOptions } from '@aws-amplify/api-graphql'
 import { ZenObservable } from '../../node_modules/zen-observable-ts'
+import { useCallback, useState } from 'react'
 
 type Callbacks<C, U, D> = {
   createfn: (data: C) => void
@@ -16,15 +17,15 @@ type Querys = {
   onDelete: GraphQLOptions['query']
 }
 
-type Subscription = {
+type Subscriptions = {
   createSubscription: ZenObservable.Subscription
   updateSubscription: ZenObservable.Subscription
   deleteSubscription: ZenObservable.Subscription
 }
 
-export const generateSubscribeFunc =
+const generateSubscribeFunc =
   <C, U, D>(querys: Querys) =>
-  (callbacks: Callbacks<C, U, D>): Subscription => {
+  (callbacks: Callbacks<C, U, D>): Subscriptions => {
     const createSubscription = gqlSubscription<C>({
       query: querys.onCreate,
       callback: {
@@ -84,3 +85,36 @@ export const subscribeComment = generateSubscribeFunc<
   onUpdate: subscription.onUpdateComment,
   onDelete: subscription.onDeleteComment,
 })
+
+export const useSubscription = (
+  subscribeFunc: () => Subscriptions
+): {
+  subscribe: () => void
+  unsubscribe: () => void
+  toggle: () => void
+} => {
+  const [subscriptions, setSubscriptions] = useState<Subscriptions | null>(null)
+
+  const subscribe = useCallback(() => {
+    if (subscriptions !== null) return
+    setSubscriptions(subscribeFunc())
+  }, [subscriptions])
+
+  const unsubscribe = useCallback(() => {
+    if (subscriptions === null) return
+    subscriptions.createSubscription.unsubscribe()
+    subscriptions.updateSubscription.unsubscribe()
+    subscriptions.deleteSubscription.unsubscribe()
+    setSubscriptions(null)
+  }, [subscriptions])
+
+  const toggle = useCallback(() => {
+    if (subscriptions === null) {
+      subscribe()
+    } else {
+      unsubscribe()
+    }
+  }, [subscriptions])
+
+  return { subscribe, unsubscribe, toggle }
+}
