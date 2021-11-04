@@ -12,7 +12,12 @@ type Props = {
 
 export const Posts: React.FC<Props> = (props) => {
   const posts = useRecoilValue(postsSelector)
-  return <PostsRenderer posts={props.posts ? props.posts : posts} />
+  return (
+    <PostsRenderer
+      posts={props.posts != null ? props.posts : posts}
+      isr={props.posts != null}
+    />
+  )
 }
 
 const useStyle = makeStyles({
@@ -23,15 +28,20 @@ const useStyle = makeStyles({
 
 type RendererProps = {
   posts: APIt.Post[]
+  isr: boolean
 }
 
-const PostsRenderer: React.FC<RendererProps> = ({ posts }) => {
+const PostsRenderer: React.FC<RendererProps> = ({ posts, isr }) => {
   const classes = useStyle()
   return (
     <Grid container alignItems="center" justifyContent="center">
       {posts.map((post, key) => (
         <Grid item xs={12} className={classes.grid} key={key}>
-          <Post postID={post.id} post={post} />
+          {isr ? (
+            <Post postID={post.id} post={post} />
+          ) : (
+            <Post postID={post.id} />
+          )}
         </Grid>
       ))}
     </Grid>

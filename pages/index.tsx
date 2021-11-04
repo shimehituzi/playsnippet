@@ -16,9 +16,18 @@ import { Button, Grid, ToggleButton } from '@mui/material'
 import { PostForm } from '../src/components/PostForm'
 import { Posts } from '../src/components/Posts'
 import { useArraySettor } from '../src/utils/recoilArraySettor'
-import { separatePosts } from '../src/utils/omit'
+import {
+  omitCode,
+  omitComment,
+  omitPost,
+  separatePosts,
+} from '../src/utils/omit'
 import { useRenderState } from '../src/utils/render'
-import { useSubscription, subscribePost } from '../src/utils/subscriptions'
+import {
+  useSubscription,
+  subscribePost,
+  subscribeCode,
+} from '../src/utils/subscriptions'
 import { Sync as SyncIcon } from '@mui/icons-material'
 
 type Props = {
@@ -55,9 +64,9 @@ const Home: NextPage<Props> = (props) => {
   const { renderState, toCSR } = useRenderState()
   const { authenticated } = useAuth()
 
-  const setPosts = useArraySettor(postsState, 'DESC')
-  const setCodes = useArraySettor(codesState, 'ASC')
-  const setComments = useArraySettor(commentsState, 'ASC')
+  const setPosts = useArraySettor(postsState, 'DESC', omitPost)
+  const setCodes = useArraySettor(codesState, 'ASC', omitCode)
+  const setComments = useArraySettor(commentsState, 'ASC', omitComment)
   const [nextToken, setNextToken] = useRecoilState(postNextTokenState)
 
   useEffect(() => {
@@ -95,23 +104,24 @@ const Home: NextPage<Props> = (props) => {
     toCSR()
   }
 
-  const subsribePostFunc = () =>
-    subscribePost({
-      createfn: (data) => {
-        const post = data?.onCreatePost
-        if (post != null) setPosts.createItem(post)
-      },
-      updatefn: (data) => {
-        const post = data?.onUpdatePost
-        if (post != null) setPosts.updateItem(post)
-      },
-      deletefn: (data) => {
-        const post = data?.onDeletePost
-        if (post != null) setPosts.deleteItem(post)
-      },
+  const subscribePostFunc = () => {
+    return subscribePost({
+      createfn: (data) => setPosts.createItem(data.onCreatePost),
+      updatefn: (data) => setPosts.updateItem(data.onUpdatePost),
+      deletefn: (data) => setPosts.deleteItem(data.onDeletePost),
     })
-
-  const { unsubscribe, toggle } = useSubscription(subsribePostFunc)
+  }
+  const subscribeCodeFunc = () => {
+    return subscribeCode({
+      createfn: (data) => setCodes.createItem(data.onCreateCode),
+      updatefn: (data) => setCodes.updateItem(data.onUpdateCode),
+      deletefn: (data) => setCodes.deleteItem(data.onDeleteCode),
+    })
+  }
+  const { unsubscribe, toggle } = useSubscription([
+    subscribePostFunc,
+    subscribeCodeFunc,
+  ])
   const [selected, setSelected] = useState<boolean>(false)
 
   const changeSubscribe = () => {

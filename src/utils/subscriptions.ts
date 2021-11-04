@@ -87,34 +87,36 @@ export const subscribeComment = generateSubscribeFunc<
 })
 
 export const useSubscription = (
-  subscribeFunc: () => Subscriptions
+  subscribeFuncArray: (() => Subscriptions)[]
 ): {
   subscribe: () => void
   unsubscribe: () => void
   toggle: () => void
 } => {
-  const [subscriptions, setSubscriptions] = useState<Subscriptions | null>(null)
+  const [state, setState] = useState<Subscriptions[] | null>(null)
 
   const subscribe = useCallback(() => {
-    if (subscriptions !== null) return
-    setSubscriptions(subscribeFunc())
-  }, [subscriptions])
+    if (state !== null) return
+    setState(subscribeFuncArray.map((subscribeFunc) => subscribeFunc()))
+  }, [state])
 
   const unsubscribe = useCallback(() => {
-    if (subscriptions === null) return
-    subscriptions.createSubscription.unsubscribe()
-    subscriptions.updateSubscription.unsubscribe()
-    subscriptions.deleteSubscription.unsubscribe()
-    setSubscriptions(null)
-  }, [subscriptions])
+    if (state === null) return
+    state.forEach((subscription) => {
+      subscription.createSubscription.unsubscribe()
+      subscription.updateSubscription.unsubscribe()
+      subscription.deleteSubscription.unsubscribe()
+    })
+    setState(null)
+  }, [state])
 
   const toggle = useCallback(() => {
-    if (subscriptions === null) {
+    if (state === null) {
       subscribe()
     } else {
       unsubscribe()
     }
-  }, [subscriptions])
+  }, [state])
 
   return { subscribe, unsubscribe, toggle }
 }

@@ -1,4 +1,6 @@
 import { RecoilState, useSetRecoilState } from 'recoil'
+import { useCallback } from 'react'
+import { Nullable } from './nullable'
 
 type SortDirection = 'ASC' | 'DESC'
 type StringID = { id: string }
@@ -62,35 +64,46 @@ export const deleteArrayItem = <T extends StringID>(arr: T[], item: T): T[] => {
 
 export const useArraySettor = <T extends StringID>(
   atom: RecoilState<T[]>,
-  sd: SortDirection
+  sd: SortDirection,
+  omitOptionField?: (item: T) => T
 ): {
-  initItems: (items: T[]) => void
-  appendItems: (items: T[]) => void
-  createItem: (item: T) => void
-  updateItem: (item: T) => void
-  deleteItem: (item: T) => void
+  initItems: (items: Nullable<T[]>) => void
+  appendItems: (items: Nullable<T[]>) => void
+  createItem: (item: Nullable<T>) => void
+  updateItem: (item: Nullable<T>) => void
+  deleteItem: (item: Nullable<T>) => void
 } => {
   const setArr = useSetRecoilState(atom)
 
-  const initItems = (items: T[]) => {
-    setArr(() => initArrayItems(items))
-  }
+  const omit = useCallback(
+    (item: T) => (omitOptionField !== undefined ? omitOptionField(item) : item),
+    []
+  )
 
-  const appendItems = (items: T[]) => {
-    setArr((arr) => appendArrayItems(arr, items, sd))
-  }
+  const initItems = useCallback((items: Nullable<T[]>) => {
+    if (items == null) return
+    setArr(() => initArrayItems(items.filter(omit)))
+  }, [])
 
-  const createItem = (item: T) => {
-    setArr((arr) => createArrayItem(arr, item, sd))
-  }
+  const appendItems = useCallback((items: Nullable<T[]>) => {
+    if (items == null) return
+    setArr((arr) => appendArrayItems(arr, items.filter(omit), sd))
+  }, [])
 
-  const updateItem = (item: T) => {
-    setArr((arr) => updateArrayItem(arr, item))
-  }
+  const createItem = useCallback((item: Nullable<T>) => {
+    if (item == null) return
+    setArr((arr) => createArrayItem(arr, omit(item), sd))
+  }, [])
 
-  const deleteItem = (item: T) => {
-    setArr((arr) => deleteArrayItem(arr, item))
-  }
+  const updateItem = useCallback((item: Nullable<T>) => {
+    if (item == null) return
+    setArr((arr) => updateArrayItem(arr, omit(item)))
+  }, [])
+
+  const deleteItem = useCallback((item: Nullable<T>) => {
+    if (item == null) return
+    setArr((arr) => deleteArrayItem(arr, omit(item)))
+  }, [])
 
   return {
     initItems,
