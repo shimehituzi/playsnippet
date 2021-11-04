@@ -1347,6 +1347,53 @@ export type ListCodesByOwnerQuery = {
   } | null,
 };
 
+export type ListCodesByPostQueryVariables = {
+  postID?: string | null,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelCodeFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListCodesByPostQuery = {
+  listCodesByPost?:  {
+    __typename: "ModelCodeConnection",
+    items?:  Array< {
+      __typename: "Code",
+      id: string,
+      owner?: string | null,
+      postID: string,
+      title: string,
+      content: string,
+      lang: string,
+      skipline: string,
+      type: string,
+      createdAt: string,
+      updatedAt: string,
+      post?:  {
+        __typename: "Post",
+        id: string,
+        owner?: string | null,
+        title: string,
+        content: string,
+        type: string,
+        createdAt: string,
+        updatedAt: string,
+        codes?:  {
+          __typename: "ModelCodeConnection",
+          nextToken?: string | null,
+        } | null,
+        comments?:  {
+          __typename: "ModelCommentConnection",
+          nextToken?: string | null,
+        } | null,
+      } | null,
+    } | null > | null,
+    nextToken?: string | null,
+  } | null,
+};
+
 export type GetCommentQueryVariables = {
   id: string,
 };

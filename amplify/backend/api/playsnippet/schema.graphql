@@ -31,7 +31,7 @@ type Code
   )
   @key(name: "codesByDate", fields: ["type", "createdAt"], queryField: "listCodesByDate")
   @key(name: "codesByOwner", fields: ["owner", "createdAt"], queryField: "listCodesByOwner")
-  @key(name: "byPost", fields: ["postID", "createdAt"])
+  @key(name: "byPost", fields: ["postID", "createdAt"], queryField: "listCodesByPost")
 {
   id: ID!
   owner: String

@@ -402,6 +402,54 @@ export const listCodesByOwner = /* GraphQL */ `
     }
   }
 `;
+export const listCodesByPost = /* GraphQL */ `
+  query ListCodesByPost(
+    $postID: ID
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelCodeFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listCodesByPost(
+      postID: $postID
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        owner
+        postID
+        title
+        content
+        lang
+        skipline
+        type
+        createdAt
+        updatedAt
+        post {
+          id
+          owner
+          title
+          content
+          type
+          createdAt
+          updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
+        }
+      }
+      nextToken
+    }
+  }
+`;
 export const getComment = /* GraphQL */ `
   query GetComment($id: ID!) {
     getComment(id: $id) {
