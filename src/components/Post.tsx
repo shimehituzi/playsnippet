@@ -79,15 +79,13 @@ const PostsRenderer: React.FC<RendererProps> = ({ post }) => {
       },
     })
 
-    const codeIds =
-      res.data?.getPost?.codes?.items?.filter(notNull).map((v) => v.id) ?? []
-
-    codeIds.forEach(async (id) => {
-      gqlMutation<APIt.DeleteCodeMutationVariables>({
+    const codes = res.data?.getPost?.codes?.items?.filter(notNull)
+    codes?.forEach(async (code) => {
+      await gqlMutation<APIt.DeleteCodeMutationVariables>({
         query: mutation.deleteCode,
         variables: {
           input: {
-            id: id,
+            id: code.id,
           },
         },
       })
