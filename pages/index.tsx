@@ -16,12 +16,7 @@ import { Button, Grid, ToggleButton } from '@mui/material'
 import { PostForm } from '../src/components/PostForm'
 import { Posts } from '../src/components/Posts'
 import { useArraySettor } from '../src/utils/recoilArraySettor'
-import {
-  omitCode,
-  omitComment,
-  omitPost,
-  separatePosts,
-} from '../src/utils/omit'
+import { omitCode, omitComment, omitPost } from '../src/utils/omit'
 import { useRenderState } from '../src/utils/render'
 import {
   useSubscription,
@@ -70,10 +65,9 @@ const Home: NextPage<Props> = (props) => {
   const [nextToken, setNextToken] = useRecoilState(postNextTokenState)
 
   useEffect(() => {
-    const data = separatePosts(props.posts)
-    setPosts.initItems(data.posts)
-    setCodes.initItems(data.codes)
-    setComments.initItems(data.comments)
+    setPosts.initItems(props.posts)
+    setCodes.initItems(props.posts.flatMap((v) => v.codes?.items))
+    setComments.initItems(props.posts.flatMap((v) => v.comments?.items))
     setNextToken(props.nextToken)
   }, [])
 
@@ -93,12 +87,11 @@ const Home: NextPage<Props> = (props) => {
       },
     })
 
-    const posts = res.data?.listPostsByDate?.items?.filter(notNull) ?? []
-    const omit = separatePosts(posts)
+    const posts = res.data?.listPostsByDate?.items
 
-    setPosts.appendItems(omit.posts)
-    setCodes.appendItems(omit.codes)
-    setComments.appendItems(omit.comments)
+    setPosts.appendItems(posts)
+    setCodes.appendItems(posts?.flatMap((v) => v?.codes?.items))
+    setComments.appendItems(posts?.flatMap((v) => v?.comments?.items))
     setNextToken(res.data?.listPostsByDate?.nextToken ?? null)
 
     toCSR()

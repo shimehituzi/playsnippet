@@ -1,6 +1,6 @@
 import { RecoilState, useSetRecoilState } from 'recoil'
 import { useCallback } from 'react'
-import { Nullable } from './nullable'
+import { notNull, Nullable } from './nullable'
 
 type SortDirection = 'ASC' | 'DESC'
 type StringID = { id: string }
@@ -62,32 +62,35 @@ export const deleteArrayItem = <T extends StringID>(arr: T[], item: T): T[] => {
   return removeArrayItem(arr, getArrayIndex<T>(arr, item))
 }
 
-export const useArraySettor = <T extends StringID>(
-  atom: RecoilState<T[]>,
+export const useArraySettor = <O extends StringID, T extends O>(
+  atom: RecoilState<O[]>,
   sd: SortDirection,
-  omitOptionField?: (item: T) => T
+  omitOptionalField?: (item: T) => O
 ): {
-  initItems: (items: Nullable<T[]>) => void
-  appendItems: (items: Nullable<T[]>) => void
+  initItems: (items: Nullable<Nullable<T>[]>) => void
+  appendItems: (items: Nullable<Nullable<T>[]>) => void
   createItem: (item: Nullable<T>) => void
   updateItem: (item: Nullable<T>) => void
   deleteItem: (item: Nullable<T>) => void
 } => {
   const setArr = useSetRecoilState(atom)
 
-  const omit = useCallback(
-    (item: T) => (omitOptionField !== undefined ? omitOptionField(item) : item),
-    []
-  )
-
-  const initItems = useCallback((items: Nullable<T[]>) => {
-    if (items == null) return
-    setArr(() => initArrayItems(items.filter(omit)))
+  const omit = useCallback((item: T) => {
+    if (omitOptionalField !== undefined) {
+      return omitOptionalField(item)
+    } else {
+      return item as O
+    }
   }, [])
 
-  const appendItems = useCallback((items: Nullable<T[]>) => {
+  const initItems = useCallback((items: Nullable<Nullable<T>[]>) => {
     if (items == null) return
-    setArr((arr) => appendArrayItems(arr, items.filter(omit), sd))
+    setArr(() => initArrayItems(items.filter(notNull).map(omit)))
+  }, [])
+
+  const appendItems = useCallback((items: Nullable<Nullable<T>[]>) => {
+    if (items == null) return
+    setArr((arr) => appendArrayItems(arr, items.filter(notNull).map(omit), sd))
   }, [])
 
   const createItem = useCallback((item: Nullable<T>) => {
