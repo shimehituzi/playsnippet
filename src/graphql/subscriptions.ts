@@ -42,6 +42,7 @@ export const onCreatePost = /* GraphQL */ `
           owner
           postID
           content
+          type
           createdAt
           updatedAt
           post {
@@ -99,6 +100,7 @@ export const onUpdatePost = /* GraphQL */ `
           owner
           postID
           content
+          type
           createdAt
           updatedAt
           post {
@@ -156,6 +158,7 @@ export const onDeletePost = /* GraphQL */ `
           owner
           postID
           content
+          type
           createdAt
           updatedAt
           post {
@@ -215,6 +218,7 @@ export const onCreateCode = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -266,6 +270,7 @@ export const onUpdateCode = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -317,6 +322,7 @@ export const onDeleteCode = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -333,6 +339,7 @@ export const onCreateComment = /* GraphQL */ `
       owner
       postID
       content
+      type
       createdAt
       updatedAt
       post {
@@ -364,6 +371,7 @@ export const onCreateComment = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -380,6 +388,7 @@ export const onUpdateComment = /* GraphQL */ `
       owner
       postID
       content
+      type
       createdAt
       updatedAt
       post {
@@ -411,6 +420,7 @@ export const onUpdateComment = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -427,6 +437,7 @@ export const onDeleteComment = /* GraphQL */ `
       owner
       postID
       content
+      type
       createdAt
       updatedAt
       post {
@@ -458,6 +469,7 @@ export const onDeleteComment = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }

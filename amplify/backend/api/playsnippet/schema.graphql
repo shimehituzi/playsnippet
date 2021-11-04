@@ -54,6 +54,7 @@ type Comment
       { allow: public, provider: iam, operations: [read] }
     ]
   )
+  @key(name: "commentsByDate", fields: ["type", "createdAt"], queryField: "listCommentsByDate")
   @key(name: "commentsByOwner", fields: ["owner", "createdAt"], queryField: "listCommentsByOwner")
   @key(name: "byPost", fields: ["postID", "createdAt"], queryField: "listCommentsByPost")
 {
@@ -62,6 +63,7 @@ type Comment
   postID: ID!
   post: Post @connection(fields: ["postID"])
   content: String!
+  type: String!
   createdAt: String!
 }
 

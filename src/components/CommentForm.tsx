@@ -31,6 +31,7 @@ export const CommentForm: React.FC<Props> = ({ postID }) => {
       variables: {
         input: {
           ...comment,
+          type: 'comment',
           postID: postID,
         },
       },
