@@ -22,6 +22,7 @@ import {
   useSubscription,
   subscribePost,
   subscribeCode,
+  subscribeComment,
 } from '../src/utils/subscriptions'
 import { Sync as SyncIcon } from '@mui/icons-material'
 
@@ -111,9 +112,17 @@ const Home: NextPage<Props> = (props) => {
       deletefn: (data) => setCodes.deleteItem(data.onDeleteCode),
     })
   }
+  const subscribeCommentFunc = () => {
+    return subscribeComment({
+      createfn: (data) => setComments.createItem(data.onCreateComment),
+      updatefn: (data) => setComments.updateItem(data.onUpdateComment),
+      deletefn: (data) => setComments.deleteItem(data.onDeleteComment),
+    })
+  }
   const { unsubscribe, toggle } = useSubscription([
     subscribePostFunc,
     subscribeCodeFunc,
+    subscribeCommentFunc,
   ])
   const [selected, setSelected] = useState<boolean>(false)
 
