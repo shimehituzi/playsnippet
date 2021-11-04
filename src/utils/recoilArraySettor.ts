@@ -1,6 +1,6 @@
 import { RecoilState, useSetRecoilState } from 'recoil'
 import { useCallback } from 'react'
-import { notNull, Nullable } from './nullable'
+import { notNull, Nullable, NullableArray } from './nullable'
 
 type SortDirection = 'ASC' | 'DESC'
 type StringID = { id: string }
@@ -67,8 +67,9 @@ export const useArraySettor = <O extends StringID, T extends O>(
   sd: SortDirection,
   omitOptionalField?: (item: T) => O
 ): {
-  initItems: (items: Nullable<Nullable<T>[]>) => void
-  appendItems: (items: Nullable<Nullable<T>[]>) => void
+  initItems: (items: NullableArray<T>) => void
+  appendItems: (items: NullableArray<T>) => void
+  newItems: (items: NullableArray<T>) => void
   createItem: (item: Nullable<T>) => void
   updateItem: (item: Nullable<T>) => void
   deleteItem: (item: Nullable<T>) => void
@@ -83,14 +84,22 @@ export const useArraySettor = <O extends StringID, T extends O>(
     }
   }, [])
 
-  const initItems = useCallback((items: Nullable<Nullable<T>[]>) => {
+  const initItems = useCallback((items: NullableArray<T>) => {
     if (items == null) return
     setArr(() => initArrayItems(items.filter(notNull).map(omit)))
   }, [])
 
-  const appendItems = useCallback((items: Nullable<Nullable<T>[]>) => {
+  const appendItems = useCallback((items: NullableArray<T>) => {
     if (items == null) return
     setArr((arr) => appendArrayItems(arr, items.filter(notNull).map(omit), sd))
+  }, [])
+
+  const revarse: SortDirection = sd === 'ASC' ? 'DESC' : 'ASC'
+  const newItems = useCallback((items: NullableArray<T>) => {
+    if (items == null) return
+    setArr((arr) =>
+      appendArrayItems(arr, items.filter(notNull).map(omit), revarse)
+    )
   }, [])
 
   const createItem = useCallback((item: Nullable<T>) => {
@@ -111,6 +120,7 @@ export const useArraySettor = <O extends StringID, T extends O>(
   return {
     initItems,
     appendItems,
+    newItems,
     createItem,
     updateItem,
     deleteItem,

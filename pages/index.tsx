@@ -9,7 +9,7 @@ import {
 } from '../src/state/apiState'
 import * as APIt from '../src/API'
 import * as query from '../src/graphql/queries'
-import { gqlQuery, serverQuery } from '../src/utils/graphql'
+import { serverQuery } from '../src/utils/graphql'
 import { notNull } from '../src/utils/nullable'
 import { useAuth } from '../src/utils/auth'
 import { Button, Grid, ToggleButton } from '@mui/material'
@@ -18,6 +18,7 @@ import { Posts } from '../src/components/Posts'
 import { useArraySettor } from '../src/utils/recoilArraySettor'
 import { omitCode, omitComment, omitPost } from '../src/utils/omit'
 import { useRenderState } from '../src/utils/render'
+import { getAdditionalPosts, getNewItems } from '../src/utils/fetcher'
 import {
   useSubscription,
   subscribePost,
@@ -72,30 +73,26 @@ const Home: NextPage<Props> = (props) => {
     setNextToken(props.nextToken)
   }, [])
 
-  const getAdditionalPosts = async () => {
+  const appendPosts = async () => {
     if (!nextToken) return
 
-    const res = await gqlQuery<
-      APIt.ListPostsByDateQueryVariables,
-      APIt.ListPostsByDateQuery
-    >({
-      query: query.listPostsByDate,
-      variables: {
-        type: 'post',
-        sortDirection: APIt.ModelSortDirection.DESC,
-        limit: 20,
-        nextToken: nextToken,
-      },
-    })
-
-    const posts = res.data?.listPostsByDate?.items
+    const { posts, newNextToken } = await getAdditionalPosts(nextToken)
 
     setPosts.appendItems(posts)
     setCodes.appendItems(posts?.flatMap((v) => v?.codes?.items))
     setComments.appendItems(posts?.flatMap((v) => v?.comments?.items))
-    setNextToken(res.data?.listPostsByDate?.nextToken ?? null)
-
+    setNextToken(newNextToken ?? null)
     toCSR()
+  }
+
+  const getCurrentTime = () => new Date().toISOString()
+  const [time, setTime] = useState<string>(getCurrentTime())
+
+  const newItems = async () => {
+    const { newPosts, newCodes, newComments } = await getNewItems(time)
+    setPosts.newItems(newPosts)
+    setCodes.newItems(newCodes)
+    setComments.newItems(newComments)
   }
 
   const subscribePostFunc = () => {
@@ -127,6 +124,11 @@ const Home: NextPage<Props> = (props) => {
   const [selected, setSelected] = useState<boolean>(false)
 
   const changeSubscribe = () => {
+    if (!selected) {
+      newItems()
+    } else {
+      setTime(getCurrentTime())
+    }
     toggle()
     setSelected(!selected)
     toCSR()
@@ -157,7 +159,7 @@ const Home: NextPage<Props> = (props) => {
       </Grid>
       {nextToken && (
         <Grid item>
-          <Button onClick={getAdditionalPosts} variant="outlined">
+          <Button onClick={appendPosts} variant="outlined">
             Read more
           </Button>
         </Grid>
