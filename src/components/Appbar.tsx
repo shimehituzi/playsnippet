@@ -21,7 +21,6 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { styled } from '@mui/material/styles'
 import { makeStyles } from '@mui/styles'
 import {
   PersonRemoveOutlined as PersonRemoveOutlinedIcon,
@@ -31,14 +30,7 @@ import {
 } from '@mui/icons-material'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
 import { Avatar } from './Avatar'
-
-const StyledToolbar = styled(Toolbar)(({ theme }) => ({
-  paddingTop: theme.spacing(1),
-  paddingBottom: theme.spacing(1),
-  '@media all': {
-    minHeight: 110,
-  },
-}))
+import { theme } from '../utils/theme'
 
 const useStyle = makeStyles({
   logo: {
@@ -46,7 +38,14 @@ const useStyle = makeStyles({
   },
   button: {
     textTransform: 'none',
-    margin: '1%',
+    margin: '0 1%',
+  },
+  toolbar: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    '@media all': {
+      minHeight: 80,
+    },
   },
 })
 
@@ -55,8 +54,8 @@ export const Appbar: React.FC = () => {
   const classes = useStyle()
 
   return (
-    <AppBar position="static">
-      <StyledToolbar>
+    <AppBar position="fixed">
+      <Toolbar className={classes.toolbar}>
         <div className={classes.logo}>
           <Link href="/">
             <Button className={classes.button}>
@@ -76,7 +75,7 @@ export const Appbar: React.FC = () => {
         ) : (
           <Sign />
         )}
-      </StyledToolbar>
+      </Toolbar>
     </AppBar>
   )
 }
@@ -180,8 +179,8 @@ const Account: React.FC<AccountProps> = ({ username }) => {
 
   return (
     <React.Fragment>
-      <IconButton onClick={openMenu}>
-        <Avatar username={username} size={75} />
+      <IconButton onClick={openMenu} size="small">
+        <Avatar username={username} size={50} />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={closeMenu} keepMounted>
         <MenuItem disableRipple style={{ backgroundColor: 'transparent' }}>
@@ -234,7 +233,7 @@ const Sign: React.FC = () => {
           size="large"
           className={classes.button}
         >
-          <Typography variant="h5">Sign in</Typography>
+          <Typography variant="h6">Sign in</Typography>
         </Button>
       </Link>
       <Link href={'/signup'}>
@@ -245,7 +244,7 @@ const Sign: React.FC = () => {
           size="large"
           className={classes.button}
         >
-          <Typography variant="h5">Sign up</Typography>
+          <Typography variant="h6">Sign up</Typography>
         </Button>
       </Link>
     </React.Fragment>
