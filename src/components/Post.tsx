@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRecoilValue } from 'recoil'
 import { postSelector } from '../state/apiState'

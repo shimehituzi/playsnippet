@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRecoilState } from 'recoil'
+import { drawerOpenState } from '../state/uiState'
 import {
   CreateAvatarMutationVariables,
   UpdateAvatarMutationVariables,
@@ -10,7 +12,6 @@ import { useAuth } from '../utils/auth'
 import { useAvatar, useAvatarUpdate } from '../utils/avatar'
 import { gqlMutation } from '../utils/graphql'
 import {
-  AppBar,
   Button,
   IconButton,
   ListItemButton,
@@ -23,51 +24,53 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import {
+  Menu as MenuIcon,
   PersonRemoveOutlined as PersonRemoveOutlinedIcon,
   Logout as SignOutIcon,
   ManageAccounts as ManageAccountsIcon,
-  GitHub as GitHubIcon,
 } from '@mui/icons-material'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
+import { AppBar } from './Styled'
 import { Avatar } from './Avatar'
-import { theme } from '../utils/theme'
 
 const useStyle = makeStyles({
-  logo: {
+  left: {
     flexGrow: 1,
   },
   button: {
     textTransform: 'none',
     margin: '0 1%',
   },
-  toolbar: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-    '@media all': {
-      minHeight: 80,
-    },
+  appBar: {
+    whiteSpace: 'nowrap',
+    overflowX: 'scroll',
   },
 })
 
 export const Appbar: React.FC = () => {
   const { authenticated, user } = useAuth()
+
+  const [drawerOpen, setDrawerOpen] = useRecoilState(drawerOpenState)
+  const openDrawer = () => setDrawerOpen(true)
+
   const classes = useStyle()
 
   return (
-    <AppBar position="fixed">
-      <Toolbar className={classes.toolbar}>
-        <div className={classes.logo}>
+    <AppBar position="fixed" open={drawerOpen} className={classes.appBar}>
+      <Toolbar>
+        <div className={classes.left}>
+          <IconButton
+            onClick={openDrawer}
+            sx={{ ...(drawerOpen && { display: 'none' }) }}
+          >
+            <MenuIcon />
+          </IconButton>
           <Link href="/">
             <Button className={classes.button}>
               <Typography variant="h4" color="primary">
                 Play Snippet
               </Typography>
             </Button>
-          </Link>
-          <Link href="https://github.com/shimehituzi/playsnippet">
-            <IconButton size="small">
-              <GitHubIcon sx={{ width: 45, height: 45 }} />
-            </IconButton>
           </Link>
         </div>
         {authenticated && user?.username ? (
