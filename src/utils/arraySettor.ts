@@ -28,19 +28,6 @@ export const initArrayItems = <T>(items: T[]): T[] => {
   return items
 }
 
-export const appendArrayItems = <T>(
-  arr: T[],
-  items: T[],
-  sd: SortDirection
-): T[] => {
-  switch (sd) {
-    case 'DESC':
-      return [...arr, ...items]
-    case 'ASC':
-      return [...items, ...arr]
-  }
-}
-
 export const createArrayItem = <T>(
   arr: T[],
   item: T,
@@ -54,12 +41,44 @@ export const createArrayItem = <T>(
   }
 }
 
+export const newArrayItems = <T>(
+  arr: T[],
+  items: T[],
+  sd: SortDirection
+): T[] => {
+  switch (sd) {
+    case 'DESC':
+      return [...items, ...arr]
+    case 'ASC':
+      return [...arr, ...items]
+  }
+}
+
+export const appendArrayItems = <T extends StringID>(
+  arr: T[],
+  items: T[],
+  sd: SortDirection
+): T[] => {
+  const itemIDs = items.map((v) => v.id)
+  const filterd = arr.filter((v) => !itemIDs.includes(v.id))
+  switch (sd) {
+    case 'DESC':
+      return [...filterd, ...items]
+    case 'ASC':
+      return [...items, ...filterd]
+  }
+}
+
 export const updateArrayItem = <T extends StringID>(arr: T[], item: T): T[] => {
-  return replaceArrayItem(arr, getArrayIndex<T>(arr, item), item)
+  const index = getArrayIndex<T>(arr, item)
+  if (index === -1) return arr
+  return replaceArrayItem(arr, index, item)
 }
 
 export const deleteArrayItem = <T extends StringID>(arr: T[], item: T): T[] => {
-  return removeArrayItem(arr, getArrayIndex<T>(arr, item))
+  const index = getArrayIndex<T>(arr, item)
+  if (index === -1) return arr
+  return removeArrayItem(arr, index)
 }
 
 export const useArraySettor = <O extends StringID, T extends O>(
@@ -94,12 +113,9 @@ export const useArraySettor = <O extends StringID, T extends O>(
     setArr((arr) => appendArrayItems(arr, items.filter(notNull).map(omit), sd))
   }, [])
 
-  const revarse: SortDirection = sd === 'ASC' ? 'DESC' : 'ASC'
   const newItems = useCallback((items: NullableArray<T>) => {
     if (items == null) return
-    setArr((arr) =>
-      appendArrayItems(arr, items.filter(notNull).map(omit), revarse)
-    )
+    setArr((arr) => newArrayItems(arr, items.filter(notNull).map(omit), sd))
   }, [])
 
   const createItem = useCallback((item: Nullable<T>) => {
