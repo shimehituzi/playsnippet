@@ -20,7 +20,7 @@ import { PostForm } from '../../src/components/PostForm'
 import { Posts } from '../../src/components/Posts'
 import { useArraySettor } from '../../src/utils/arraySettor'
 import { separatePosts } from '../../src/utils/api/omit'
-import { useRenderState } from '../../src/utils/render'
+import { usePageRender } from '../../src/utils/render'
 
 type Props = {
   posts: APIt.Post[]
@@ -73,7 +73,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
 }
 
 const UserPosts: NextPage<Props> = (props) => {
-  const { renderState, toCSR } = useRenderState()
+  const { pageState, toCSR } = usePageRender()
   const { authenticated } = useAuth()
 
   const router = useRouter()
@@ -131,7 +131,11 @@ const UserPosts: NextPage<Props> = (props) => {
           </Grid>
         )}
         <Grid item xs={12}>
-          {renderState === 'ISR' ? <Posts posts={props.posts} /> : <Posts />}
+          {pageState.render === 'ISR' ? (
+            <Posts posts={props.posts} />
+          ) : (
+            <Posts />
+          )}
         </Grid>
         {nextToken && (
           <Grid item>

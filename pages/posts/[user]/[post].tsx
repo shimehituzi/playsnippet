@@ -14,7 +14,7 @@ import { useArraySettor } from '../../../src/utils/arraySettor'
 import { separatePosts } from '../../../src/utils/api/omit'
 import { Grid } from '@mui/material'
 import { Post } from '../../../src/components/Post'
-import { useRenderState } from '../../../src/utils/render'
+import { usePageRender } from '../../../src/utils/render'
 
 type Props = {
   post: APIt.Post
@@ -62,7 +62,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
 }
 
 const UserPost: NextPage<Props> = (props) => {
-  const { renderState } = useRenderState()
+  const { pageState } = usePageRender()
 
   const setPosts = useArraySettor(postsState, 'DESC')
   const setCodes = useArraySettor(codesState, 'ASC')
@@ -82,7 +82,7 @@ const UserPost: NextPage<Props> = (props) => {
       </Head>
       <Grid container alignItems="center" justifyContent="center">
         <Grid item xs={12} sx={{ padding: '2%' }}>
-          {renderState === 'ISR' ? (
+          {pageState.render === 'ISR' ? (
             <Post postID={props.post.id} post={props.post} />
           ) : (
             <Post postID={props.post.id} />
