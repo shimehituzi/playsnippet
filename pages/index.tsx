@@ -15,16 +15,16 @@ import { useAuth } from '../src/utils/auth'
 import { Button, Grid, ToggleButton } from '@mui/material'
 import { PostForm } from '../src/components/PostForm'
 import { Posts } from '../src/components/Posts'
-import { useArraySettor } from '../src/utils/recoilArraySettor'
-import { omitCode, omitComment, omitPost } from '../src/utils/omit'
+import { useArraySettor } from '../src/utils/arraySettor'
+import { omitCode, omitComment, omitPost } from '../src/utils/api/omit'
 import { useRenderState } from '../src/utils/render'
-import { getAdditionalPosts, getNewItems } from '../src/utils/fetcher'
+import { getAdditionalPosts, getNewItems } from '../src/utils/api/query'
+import { useSubscribe } from '../src/utils/subscribe'
 import {
-  useSubscribe,
   subscribePost,
   subscribeCode,
   subscribeComment,
-} from '../src/utils/subscriptions'
+} from '../src/utils/api/subscription'
 import { Sync as SyncIcon } from '@mui/icons-material'
 
 type Props = {

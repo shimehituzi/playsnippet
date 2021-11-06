@@ -1,7 +1,7 @@
-import { gqlQuery } from './graphql'
-import * as APIt from '../API'
-import * as query from '../graphql/queries'
-import { Nullable, NullableArray } from './nullable'
+import * as APIt from '../../API'
+import * as query from '../../graphql/queries'
+import { gqlQuery } from '../graphql'
+import { Nullable, NullableArray } from '../nullable'
 
 export const getNewItems = async (
   time: string

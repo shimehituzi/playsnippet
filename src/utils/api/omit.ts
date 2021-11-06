@@ -1,27 +1,27 @@
-import { Post, Code, Comment } from '../API'
-import { OmitPost, OmitCode, OmitComment } from '../state/apiState'
-import { notNull } from './nullable'
+import * as APIt from '../../API'
+import { OmitPost, OmitCode, OmitComment } from '../../state/apiState'
+import { notNull } from '../nullable'
 
-export const omitPost = (post: Post): OmitPost => {
+export const omitPost = (post: APIt.Post): OmitPost => {
   const { codes: _, comments: __, ...omitPost } = post
   return omitPost
 }
 
-export const omitCode = (code: Code): OmitCode => {
+export const omitCode = (code: APIt.Code): OmitCode => {
   const { post: _, ...omitCode } = code
   return omitCode
 }
 
-export const omitComment = (comment: Comment): OmitComment => {
+export const omitComment = (comment: APIt.Comment): OmitComment => {
   const { post: _, ...omitComment } = comment
   return omitComment
 }
 
-export const postsToOmitPosts = (posts: Post[]): OmitPost[] => {
+export const postsToOmitPosts = (posts: APIt.Post[]): OmitPost[] => {
   return posts.map((post) => omitPost(post))
 }
 
-export const postsToOmitCodes = (posts: Post[]): OmitCode[] => {
+export const postsToOmitCodes = (posts: APIt.Post[]): OmitCode[] => {
   return posts
     .map((post) => post.codes?.items)
     .flat()
@@ -29,7 +29,7 @@ export const postsToOmitCodes = (posts: Post[]): OmitCode[] => {
     .map((code) => omitCode(code))
 }
 
-export const postsToOmitComments = (posts: Post[]): OmitComment[] => {
+export const postsToOmitComments = (posts: APIt.Post[]): OmitComment[] => {
   return posts
     .map((post) => post.comments?.items)
     .flat()
@@ -43,7 +43,7 @@ export type SeparatePosts = {
   comments: OmitComment[]
 }
 
-export const separatePosts = (posts: Post[]): SeparatePosts => {
+export const separatePosts = (posts: APIt.Post[]): SeparatePosts => {
   return {
     posts: postsToOmitPosts(posts),
     codes: postsToOmitCodes(posts),

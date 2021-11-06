@@ -1,5 +1,3 @@
-import * as APIt from '../API'
-import * as subscription from '../graphql/subscriptions'
 import { gqlSubscription } from '../utils/graphql'
 import { GraphQLOptions } from '@aws-amplify/api-graphql'
 import { ZenObservable } from '../../node_modules/zen-observable-ts'
@@ -29,7 +27,7 @@ export type Subscription = {
   deleteSubscription: ZenObservable.Subscription
 }
 
-const generateSubscribeFunc =
+export const generateSubscribeFunc =
   <C, U, D>(query: SubscriptionQuery) =>
   (callback: SubscriptionCallback<C, U, D>): SubscribeFunc => {
     const subscribeCreate = () =>
@@ -64,36 +62,6 @@ const generateSubscribeFunc =
       })
     return { subscribeCreate, subscribeUpdate, subscribeDelete }
   }
-
-export const subscribePost = generateSubscribeFunc<
-  APIt.OnCreatePostSubscription,
-  APIt.OnUpdatePostSubscription,
-  APIt.OnDeletePostSubscription
->({
-  onCreate: subscription.onCreatePost,
-  onUpdate: subscription.onUpdatePost,
-  onDelete: subscription.onDeletePost,
-})
-
-export const subscribeCode = generateSubscribeFunc<
-  APIt.OnCreateCodeSubscription,
-  APIt.OnUpdateCodeSubscription,
-  APIt.OnDeleteCodeSubscription
->({
-  onCreate: subscription.onCreateCode,
-  onUpdate: subscription.onUpdateCode,
-  onDelete: subscription.onDeleteCode,
-})
-
-export const subscribeComment = generateSubscribeFunc<
-  APIt.OnCreateCommentSubscription,
-  APIt.OnUpdateCommentSubscription,
-  APIt.OnDeleteCommentSubscription
->({
-  onCreate: subscription.onCreateComment,
-  onUpdate: subscription.onUpdateComment,
-  onDelete: subscription.onDeleteComment,
-})
 
 export const useSubscribe = (
   subscribeFuncArray: SubscribeFunc[]

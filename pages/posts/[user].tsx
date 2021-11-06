@@ -18,8 +18,8 @@ import { useAuth } from '../../src/utils/auth'
 import { Button, Grid } from '@mui/material'
 import { PostForm } from '../../src/components/PostForm'
 import { Posts } from '../../src/components/Posts'
-import { useArraySettor } from '../../src/utils/recoilArraySettor'
-import { separatePosts } from '../../src/utils/omit'
+import { useArraySettor } from '../../src/utils/arraySettor'
+import { separatePosts } from '../../src/utils/api/omit'
 import { useRenderState } from '../../src/utils/render'
 
 type Props = {

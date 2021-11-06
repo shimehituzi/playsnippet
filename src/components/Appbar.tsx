@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRecoilState } from 'recoil'
+import {
+  useRecoilState,
+  useRecoilValueLoadable,
+  useSetRecoilState,
+} from 'recoil'
+import { avatarQuery, forceAvatarUpdate } from '../state/avatarsState'
 import { drawerOpenState } from '../state/uiState'
 import {
   CreateAvatarMutationVariables,
@@ -9,7 +14,6 @@ import {
 } from '../API'
 import { createAvatar, deleteAvatar, updateAvatar } from '../graphql/mutations'
 import { useAuth } from '../utils/auth'
-import { useAvatar, useAvatarUpdate } from '../utils/avatar'
 import { gqlMutation } from '../utils/graphql'
 import {
   Button,
@@ -89,8 +93,12 @@ type AccountProps = {
 
 const Account: React.FC<AccountProps> = ({ username }) => {
   const { user } = useAuth()
-  const avatar = useAvatar(username)
-  const forceUpdate = useAvatarUpdate()
+
+  const loadable = useRecoilValueLoadable(avatarQuery(username))
+  const hasAvatar =
+    loadable.state === 'hasValue' ? loadable.contents != null : false
+  const setForceAvatarUpdate = useSetRecoilState(forceAvatarUpdate)
+  const forceUpdate = () => setForceAvatarUpdate((n) => n + 1)
 
   const handleCreateAvatar = async (imageURL: string) => {
     if (!user || !user.username) return
@@ -134,7 +142,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
       if (!imageURL) return
       const size = Buffer.from(imageURL).length / 1e3
       if (size <= 400) {
-        if (avatar) {
+        if (hasAvatar) {
           handleUpdateAvatar(imageURL)
         } else {
           handleCreateAvatar(imageURL)
@@ -153,8 +161,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
   const handleDeleteAvatar = async () => {
     if (!user || !user.username) return
 
-    if (avatar) {
-      if (!user || !user.username) return
+    if (hasAvatar) {
       if (window.confirm('Are you sure you want to REMOVE Account Icon?')) {
         await gqlMutation<DeleteAvatarMutationVariables>({
           query: deleteAvatar,
@@ -199,7 +206,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
             <ManageAccountsIcon />
           </ListItemIcon>
           <ListItemButton component="label">
-            {avatar ? 'Change Account Icon' : 'Upload Account Icon'}
+            {hasAvatar ? 'Change Account Icon' : 'Upload Account Icon'}
             <input
               type="file"
               accept="image/jpeg,image/png,image/jpg,image/gif,image/svg"
@@ -208,7 +215,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
             />
           </ListItemButton>
         </MenuItem>
-        {avatar && (
+        {hasAvatar && (
           <MenuItem disableRipple style={{ backgroundColor: 'transparent' }}>
             <ListItemIcon>
               <PersonRemoveOutlinedIcon />
