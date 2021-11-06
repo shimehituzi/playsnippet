@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { GetStaticProps, NextPage } from 'next'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import {
   codesState,
   commentsState,
+  latestTimeStampSelector,
   postNextTokenState,
   postsState,
 } from '../src/state/apiState'
@@ -85,11 +86,11 @@ const Home: NextPage<Props> = (props) => {
     toCSR()
   }
 
-  const getCurrentTime = () => new Date().toISOString()
-  const [time, setTime] = useState<string>(getCurrentTime())
-
+  const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
   const newItems = async () => {
-    const { newPosts, newCodes, newComments } = await getNewItems(time)
+    const { newPosts, newCodes, newComments } = await getNewItems(
+      latestTimeStamp
+    )
     setPosts.newItems(newPosts)
     setCodes.newItems(newCodes)
     setComments.newItems(newComments)
@@ -117,8 +118,6 @@ const Home: NextPage<Props> = (props) => {
   const changeSubscribe = () => {
     if (!selected) {
       newItems()
-    } else {
-      setTime(getCurrentTime())
     }
     toggle()
     setSelected(!selected)
