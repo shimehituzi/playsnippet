@@ -5,55 +5,64 @@ import { GraphQLOptions } from '@aws-amplify/api-graphql'
 import { ZenObservable } from '../../node_modules/zen-observable-ts'
 import { useCallback, useState } from 'react'
 
-type Callbacks<C, U, D> = {
-  createfn: (data: C) => void
-  updatefn: (data: U) => void
-  deletefn: (data: D) => void
+type SubscriptionCallback<C, U, D> = {
+  onCreate: (data: C) => void
+  onUpdate: (data: U) => void
+  onDelete: (data: D) => void
 }
 
-type Querys = {
+type SubscriptionQuery = {
   onCreate: GraphQLOptions['query']
   onUpdate: GraphQLOptions['query']
   onDelete: GraphQLOptions['query']
 }
 
-type Subscriptions = {
+export type SubscribeFunc = {
+  subscribeCreate: () => ZenObservable.Subscription
+  subscribeUpdate: () => ZenObservable.Subscription
+  subscribeDelete: () => ZenObservable.Subscription
+}
+
+export type Subscription = {
   createSubscription: ZenObservable.Subscription
   updateSubscription: ZenObservable.Subscription
   deleteSubscription: ZenObservable.Subscription
 }
 
 const generateSubscribeFunc =
-  <C, U, D>(querys: Querys) =>
-  (callbacks: Callbacks<C, U, D>): Subscriptions => {
-    const createSubscription = gqlSubscription<C>({
-      query: querys.onCreate,
-      callback: {
-        next: (msg) => {
-          const data = msg.value.data
-          if (data != null) callbacks.createfn(data)
+  <C, U, D>(query: SubscriptionQuery) =>
+  (callback: SubscriptionCallback<C, U, D>): SubscribeFunc => {
+    const subscribeCreate = () =>
+      gqlSubscription<C>({
+        query: query.onCreate,
+        callback: {
+          next: (msg) => {
+            const data = msg.value.data
+            if (data != null) callback.onCreate(data)
+          },
         },
-      },
-    })
-    const updateSubscription = gqlSubscription<U>({
-      query: querys.onUpdate,
-      callback: {
-        next: (msg) => {
-          const data = msg.value.data
-          if (data != null) callbacks.updatefn(data)
+      })
+    const subscribeUpdate = () =>
+      gqlSubscription<U>({
+        query: query.onUpdate,
+        callback: {
+          next: (msg) => {
+            const data = msg.value.data
+            if (data != null) callback.onUpdate(data)
+          },
         },
-      },
-    })
-    const deleteSubscription = gqlSubscription<D>({
-      query: querys.onDelete,
-      callback: {
-        next: (msg) => {
-          const data = msg.value.data
-          if (data != null) callbacks.deletefn(data)
+      })
+    const subscribeDelete = () =>
+      gqlSubscription<D>({
+        query: query.onDelete,
+        callback: {
+          next: (msg) => {
+            const data = msg.value.data
+            if (data != null) callback.onDelete(data)
+          },
         },
-      },
-    })
-    return { createSubscription, updateSubscription, deleteSubscription }
+      })
+    return { subscribeCreate, subscribeUpdate, subscribeDelete }
   }
 
 export const subscribePost = generateSubscribeFunc<
@@ -86,37 +95,43 @@ export const subscribeComment = generateSubscribeFunc<
   onDelete: subscription.onDeleteComment,
 })
 
-export const useSubscription = (
-  subscribeFuncArray: (() => Subscriptions)[]
+export const useSubscribe = (
+  subscribeFuncArray: SubscribeFunc[]
 ): {
   subscribe: () => void
   unsubscribe: () => void
   toggle: () => void
 } => {
-  const [state, setState] = useState<Subscriptions[] | null>(null)
+  const [subscription, setSubscription] = useState<Subscription[] | null>(null)
 
   const subscribe = useCallback(() => {
-    if (state !== null) return
-    setState(subscribeFuncArray.map((subscribeFunc) => subscribeFunc()))
-  }, [state])
+    if (subscription !== null) return
+    setSubscription(
+      subscribeFuncArray.map((subscribeFunc) => ({
+        createSubscription: subscribeFunc.subscribeCreate(),
+        updateSubscription: subscribeFunc.subscribeUpdate(),
+        deleteSubscription: subscribeFunc.subscribeDelete(),
+      }))
+    )
+  }, [subscription])
 
   const unsubscribe = useCallback(() => {
-    if (state === null) return
-    state.forEach((subscription) => {
+    if (subscription === null) return
+    subscription.forEach((subscription) => {
       subscription.createSubscription.unsubscribe()
       subscription.updateSubscription.unsubscribe()
       subscription.deleteSubscription.unsubscribe()
     })
-    setState(null)
-  }, [state])
+    setSubscription(null)
+  }, [subscription])
 
   const toggle = useCallback(() => {
-    if (state === null) {
+    if (subscription === null) {
       subscribe()
     } else {
       unsubscribe()
     }
-  }, [state])
+  }, [subscription])
 
   return { subscribe, unsubscribe, toggle }
 }

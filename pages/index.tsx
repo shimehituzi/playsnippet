@@ -20,7 +20,7 @@ import { omitCode, omitComment, omitPost } from '../src/utils/omit'
 import { useRenderState } from '../src/utils/render'
 import { getAdditionalPosts, getNewItems } from '../src/utils/fetcher'
 import {
-  useSubscription,
+  useSubscribe,
   subscribePost,
   subscribeCode,
   subscribeComment,
@@ -95,31 +95,22 @@ const Home: NextPage<Props> = (props) => {
     setComments.newItems(newComments)
   }
 
-  const subscribePostFunc = () => {
-    return subscribePost({
-      createfn: (data) => setPosts.createItem(data.onCreatePost),
-      updatefn: (data) => setPosts.updateItem(data.onUpdatePost),
-      deletefn: (data) => setPosts.deleteItem(data.onDeletePost),
-    })
-  }
-  const subscribeCodeFunc = () => {
-    return subscribeCode({
-      createfn: (data) => setCodes.createItem(data.onCreateCode),
-      updatefn: (data) => setCodes.updateItem(data.onUpdateCode),
-      deletefn: (data) => setCodes.deleteItem(data.onDeleteCode),
-    })
-  }
-  const subscribeCommentFunc = () => {
-    return subscribeComment({
-      createfn: (data) => setComments.createItem(data.onCreateComment),
-      updatefn: (data) => setComments.updateItem(data.onUpdateComment),
-      deletefn: (data) => setComments.deleteItem(data.onDeleteComment),
-    })
-  }
-  const { unsubscribe, toggle } = useSubscription([
-    subscribePostFunc,
-    subscribeCodeFunc,
-    subscribeCommentFunc,
+  const { unsubscribe, toggle } = useSubscribe([
+    subscribePost({
+      onCreate: (data) => setPosts.createItem(data.onCreatePost),
+      onUpdate: (data) => setPosts.updateItem(data.onUpdatePost),
+      onDelete: (data) => setPosts.deleteItem(data.onDeletePost),
+    }),
+    subscribeCode({
+      onCreate: (data) => setCodes.createItem(data.onCreateCode),
+      onUpdate: (data) => setCodes.updateItem(data.onUpdateCode),
+      onDelete: (data) => setCodes.deleteItem(data.onDeleteCode),
+    }),
+    subscribeComment({
+      onCreate: (data) => setComments.createItem(data.onCreateComment),
+      onUpdate: (data) => setComments.updateItem(data.onUpdateComment),
+      onDelete: (data) => setComments.deleteItem(data.onDeleteComment),
+    }),
   ])
   const [selected, setSelected] = useState<boolean>(false)
 
