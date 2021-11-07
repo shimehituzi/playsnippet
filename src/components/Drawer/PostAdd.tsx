@@ -42,7 +42,7 @@ export const PostAdd: React.FC = () => {
         <ListItemIcon>
           <PostAddIcon className={classes.icon} />
         </ListItemIcon>
-        <ListItemText>Submit an Post</ListItemText>
+        <ListItemText>Create a Post</ListItemText>
       </ListItem>
       <Dialog
         open={open}

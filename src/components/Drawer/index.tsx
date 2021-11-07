@@ -9,6 +9,8 @@ import { GitHubLink } from './GitHubLink'
 import { Subscription } from './Subscription'
 import { PostAdd } from './PostAdd'
 import { useAuth } from '../../utils/auth'
+import { MyPosts } from './MyPosts'
+import { GlobalPosts } from './GlobalPosts'
 
 export const useIconStyle = makeStyles({
   icon: {
@@ -19,8 +21,9 @@ export const useIconStyle = makeStyles({
 
 export const Drawer: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useRecoilState(drawerOpenState)
-  const { authenticated } = useAuth()
   const closeDrawer = () => setDrawerOpen(false)
+
+  const { user } = useAuth()
 
   return (
     <StyledDrawer variant="permanent" open={drawerOpen}>
@@ -33,12 +36,15 @@ export const Drawer: React.FC = () => {
       <List>
         <Subscription />
         <Divider />
-        {authenticated && (
+        {user?.username != null && (
           <>
             <PostAdd />
             <Divider />
+            <MyPosts username={user.username} />
           </>
         )}
+        <GlobalPosts />
+        <Divider />
         <GitHubLink />
       </List>
     </StyledDrawer>
