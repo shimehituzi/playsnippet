@@ -42,6 +42,17 @@ export const serverListPostsByDate = generateQueryFunc<
   server: true,
 })
 
+export const serverListPostsByOwner = generateQueryFunc<
+  APIt.ListPostsByOwnerQueryVariables,
+  APIt.ListPostsByOwnerQuery
+>({
+  query: query.listPostsByOwner,
+  defaultVariables: {
+    sortDirection: sd.DESC,
+  },
+  server: true,
+})
+
 export const listPostsByDate = generateQueryFunc<
   APIt.ListPostsByDateQueryVariables,
   APIt.ListPostsByDateQuery
@@ -49,6 +60,16 @@ export const listPostsByDate = generateQueryFunc<
   query: query.listPostsByDate,
   defaultVariables: {
     type: 'post',
+    sortDirection: sd.DESC,
+  },
+})
+
+export const listPostsByOwner = generateQueryFunc<
+  APIt.ListPostsByOwnerQueryVariables,
+  APIt.ListPostsByOwnerQuery
+>({
+  query: query.listPostsByOwner,
+  defaultVariables: {
     sortDirection: sd.DESC,
   },
 })

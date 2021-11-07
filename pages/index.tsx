@@ -8,7 +8,7 @@ import {
   postNextTokenState,
   latestTimeStampSelector,
 } from '../src/state/apiState'
-import * as APIt from '../src/API'
+import { Post } from '../src/API'
 import { notNull } from '../src/utils/nullable'
 import { useAuth } from '../src/utils/auth'
 import { useArraySettor } from '../src/utils/arraySettor'
@@ -31,7 +31,7 @@ import {
 import { useSubscription } from '../src/utils/subscribe'
 
 type Props = {
-  posts: APIt.Post[]
+  posts: Post[]
   nextToken: string | null
 }
 
