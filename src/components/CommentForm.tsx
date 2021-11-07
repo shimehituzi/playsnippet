@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useSetRecoilState } from 'recoil'
+import { subscribeFlagState } from '../state/uiState'
 import { CreateCommentMutationVariables, CreateCommentInput } from '../API'
 import { createComment } from '../graphql/mutations'
 import { gqlMutation } from '../utils/graphql'
@@ -12,6 +14,8 @@ type Props = {
 
 export const CommentForm: React.FC<Props> = ({ postID }) => {
   const { authenticated } = useAuth()
+  const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
+
   const [comment, setComment] = useState<Pick<CreateCommentInput, 'content'>>({
     content: '',
   })
@@ -25,6 +29,7 @@ export const CommentForm: React.FC<Props> = ({ postID }) => {
 
   const handleSubmit = async () => {
     if (!authenticated) return
+    setSubscribeFlag(true)
 
     await gqlMutation<CreateCommentMutationVariables>({
       query: createComment,

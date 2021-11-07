@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRecoilValue } from 'recoil'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { postSelector } from '../state/apiState'
+import { subscribeFlagState } from '../state/uiState'
 import * as APIt from '../API'
 import * as query from '../graphql/queries'
 import * as mutation from '../graphql/mutations'
@@ -68,9 +69,11 @@ type RendererProps = {
 
 const PostsRenderer: React.FC<RendererProps> = ({ post }) => {
   const { authenticated, user } = useAuth()
+  const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
 
   const deletePost = async () => {
     if (!authenticated) return
+    setSubscribeFlag(true)
 
     const res = await gqlQuery<APIt.GetPostQueryVariables, APIt.GetPostQuery>({
       query: query.getPost,
