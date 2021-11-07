@@ -1,43 +1,16 @@
-import { useCallback } from 'react'
-import { useRecoilState } from 'recoil'
-import { pageRenderState, PageRenderState } from '../state/uiState'
+import { useState, useCallback } from 'react'
 
-export const usePageRender = (): {
-  pageState: PageRenderState
+type RenderState = 'ISR' | 'CSR'
+
+export const useRenderState = (): {
+  render: RenderState
   toCSR: () => void
-  toISR: () => void
-  mount: () => void
-  unmount: () => void
 } => {
-  const [pageState, setPageState] = useRecoilState(pageRenderState)
+  const [render, setRender] = useState<RenderState>('ISR')
 
   const toCSR = useCallback(() => {
-    setPageState((prev) => ({
-      ...prev,
-      render: 'CSR',
-    }))
+    setRender('CSR')
   }, [])
 
-  const toISR = useCallback(() => {
-    setPageState((prev) => ({
-      ...prev,
-      render: 'ISR',
-    }))
-  }, [])
-
-  const mount = useCallback(() => {
-    setPageState({
-      render: 'ISR',
-      mount: true,
-    })
-  }, [])
-
-  const unmount = useCallback(() => {
-    setPageState({
-      render: 'ISR',
-      mount: false,
-    })
-  }, [])
-
-  return { pageState, toCSR, toISR, mount, unmount }
+  return { render, toCSR }
 }

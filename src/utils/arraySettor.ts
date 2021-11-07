@@ -1,5 +1,5 @@
 import { RecoilState, useSetRecoilState } from 'recoil'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { notNull, Nullable, NullableArray } from './nullable'
 
 type SortDirection = 'ASC' | 'DESC'
@@ -131,6 +131,14 @@ export const useArraySettor = <O extends StringID, T extends O>(
   const deleteItem = useCallback((item: Nullable<T>) => {
     if (item == null) return
     setArr((arr) => deleteArrayItem(arr, omit(item)))
+  }, [])
+
+  const reset = useCallback(() => {
+    setArr([])
+  }, [])
+
+  useEffect(() => {
+    return reset
   }, [])
 
   return {

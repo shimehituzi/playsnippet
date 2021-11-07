@@ -1,13 +1,10 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { gqlSubscription } from '../utils/graphql'
 import { GraphQLOptions } from '@aws-amplify/api-graphql'
 import { ZenObservable } from '../../node_modules/zen-observable-ts'
-import { useCallback, useState } from 'react'
-
-type SubscriptionCallback<C, U, D> = {
-  onCreate: (data: C) => void
-  onUpdate: (data: U) => void
-  onDelete: (data: D) => void
-}
+import { Nullable } from './nullable'
+import { useRecoilState } from 'recoil'
+import { subscribeFlagState } from '../state/uiState'
 
 type SubscriptionQuery = {
   onCreate: GraphQLOptions['query']
@@ -15,91 +12,121 @@ type SubscriptionQuery = {
   onDelete: GraphQLOptions['query']
 }
 
-export type SubscribeFunc = {
-  subscribeCreate: () => ZenObservable.Subscription
-  subscribeUpdate: () => ZenObservable.Subscription
-  subscribeDelete: () => ZenObservable.Subscription
+type SubscriptionCallback<C, U, D> = {
+  onCreate?: (data: Nullable<C>) => void
+  onUpdate?: (data: Nullable<U>) => void
+  onDelete?: (data: Nullable<D>) => void
 }
 
-export type Subscription = {
-  createSubscription: ZenObservable.Subscription
-  updateSubscription: ZenObservable.Subscription
-  deleteSubscription: ZenObservable.Subscription
+type SubscribeFunction = {
+  subscribeCreate?: () => ZenObservable.Subscription
+  subscribeUpdate?: () => ZenObservable.Subscription
+  subscribeDelete?: () => ZenObservable.Subscription
+}
+
+type Subscription = {
+  createSubscription?: ZenObservable.Subscription
+  updateSubscription?: ZenObservable.Subscription
+  deleteSubscription?: ZenObservable.Subscription
 }
 
 export const generateSubscribeFunc =
   <C, U, D>(query: SubscriptionQuery) =>
-  (callback: SubscriptionCallback<C, U, D>): SubscribeFunc => {
-    const subscribeCreate = () =>
-      gqlSubscription<C>({
-        query: query.onCreate,
-        callback: {
-          next: (msg) => {
-            const data = msg.value.data
-            if (data != null) callback.onCreate(data)
-          },
-        },
-      })
-    const subscribeUpdate = () =>
-      gqlSubscription<U>({
-        query: query.onUpdate,
-        callback: {
-          next: (msg) => {
-            const data = msg.value.data
-            if (data != null) callback.onUpdate(data)
-          },
-        },
-      })
-    const subscribeDelete = () =>
-      gqlSubscription<D>({
-        query: query.onDelete,
-        callback: {
-          next: (msg) => {
-            const data = msg.value.data
-            if (data != null) callback.onDelete(data)
-          },
-        },
-      })
+  (callback: SubscriptionCallback<C, U, D>): SubscribeFunction => {
+    const { onCreate, onUpdate, onDelete } = callback
+
+    const subscribeCreate = onCreate
+      ? () =>
+          gqlSubscription<C>({
+            query: query.onCreate,
+            callback: { next: (msg) => onCreate(msg.value.data) },
+          })
+      : undefined
+
+    const subscribeUpdate = onUpdate
+      ? () =>
+          gqlSubscription<U>({
+            query: query.onUpdate,
+            callback: { next: (msg) => onUpdate(msg.value.data) },
+          })
+      : undefined
+
+    const subscribeDelete = onDelete
+      ? () =>
+          gqlSubscription<D>({
+            query: query.onDelete,
+            callback: { next: (msg) => onDelete(msg.value.data) },
+          })
+      : undefined
+
     return { subscribeCreate, subscribeUpdate, subscribeDelete }
   }
 
-export const useSubscribe = (
-  subscribeFuncArray: SubscribeFunc[]
-): {
-  subscribe: () => void
-  unsubscribe: () => void
-  toggle: () => void
-} => {
-  const [subscription, setSubscription] = useState<Subscription[] | null>(null)
+type SubscriptionsState = Subscription[] | null
+type ArgsUseSubscription = {
+  subscribeFuncArray: SubscribeFunction[]
+  newItemsFuncArray: (() => Promise<void>)[]
+  toCSR: VoidFunction
+}
+
+export const useSubscription = ({
+  subscribeFuncArray,
+  newItemsFuncArray,
+  toCSR,
+}: ArgsUseSubscription): void => {
+  const [subscriptions, setSubscriptions] = useState<SubscriptionsState>(null)
+  const [subscribeFlag, setSubscribeFlag] = useRecoilState(subscribeFlagState)
 
   const subscribe = useCallback(() => {
-    if (subscription !== null) return
-    setSubscription(
+    if (subscriptions !== null) return
+    setSubscriptions(
       subscribeFuncArray.map((subscribeFunc) => ({
-        createSubscription: subscribeFunc.subscribeCreate(),
-        updateSubscription: subscribeFunc.subscribeUpdate(),
-        deleteSubscription: subscribeFunc.subscribeDelete(),
+        createSubscription: subscribeFunc.subscribeCreate?.(),
+        updateSubscription: subscribeFunc.subscribeUpdate?.(),
+        deleteSubscription: subscribeFunc.subscribeDelete?.(),
       }))
     )
-  }, [subscription])
+  }, [subscriptions])
 
   const unsubscribe = useCallback(() => {
-    if (subscription === null) return
-    subscription.forEach((subscription) => {
-      subscription.createSubscription.unsubscribe()
-      subscription.updateSubscription.unsubscribe()
-      subscription.deleteSubscription.unsubscribe()
+    if (subscriptions === null) return
+    subscriptions.forEach((subscription) => {
+      subscription.createSubscription?.unsubscribe()
+      subscription.updateSubscription?.unsubscribe()
+      subscription.deleteSubscription?.unsubscribe()
     })
-    setSubscription(null)
-  }, [subscription])
+    setSubscriptions(null)
+  }, [subscriptions])
 
-  const toggle = useCallback(() => {
-    if (subscription === null) {
+  useEffect(() => {
+    if (subscribeFlag) {
+      newItemsFuncArray.forEach(async (newItemsFunc) => {
+        await newItemsFunc()
+      })
       subscribe()
     } else {
       unsubscribe()
     }
-  }, [subscription])
+  }, [subscribeFlag])
 
-  return { subscribe, unsubscribe, toggle }
+  useEffect(() => {
+    if (subscriptions !== null) {
+      toCSR()
+    }
+  }, [subscriptions])
+
+  const ref = useRef<SubscriptionsState>(null)
+  ref.current = subscriptions
+
+  useEffect(() => {
+    return () => {
+      ref.current?.forEach((subscription) => {
+        subscription.createSubscription?.unsubscribe()
+        subscription.updateSubscription?.unsubscribe()
+        subscription.deleteSubscription?.unsubscribe()
+      })
+      setSubscriptions(null)
+      setSubscribeFlag(false)
+    }
+  }, [])
 }

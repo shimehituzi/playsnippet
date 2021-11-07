@@ -1,20 +1,7 @@
 import { atom } from 'recoil'
 
-export type PageRenderState = {
-  render: 'ISR' | 'CSR'
-  mount: boolean
-}
-
-export const pageRenderState = atom<PageRenderState>({
-  key: 'renderState',
-  default: {
-    render: 'ISR',
-    mount: false,
-  },
-})
-
-export const isSubscribeState = atom<boolean>({
-  key: 'isSubscribeState',
+export const subscribeFlagState = atom<boolean>({
+  key: 'subscribeFlagState',
   default: false,
 })
 
