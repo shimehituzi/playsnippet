@@ -52,7 +52,11 @@ const useStyle = makeStyles({
   },
 })
 
-export const PostForm: React.FC = () => {
+type Props = {
+  onClose: VoidFunction
+}
+
+export const PostForm: React.FC<Props> = ({ onClose }) => {
   const { authenticated } = useAuth()
   const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
 
@@ -99,6 +103,7 @@ export const PostForm: React.FC = () => {
       content: '',
     })
     setCodes([])
+    onClose()
   }
 
   const onChangePost = (e: React.ChangeEvent<HTMLInputElement>) => {

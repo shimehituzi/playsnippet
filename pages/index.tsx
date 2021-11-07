@@ -10,7 +10,6 @@ import {
 } from '../src/state/apiState'
 import { Post } from '../src/API'
 import { notNull } from '../src/utils/nullable'
-import { useAuth } from '../src/utils/auth'
 import { useArraySettor } from '../src/utils/arraySettor'
 import { omitCode, omitComment, omitPost } from '../src/utils/api/omit'
 import { useRenderState } from '../src/utils/render'
@@ -21,7 +20,6 @@ import {
   serverListPostsByDate,
 } from '../src/utils/api/query'
 import { Button, Grid } from '@mui/material'
-import { PostForm } from '../src/components/PostForm'
 import { Posts } from '../src/components/Posts'
 import {
   subscribeCode,
@@ -51,7 +49,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
 const Home: NextPage<Props> = (props) => {
   const { render, toCSR } = useRenderState()
-  const { authenticated } = useAuth()
 
   const setPosts = useArraySettor(postsState, 'DESC', omitPost)
   const setCodes = useArraySettor(codesState, 'ASC', omitCode)
@@ -107,11 +104,6 @@ const Home: NextPage<Props> = (props) => {
 
   return (
     <Grid container alignItems="center" justifyContent="center">
-      {authenticated && (
-        <Grid item xs={12} sx={{ padding: '2%' }}>
-          <PostForm />
-        </Grid>
-      )}
       <Grid item xs={12}>
         {render === 'ISR' ? <Posts posts={props.posts} /> : <Posts />}
       </Grid>

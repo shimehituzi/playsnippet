@@ -7,6 +7,8 @@ import { ChevronLeft as ChevronLeftIcon } from '@mui/icons-material'
 import { Drawer as StyledDrawer, DrawerHeader } from '../Styled'
 import { GitHubLink } from './GitHubLink'
 import { Subscription } from './Subscription'
+import { PostAdd } from './PostAdd'
+import { useAuth } from '../../utils/auth'
 
 export const useIconStyle = makeStyles({
   icon: {
@@ -17,6 +19,7 @@ export const useIconStyle = makeStyles({
 
 export const Drawer: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useRecoilState(drawerOpenState)
+  const { authenticated } = useAuth()
   const closeDrawer = () => setDrawerOpen(false)
 
   return (
@@ -30,6 +33,12 @@ export const Drawer: React.FC = () => {
       <List>
         <Subscription />
         <Divider />
+        {authenticated && (
+          <>
+            <PostAdd />
+            <Divider />
+          </>
+        )}
         <GitHubLink />
       </List>
     </StyledDrawer>
