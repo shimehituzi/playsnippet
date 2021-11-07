@@ -65,13 +65,13 @@ export const generateSubscribeFunc =
 type SubscriptionsState = Subscription[] | null
 type ArgsUseSubscription = {
   subscribeFuncArray: SubscribeFunction[]
-  newItemsFuncArray: (() => Promise<void>)[]
+  newItems: () => Promise<void>
   toCSR: VoidFunction
 }
 
 export const useSubscription = ({
   subscribeFuncArray,
-  newItemsFuncArray,
+  newItems,
   toCSR,
 }: ArgsUseSubscription): void => {
   const [subscriptions, setSubscriptions] = useState<SubscriptionsState>(null)
@@ -100,9 +100,7 @@ export const useSubscription = ({
 
   useEffect(() => {
     if (subscribeFlag) {
-      newItemsFuncArray.forEach(async (newItemsFunc) => {
-        await newItemsFunc()
-      })
+      newItems()
       subscribe()
     } else {
       unsubscribe()

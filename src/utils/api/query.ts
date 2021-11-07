@@ -1,85 +1,76 @@
 import * as APIt from '../../API'
 import * as query from '../../graphql/queries'
-import { gqlQuery } from '../graphql'
-import { Nullable, NullableArray } from '../nullable'
+import { ModelSortDirection as sd } from '../../API'
+import { gqlQuery, serverQuery } from '../graphql'
+import { GraphQLOptions, GraphQLResult } from '@aws-amplify/api-graphql'
 
-export const getNewItems = async (
-  time: string
-): Promise<{
-  newPosts: NullableArray<APIt.Post>
-  newCodes: NullableArray<APIt.Code>
-  newComments: NullableArray<APIt.Comment>
-}> => {
-  const posts = await gqlQuery<
-    APIt.ListPostsByDateQueryVariables,
-    APIt.ListPostsByDateQuery
-  >({
-    query: query.listPostsByDate,
-    variables: {
-      type: 'post',
-      sortDirection: APIt.ModelSortDirection.DESC,
-      createdAt: {
-        gt: time,
-      },
-    },
-  })
-
-  const codes = await gqlQuery<
-    APIt.ListCodesByDateQueryVariables,
-    APIt.ListCodesByDateQuery
-  >({
-    query: query.listCodesByDate,
-    variables: {
-      type: 'code',
-      sortDirection: APIt.ModelSortDirection.ASC,
-      createdAt: {
-        gt: time,
-      },
-    },
-  })
-
-  const comments = await gqlQuery<
-    APIt.ListCommentsByDateQueryVariables,
-    APIt.ListCommentsByDateQuery
-  >({
-    query: query.listCommentsByDate,
-    variables: {
-      type: 'comment',
-      sortDirection: APIt.ModelSortDirection.ASC,
-      createdAt: {
-        gt: time,
-      },
-    },
-  })
-
-  const newPosts = posts.data?.listPostsByDate?.items
-  const newCodes = codes.data?.listCodesByDate?.items
-  const newComments = comments.data?.listCommentsByDate?.items
-
-  return { newPosts, newCodes, newComments }
+type defaultOptions<V extends Record<string, unknown>> = {
+  query: GraphQLOptions['query']
+  defaultVariables: V
+  server?: boolean
 }
 
-export const getAdditionalPosts = async (
-  nextToken: string
-): Promise<{
-  posts: NullableArray<APIt.Post>
-  newNextToken: Nullable<string>
-}> => {
-  const res = await gqlQuery<
-    APIt.ListPostsByDateQueryVariables,
-    APIt.ListPostsByDateQuery
-  >({
-    query: query.listPostsByDate,
-    variables: {
-      type: 'post',
-      sortDirection: APIt.ModelSortDirection.DESC,
-      limit: 20,
-      nextToken: nextToken,
-    },
-  })
-
-  return {
-    posts: res?.data?.listPostsByDate?.items,
-    newNextToken: res?.data?.listPostsByDate?.nextToken,
+const generateQueryFunc =
+  <V extends Record<string, unknown>, Q>({
+    query,
+    defaultVariables,
+    server,
+  }: defaultOptions<V>) =>
+  (variables: V): Promise<GraphQLResult<Q>> => {
+    const graphqlOptions = {
+      query,
+      variables: {
+        ...defaultVariables,
+        ...variables,
+      },
+    }
+    if (server) {
+      return serverQuery<V, Q>(graphqlOptions)
+    }
+    return gqlQuery<V, Q>(graphqlOptions)
   }
-}
+
+export const serverListPostsByDate = generateQueryFunc<
+  APIt.ListPostsByDateQueryVariables,
+  APIt.ListPostsByDateQuery
+>({
+  query: query.listPostsByDate,
+  defaultVariables: {
+    type: 'post',
+    sortDirection: sd.DESC,
+  },
+  server: true,
+})
+
+export const listPostsByDate = generateQueryFunc<
+  APIt.ListPostsByDateQueryVariables,
+  APIt.ListPostsByDateQuery
+>({
+  query: query.listPostsByDate,
+  defaultVariables: {
+    type: 'post',
+    sortDirection: sd.DESC,
+  },
+})
+
+export const listCodesByDate = generateQueryFunc<
+  APIt.ListCodesByDateQueryVariables,
+  APIt.ListCodesByDateQuery
+>({
+  query: query.listCodesByDate,
+  defaultVariables: {
+    type: 'code',
+    sortDirection: sd.ASC,
+  },
+})
+
+export const listCommentsByDate = generateQueryFunc<
+  APIt.ListCommentsByDateQueryVariables,
+  APIt.ListCommentsByDateQuery
+>({
+  query: query.listCommentsByDate,
+  defaultVariables: {
+    type: 'comment',
+    sortDirection: sd.ASC,
+  },
+})

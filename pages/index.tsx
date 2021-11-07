@@ -9,14 +9,17 @@ import {
   latestTimeStampSelector,
 } from '../src/state/apiState'
 import * as APIt from '../src/API'
-import * as query from '../src/graphql/queries'
-import { serverQuery } from '../src/utils/graphql'
 import { notNull } from '../src/utils/nullable'
 import { useAuth } from '../src/utils/auth'
 import { useArraySettor } from '../src/utils/arraySettor'
 import { omitCode, omitComment, omitPost } from '../src/utils/api/omit'
 import { useRenderState } from '../src/utils/render'
-import { getAdditionalPosts, getNewItems } from '../src/utils/api/query'
+import {
+  listPostsByDate,
+  listCodesByDate,
+  listCommentsByDate,
+  serverListPostsByDate,
+} from '../src/utils/api/query'
 import { Button, Grid } from '@mui/material'
 import { PostForm } from '../src/components/PostForm'
 import { Posts } from '../src/components/Posts'
@@ -33,18 +36,7 @@ type Props = {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const res = await serverQuery<
-    APIt.ListPostsByDateQueryVariables,
-    APIt.ListPostsByDateQuery
-  >({
-    query: query.listPostsByDate,
-    variables: {
-      type: 'post',
-      sortDirection: APIt.ModelSortDirection.DESC,
-      limit: 20,
-    },
-  })
-
+  const res = await serverListPostsByDate({ limit: 20 })
   const posts = res.data?.listPostsByDate?.items?.filter(notNull) ?? []
 
   return {
@@ -76,23 +68,27 @@ const Home: NextPage<Props> = (props) => {
   const appendPosts = async () => {
     if (!nextToken) return
 
-    const { posts, newNextToken } = await getAdditionalPosts(nextToken)
+    const posts = await listPostsByDate({ limit: 20, nextToken })
+    const postsItems = posts?.data?.listPostsByDate?.items
 
-    setPosts.appendItems(posts)
-    setCodes.appendItems(posts?.flatMap((v) => v?.codes?.items))
-    setComments.appendItems(posts?.flatMap((v) => v?.comments?.items))
-    setNextToken(newNextToken ?? null)
+    setPosts.appendItems(postsItems)
+    setCodes.appendItems(postsItems?.flatMap((v) => v?.codes?.items))
+    setComments.appendItems(postsItems?.flatMap((v) => v?.comments?.items))
+    setNextToken(posts.data?.listPostsByDate?.nextToken ?? null)
     toCSR()
   }
 
   const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
   const newItems = async () => {
-    const { newPosts, newCodes, newComments } = await getNewItems(
-      latestTimeStamp
-    )
-    setPosts.newItems(newPosts)
-    setCodes.newItems(newCodes)
-    setComments.newItems(newComments)
+    const posts = await listPostsByDate({ createdAt: { gt: latestTimeStamp } })
+    const codes = await listCodesByDate({ createdAt: { gt: latestTimeStamp } })
+    const comments = await listCommentsByDate({
+      createdAt: { gt: latestTimeStamp },
+    })
+
+    setPosts.newItems(posts.data?.listPostsByDate?.items)
+    setCodes.newItems(codes.data?.listCodesByDate?.items)
+    setComments.newItems(comments.data?.listCommentsByDate?.items)
   }
   const subscribeFuncArray = [
     subscribePost({
@@ -107,11 +103,7 @@ const Home: NextPage<Props> = (props) => {
       onCreate: (data) => setComments.createItem(data?.onCreateComment),
     }),
   ]
-  useSubscription({
-    subscribeFuncArray,
-    newItemsFuncArray: [newItems],
-    toCSR,
-  })
+  useSubscription({ subscribeFuncArray, newItems, toCSR })
 
   return (
     <Grid container alignItems="center" justifyContent="center">
