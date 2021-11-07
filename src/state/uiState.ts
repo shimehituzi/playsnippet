@@ -5,11 +5,6 @@ export const subscribeFlagState = atom<boolean>({
   default: false,
 })
 
-export const enableSabscribeState = atom<boolean>({
-  key: 'isEnableSubscribeState',
-  default: false,
-})
-
 export const typingIDState = atom<string | null>({
   key: 'typingIDState',
   default: null,

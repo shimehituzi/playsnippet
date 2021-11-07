@@ -3,8 +3,8 @@ import { gqlSubscription } from '../utils/graphql'
 import { GraphQLOptions } from '@aws-amplify/api-graphql'
 import { ZenObservable } from '../../node_modules/zen-observable-ts'
 import { Nullable } from './nullable'
-import { useRecoilState, useSetRecoilState } from 'recoil'
-import { enableSabscribeState, subscribeFlagState } from '../state/uiState'
+import { useRecoilState } from 'recoil'
+import { subscribeFlagState } from '../state/uiState'
 
 type SubscriptionQuery = {
   onCreate: GraphQLOptions['query']
@@ -76,7 +76,6 @@ export const useSubscription = ({
 }: ArgsUseSubscription): void => {
   const [subscriptions, setSubscriptions] = useState<SubscriptionsState>(null)
   const [subscribeFlag, setSubscribeFlag] = useRecoilState(subscribeFlagState)
-  const setEnableSubScribe = useSetRecoilState(enableSabscribeState)
 
   const subscribe = useCallback(() => {
     if (subscriptions !== null) return
@@ -98,10 +97,6 @@ export const useSubscription = ({
     })
     setSubscriptions(null)
   }, [subscriptions])
-
-  useEffect(() => {
-    setEnableSubScribe(true)
-  }, [])
 
   useEffect(() => {
     if (subscribeFlag) {
@@ -130,7 +125,6 @@ export const useSubscription = ({
       })
       setSubscriptions(null)
       setSubscribeFlag(false)
-      setEnableSubScribe(false)
     }
   }, [])
 }
