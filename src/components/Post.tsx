@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRecoilValue } from 'recoil'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { postSelector } from '../state/apiState'
+import { subscribeFlagState } from '../state/uiState'
 import * as APIt from '../API'
 import * as query from '../graphql/queries'
 import * as mutation from '../graphql/mutations'
@@ -48,31 +49,46 @@ const useStyle = makeStyles({
 
 type Props = {
   postID: string
+  post?: APIt.Post
 }
 
-export const Post: React.FC<Props> = ({ postID }) => {
-  const post = useRecoilValue(postSelector(postID))
+export const Post: React.FC<Props> = (props) => {
+  const post = useRecoilValue(postSelector(props.postID))
+  if (props.post) {
+    return <PostsRenderer post={props.post} />
+  } else if (post) {
+    return <PostsRenderer post={post} />
+  } else {
+    return <React.Fragment />
+  }
+}
+
+type RendererProps = {
+  post: APIt.Post
+}
+
+const PostsRenderer: React.FC<RendererProps> = ({ post }) => {
   const { authenticated, user } = useAuth()
+  const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
 
   const deletePost = async () => {
     if (!authenticated) return
+    setSubscribeFlag(true)
 
     const res = await gqlQuery<APIt.GetPostQueryVariables, APIt.GetPostQuery>({
       query: query.getPost,
       variables: {
-        id: postID,
+        id: post.id,
       },
     })
 
-    const codeIds =
-      res.data?.getPost?.codes?.items?.filter(notNull).map((v) => v.id) ?? []
-
-    codeIds.forEach(async (id) => {
-      gqlMutation<APIt.DeleteCodeMutationVariables>({
+    const codes = res.data?.getPost?.codes?.items?.filter(notNull)
+    codes?.forEach(async (code) => {
+      await gqlMutation<APIt.DeleteCodeMutationVariables>({
         query: mutation.deleteCode,
         variables: {
           input: {
-            id: id,
+            id: code.id,
           },
         },
       })
@@ -82,7 +98,7 @@ export const Post: React.FC<Props> = ({ postID }) => {
       query: mutation.deletePost,
       variables: {
         input: {
-          id: postID,
+          id: post.id,
         },
       },
     })
@@ -111,9 +127,10 @@ export const Post: React.FC<Props> = ({ postID }) => {
 
   const classes = useStyle()
 
-  return !post ? (
-    <React.Fragment />
-  ) : (
+  const codes = post.codes?.items?.filter(notNull)
+  const comments = post.comments?.items?.filter(notNull)
+
+  return (
     <Card className={classes.card}>
       <CardHeader
         title={
@@ -153,7 +170,7 @@ export const Post: React.FC<Props> = ({ postID }) => {
       />
       <CardContent>
         <ReactMarkdown>{post.content}</ReactMarkdown>
-        <Codes postID={post.id} />
+        <Codes codes={codes} postID={post.id} />
       </CardContent>
       <CardActions>
         <div className={classes.expand}>
@@ -165,7 +182,7 @@ export const Post: React.FC<Props> = ({ postID }) => {
       </CardActions>
       <Collapse in={expandComment} timeout="auto" unmountOnExit>
         <CardContent>
-          <Comments postID={post.id} />
+          <Comments postID={post.id} comments={comments} />
           {authenticated && <CommentForm postID={post.id} />}
         </CardContent>
       </Collapse>

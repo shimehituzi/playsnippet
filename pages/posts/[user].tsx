@@ -3,30 +3,37 @@ import Head from 'next/head'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { ParsedUrlQuery } from 'querystring'
 import { useRouter } from 'next/router'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import {
+  postsState,
   codesState,
   commentsState,
   postNextTokenState,
-  postsState,
+  latestTimeStampSelector,
 } from '../../src/state/apiState'
-import * as APIt from '../../src/API'
-import * as query from '../../src/graphql/queries'
-import * as subscription from '../../src/graphql/subscriptions'
-import { gqlQuery, gqlSubscription, serverQuery } from '../../src/utils/graphql'
+import { Post } from '../../src/API'
 import { notNull } from '../../src/utils/nullable'
-import { useAuth } from '../../src/utils/auth'
+import { useArraySettor } from '../../src/utils/arraySettor'
+import { omitCode, omitComment, omitPost } from '../../src/utils/api/omit'
+import { useRenderState } from '../../src/utils/render'
+import {
+  listCodesByDate,
+  listCommentsByDate,
+  listPostsByOwner,
+  serverListPostsByOwner,
+} from '../../src/utils/api/query'
 import { Button, Grid } from '@mui/material'
-import { PostForm } from '../../src/components/PostForm'
 import { Posts } from '../../src/components/Posts'
-import { useArraySettor } from '../../src/utils/recoilArraySettor'
-import { SeparatePosts, separatePosts } from '../../src/utils/omit'
+import {
+  subscribeCode,
+  subscribeComment,
+  subscribePost,
+} from '../../src/utils/api/subscription'
+import { useSubscription } from '../../src/utils/subscribe'
 
 type Props = {
-  data: {
-    items: SeparatePosts
-    nextToken: string | null
-  }
+  posts: Post[]
+  nextToken: string | null
 }
 
 type Params = ParsedUrlQuery & {
@@ -46,27 +53,14 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   const owner = params?.user
   if (owner === undefined) return { notFound: true }
 
-  const res = await serverQuery<
-    APIt.ListPostsByOwnerQueryVariables,
-    APIt.ListPostsByOwnerQuery
-  >({
-    query: query.listPostsByOwner,
-    variables: {
-      owner: owner,
-      sortDirection: APIt.ModelSortDirection.DESC,
-      limit: 20,
-    },
-  })
-
+  const res = await serverListPostsByOwner({ owner: owner, limit: 20 })
   const posts = res.data?.listPostsByOwner?.items?.filter(notNull) ?? []
 
   if (posts.length > 0) {
     return {
       props: {
-        data: {
-          items: separatePosts(posts),
-          nextToken: res.data?.listPostsByOwner?.nextToken ?? null,
-        },
+        posts: posts,
+        nextToken: res.data?.listPostsByOwner?.nextToken ?? null,
       },
       revalidate: 5,
       notFound: false,
@@ -76,120 +70,67 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   }
 }
 
-const UserPosts: NextPage<Props> = ({ data }) => {
-  const { authenticated, isInit } = useAuth()
+const UserPosts: NextPage<Props> = (props) => {
+  const { render, toCSR } = useRenderState()
 
   const router = useRouter()
   const { user } = router.query
+  const owner = user ? String(user) : router.asPath.split('/').slice(-1)[0]
 
-  const setPosts = useArraySettor(postsState, 'DESC')
-  const setCodes = useArraySettor(codesState, 'ASC')
-  const setComments = useArraySettor(commentsState, 'ASC')
+  const setPosts = useArraySettor(postsState, 'DESC', omitPost)
+  const setCodes = useArraySettor(codesState, 'ASC', omitCode)
+  const setComments = useArraySettor(commentsState, 'ASC', omitComment)
   const [nextToken, setNextToken] = useRecoilState(postNextTokenState)
 
   useEffect(() => {
-    setPosts.initItems(data.items.posts)
-    setCodes.initItems(data.items.codes)
-    setComments.initItems(data.items.comments)
-    setNextToken(data.nextToken)
+    setPosts.initItems(props.posts)
+    setCodes.initItems(props.posts.flatMap((v) => v.codes?.items))
+    setComments.initItems(props.posts.flatMap((v) => v.comments?.items))
+    setNextToken(props.nextToken)
   }, [])
 
-  const getAdditionalPosts = async () => {
+  const appendPosts = async () => {
     if (!nextToken) return
 
-    const res = await gqlQuery<
-      APIt.ListPostsByOwnerQueryVariables,
-      APIt.ListPostsByOwnerQuery
-    >({
-      query: query.listPostsByOwner,
-      variables: {
-        owner: user && String(user),
-        sortDirection: APIt.ModelSortDirection.DESC,
-        limit: 20,
-        nextToken: nextToken,
-      },
-    })
+    const posts = await listPostsByOwner({ owner, nextToken, limit: 20 })
+    const postsItems = posts?.data?.listPostsByOwner?.items
 
-    const posts = res.data?.listPostsByOwner?.items?.filter(notNull) ?? []
-    const omit = separatePosts(posts)
-
-    setPosts.appendItems(omit.posts)
-    setCodes.appendItems(omit.codes)
-    setComments.appendItems(omit.comments)
-    setNextToken(res.data?.listPostsByOwner?.nextToken ?? null)
+    setPosts.appendItems(postsItems)
+    setCodes.appendItems(postsItems?.flatMap((v) => v?.codes?.items))
+    setComments.appendItems(postsItems?.flatMap((v) => v?.comments?.items))
+    setNextToken(posts.data?.listPostsByOwner?.nextToken ?? null)
+    toCSR()
   }
 
-  useEffect(() => {
-    if (!isInit) return
-
-    const onCPost = gqlSubscription<APIt.OnCreatePostSubscription>({
-      query: subscription.onCreatePost,
-      callback: {
-        next: (msg) => {
-          const post = msg.value.data?.onCreatePost
-          post && post.owner === user && setPosts.createItem(post)
-        },
-      },
+  const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
+  const newItems = async () => {
+    const posts = await listPostsByOwner({
+      owner: owner,
+      createdAt: { gt: latestTimeStamp },
     })
-    const onDPost = gqlSubscription<APIt.OnDeletePostSubscription>({
-      query: subscription.onDeletePost,
-      callback: {
-        next: (msg) => {
-          const post = msg.value.data?.onDeletePost
-          post && post.owner === user && setPosts.deleteItem(post)
-        },
-      },
-    })
-    const onCCode = gqlSubscription<APIt.OnCreateCodeSubscription>({
-      query: subscription.onCreateCode,
-      callback: {
-        next: (msg) => {
-          const code = msg.value.data?.onCreateCode
-          code && code.owner === user && setCodes.createItem(code)
-        },
-      },
-    })
-    const onDCode = gqlSubscription<APIt.OnDeleteCodeSubscription>({
-      query: subscription.onDeleteCode,
-      callback: {
-        next: (msg) => {
-          const code = msg.value.data?.onDeleteCode
-          code && code.owner === user && setCodes.deleteItem(code)
-        },
-      },
-    })
-    const onCComment = gqlSubscription<APIt.OnCreateCommentSubscription>({
-      query: subscription.onCreateComment,
-      callback: {
-        next: (msg) => {
-          const comment = msg.value.data?.onCreateComment
-          comment &&
-            comment.post?.owner === user &&
-            setComments.createItem(comment)
-        },
-      },
-    })
-    const onDComment = gqlSubscription<APIt.OnDeleteCommentSubscription>({
-      query: subscription.onDeleteComment,
-      callback: {
-        next: (msg) => {
-          const comment = msg.value.data?.onDeleteComment
-          comment &&
-            comment.post?.owner === user &&
-            setComments.deleteItem(comment)
-        },
-      },
+    const codes = await listCodesByDate({ createdAt: { gt: latestTimeStamp } })
+    const comments = await listCommentsByDate({
+      createdAt: { gt: latestTimeStamp },
     })
 
-    return () => {
-      onCPost.unsubscribe()
-      onDPost.unsubscribe()
-      onCCode.unsubscribe()
-      onDCode.unsubscribe()
-      onCComment.unsubscribe()
-      onDComment.unsubscribe()
-    }
-  }, [isInit])
+    setPosts.newItems(posts.data?.listPostsByOwner?.items)
+    setCodes.newItems(codes.data?.listCodesByDate?.items)
+    setComments.newItems(comments.data?.listCommentsByDate?.items)
+  }
+  const subscribeFuncArray = [
+    subscribePost({
+      onCreate: (data) => setPosts.createItem(data?.onCreatePost),
+      onDelete: (data) => setPosts.deleteItem(data?.onDeletePost),
+    }),
+    subscribeCode({
+      onCreate: (data) => setCodes.createItem(data?.onCreateCode),
+      onDelete: (data) => setCodes.deleteItem(data?.onDeleteCode),
+    }),
+    subscribeComment({
+      onCreate: (data) => setComments.createItem(data?.onCreateComment),
+    }),
+  ]
+  useSubscription({ subscribeFuncArray, newItems, toCSR })
 
   return (
     <>
@@ -197,19 +138,16 @@ const UserPosts: NextPage<Props> = ({ data }) => {
         <title>{`${user}'s posts - PlaySnippet`}</title>
       </Head>
       <Grid container alignItems="center" justifyContent="center">
-        {authenticated && (
-          <Grid item xs={12} sx={{ padding: '2%' }}>
-            <PostForm />
+        <Grid item xs={12}>
+          {render === 'ISR' ? <Posts posts={props.posts} /> : <Posts />}
+        </Grid>
+        {nextToken && (
+          <Grid item>
+            <Button onClick={appendPosts} variant="outlined">
+              Read more
+            </Button>
           </Grid>
         )}
-        <Grid item xs={12}>
-          <Posts />
-        </Grid>
-        <Grid item>
-          <Button onClick={getAdditionalPosts} variant="outlined">
-            Read more
-          </Button>
-        </Grid>
       </Grid>
     </>
   )

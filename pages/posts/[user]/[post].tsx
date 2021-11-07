@@ -2,26 +2,25 @@ import React, { useEffect } from 'react'
 import Head from 'next/head'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { ParsedUrlQuery } from 'querystring'
-import { useRouter } from 'next/router'
+import { useRecoilValue } from 'recoil'
 import {
+  postsState,
   codesState,
   commentsState,
-  postSelector,
-  postsState,
+  latestTimeStampSelector,
 } from '../../../src/state/apiState'
-import * as APIt from '../../../src/API'
-import * as query from '../../../src/graphql/queries'
-import * as subscription from '../../../src/graphql/subscriptions'
-import { gqlSubscription, serverQuery } from '../../../src/utils/graphql'
-import { useAuth } from '../../../src/utils/auth'
-import { useArraySettor } from '../../../src/utils/recoilArraySettor'
-import { SeparatePosts, separatePosts } from '../../../src/utils/omit'
+import { Post as TypePost } from '../../../src/API'
+import { useArraySettor } from '../../../src/utils/arraySettor'
+import { omitCode, omitComment, omitPost } from '../../../src/utils/api/omit'
+import { useRenderState } from '../../../src/utils/render'
+import { listCommentsByPost, serverGetPost } from '../../../src/utils/api/query'
 import { Grid } from '@mui/material'
 import { Post } from '../../../src/components/Post'
-import { useRecoilValue } from 'recoil'
+import { subscribeComment } from '../../../src/utils/api/subscription'
+import { useSubscription } from '../../../src/utils/subscribe'
 
 type Props = {
-  data: SeparatePosts
+  post: TypePost
 }
 
 type Params = ParsedUrlQuery & {
@@ -43,19 +42,13 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   const postID = params?.post
   if (owner === undefined || postID === undefined) return { notFound: true }
 
-  const res = await serverQuery<APIt.GetPostQueryVariables, APIt.GetPostQuery>({
-    query: query.getPost,
-    variables: {
-      id: postID,
-    },
-  })
-
+  const res = await serverGetPost({ id: postID })
   const post = res.data?.getPost
 
   if (post && post.owner === owner) {
     return {
       props: {
-        data: separatePosts([post]),
+        post: post,
       },
       revalidate: 5,
       notFound: false,
@@ -65,68 +58,49 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   }
 }
 
-const UserPost: NextPage<Props> = ({ data }) => {
-  const { isInit } = useAuth()
+const UserPost: NextPage<Props> = (props) => {
+  const { render, toCSR } = useRenderState()
 
-  const router = useRouter()
-  const { user, post: pid } = router.query
-
-  const setPosts = useArraySettor(postsState, 'DESC')
-  const setCodes = useArraySettor(codesState, 'ASC')
-  const setComments = useArraySettor(commentsState, 'ASC')
-
-  const post = useRecoilValue(postSelector(pid as string))
+  const setPosts = useArraySettor(postsState, 'DESC', omitPost)
+  const setCodes = useArraySettor(codesState, 'ASC', omitCode)
+  const setComments = useArraySettor(commentsState, 'ASC', omitComment)
 
   useEffect(() => {
-    setPosts.initItems(data.posts)
-    setCodes.initItems(data.codes)
-    setComments.initItems(data.comments)
+    setPosts.initItems([props.post])
+    setCodes.initItems(props.post.codes?.items)
+    setComments.initItems(props.post.comments?.items)
   }, [])
 
-  useEffect(() => {
-    if (!isInit) return
-    const onCComment = gqlSubscription<APIt.OnCreateCommentSubscription>({
-      query: subscription.onCreateComment,
-      callback: {
-        next: (msg) => {
-          const comment = msg.value.data?.onCreateComment
-          comment &&
-            comment.post?.owner === user &&
-            setComments.createItem(comment)
-        },
-      },
+  const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
+  const newItems = async () => {
+    const comments = await listCommentsByPost({
+      postID: props.post.id,
+      createdAt: { gt: latestTimeStamp },
     })
-    const onDComment = gqlSubscription<APIt.OnDeleteCommentSubscription>({
-      query: subscription.onDeleteComment,
-      callback: {
-        next: (msg) => {
-          const comment = msg.value.data?.onDeleteComment
-          comment &&
-            comment.post?.owner === user &&
-            setComments.deleteItem(comment)
-        },
-      },
-    })
+    setComments.newItems(comments.data?.listCommentsByPost?.items)
+  }
+  const subscribeFuncArray = [
+    subscribeComment({
+      onCreate: (data) => setComments.createItem(data?.onCreateComment),
+    }),
+  ]
+  useSubscription({ subscribeFuncArray, newItems, toCSR })
 
-    return () => {
-      onCComment.unsubscribe()
-      onDComment.unsubscribe()
-    }
-  }, [isInit])
-
-  return post ? (
+  return (
     <>
       <Head>
-        <title>{`${post.title} - PlaySnippet`}</title>
+        <title>{`${props.post.title} - PlaySnippet`}</title>
       </Head>
       <Grid container alignItems="center" justifyContent="center">
         <Grid item xs={12} sx={{ padding: '2%' }}>
-          <Post postID={post.id} />
+          {render === 'ISR' ? (
+            <Post postID={props.post.id} post={props.post} />
+          ) : (
+            <Post postID={props.post.id} />
+          )}
         </Grid>
       </Grid>
     </>
-  ) : (
-    <React.Fragment />
   )
 }
 

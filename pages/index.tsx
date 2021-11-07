@@ -1,181 +1,119 @@
 import React, { useEffect } from 'react'
 import { GetStaticProps, NextPage } from 'next'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import {
+  postsState,
   codesState,
   commentsState,
   postNextTokenState,
-  postsState,
+  latestTimeStampSelector,
 } from '../src/state/apiState'
-import * as APIt from '../src/API'
-import * as query from '../src/graphql/queries'
-import * as subscription from '../src/graphql/subscriptions'
-import { gqlQuery, gqlSubscription, serverQuery } from '../src/utils/graphql'
+import { Post } from '../src/API'
 import { notNull } from '../src/utils/nullable'
-import { useAuth } from '../src/utils/auth'
+import { useArraySettor } from '../src/utils/arraySettor'
+import { omitCode, omitComment, omitPost } from '../src/utils/api/omit'
+import { useRenderState } from '../src/utils/render'
+import {
+  listPostsByDate,
+  listCodesByDate,
+  listCommentsByDate,
+  serverListPostsByDate,
+} from '../src/utils/api/query'
 import { Button, Grid } from '@mui/material'
-import { PostForm } from '../src/components/PostForm'
 import { Posts } from '../src/components/Posts'
-import { useArraySettor } from '../src/utils/recoilArraySettor'
-import { SeparatePosts, separatePosts } from '../src/utils/omit'
+import {
+  subscribeCode,
+  subscribeComment,
+  subscribePost,
+} from '../src/utils/api/subscription'
+import { useSubscription } from '../src/utils/subscribe'
 
 type Props = {
-  data: {
-    items: SeparatePosts
-    nextToken: string | null
-  }
+  posts: Post[]
+  nextToken: string | null
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const res = await serverQuery<
-    APIt.ListPostsByDateQueryVariables,
-    APIt.ListPostsByDateQuery
-  >({
-    query: query.listPostsByDate,
-    variables: {
-      type: 'post',
-      sortDirection: APIt.ModelSortDirection.DESC,
-      limit: 20,
-    },
-  })
-
+  const res = await serverListPostsByDate({ limit: 20 })
   const posts = res.data?.listPostsByDate?.items?.filter(notNull) ?? []
 
   return {
     props: {
-      data: {
-        items: separatePosts(posts),
-        nextToken: res.data?.listPostsByDate?.nextToken ?? null,
-      },
+      posts: posts,
+      nextToken: res.data?.listPostsByDate?.nextToken ?? null,
     },
     revalidate: 5,
     notFound: false,
   }
 }
 
-const Home: NextPage<Props> = ({ data }) => {
-  const { authenticated, isInit } = useAuth()
+const Home: NextPage<Props> = (props) => {
+  const { render, toCSR } = useRenderState()
 
-  const setPosts = useArraySettor(postsState, 'DESC')
-  const setCodes = useArraySettor(codesState, 'ASC')
-  const setComments = useArraySettor(commentsState, 'ASC')
+  const setPosts = useArraySettor(postsState, 'DESC', omitPost)
+  const setCodes = useArraySettor(codesState, 'ASC', omitCode)
+  const setComments = useArraySettor(commentsState, 'ASC', omitComment)
   const [nextToken, setNextToken] = useRecoilState(postNextTokenState)
 
   useEffect(() => {
-    setPosts.initItems(data.items.posts)
-    setCodes.initItems(data.items.codes)
-    setComments.initItems(data.items.comments)
-    setNextToken(data.nextToken)
+    setPosts.initItems(props.posts)
+    setCodes.initItems(props.posts.flatMap((v) => v.codes?.items))
+    setComments.initItems(props.posts.flatMap((v) => v.comments?.items))
+    setNextToken(props.nextToken)
   }, [])
 
-  const getAdditionalPosts = async () => {
+  const appendPosts = async () => {
     if (!nextToken) return
 
-    const res = await gqlQuery<
-      APIt.ListPostsByDateQueryVariables,
-      APIt.ListPostsByDateQuery
-    >({
-      query: query.listPostsByDate,
-      variables: {
-        type: 'post',
-        sortDirection: APIt.ModelSortDirection.DESC,
-        limit: 20,
-        nextToken: nextToken,
-      },
-    })
+    const posts = await listPostsByDate({ limit: 20, nextToken })
+    const postsItems = posts?.data?.listPostsByDate?.items
 
-    const posts = res.data?.listPostsByDate?.items?.filter(notNull) ?? []
-    const omit = separatePosts(posts)
-
-    setPosts.appendItems(omit.posts)
-    setCodes.appendItems(omit.codes)
-    setComments.appendItems(omit.comments)
-    setNextToken(res.data?.listPostsByDate?.nextToken ?? null)
+    setPosts.appendItems(postsItems)
+    setCodes.appendItems(postsItems?.flatMap((v) => v?.codes?.items))
+    setComments.appendItems(postsItems?.flatMap((v) => v?.comments?.items))
+    setNextToken(posts.data?.listPostsByDate?.nextToken ?? null)
+    toCSR()
   }
 
-  useEffect(() => {
-    if (!isInit) return
-
-    const onCPost = gqlSubscription<APIt.OnCreatePostSubscription>({
-      query: subscription.onCreatePost,
-      callback: {
-        next: (msg) => {
-          const post = msg.value.data?.onCreatePost
-          post && setPosts.createItem(post)
-        },
-      },
-    })
-    const onDPost = gqlSubscription<APIt.OnDeletePostSubscription>({
-      query: subscription.onDeletePost,
-      callback: {
-        next: (msg) => {
-          const post = msg.value.data?.onDeletePost
-          post && setPosts.deleteItem(post)
-        },
-      },
-    })
-    const onCCode = gqlSubscription<APIt.OnCreateCodeSubscription>({
-      query: subscription.onCreateCode,
-      callback: {
-        next: (msg) => {
-          const code = msg.value.data?.onCreateCode
-          code && setCodes.createItem(code)
-        },
-      },
-    })
-    const onDCode = gqlSubscription<APIt.OnDeleteCodeSubscription>({
-      query: subscription.onDeleteCode,
-      callback: {
-        next: (msg) => {
-          const code = msg.value.data?.onDeleteCode
-          code && setCodes.deleteItem(code)
-        },
-      },
-    })
-    const onCComment = gqlSubscription<APIt.OnCreateCommentSubscription>({
-      query: subscription.onCreateComment,
-      callback: {
-        next: (msg) => {
-          const comment = msg.value.data?.onCreateComment
-          comment && setComments.createItem(comment)
-        },
-      },
-    })
-    const onDComment = gqlSubscription<APIt.OnDeleteCommentSubscription>({
-      query: subscription.onDeleteComment,
-      callback: {
-        next: (msg) => {
-          const comment = msg.value.data?.onDeleteComment
-          comment && setComments.deleteItem(comment)
-        },
-      },
+  const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
+  const newItems = async () => {
+    const posts = await listPostsByDate({ createdAt: { gt: latestTimeStamp } })
+    const codes = await listCodesByDate({ createdAt: { gt: latestTimeStamp } })
+    const comments = await listCommentsByDate({
+      createdAt: { gt: latestTimeStamp },
     })
 
-    return () => {
-      onCPost.unsubscribe()
-      onDPost.unsubscribe()
-      onCCode.unsubscribe()
-      onDCode.unsubscribe()
-      onCComment.unsubscribe()
-      onDComment.unsubscribe()
-    }
-  }, [isInit])
+    setPosts.newItems(posts.data?.listPostsByDate?.items)
+    setCodes.newItems(codes.data?.listCodesByDate?.items)
+    setComments.newItems(comments.data?.listCommentsByDate?.items)
+  }
+  const subscribeFuncArray = [
+    subscribePost({
+      onCreate: (data) => setPosts.createItem(data?.onCreatePost),
+      onDelete: (data) => setPosts.deleteItem(data?.onDeletePost),
+    }),
+    subscribeCode({
+      onCreate: (data) => setCodes.createItem(data?.onCreateCode),
+      onDelete: (data) => setCodes.deleteItem(data?.onDeleteCode),
+    }),
+    subscribeComment({
+      onCreate: (data) => setComments.createItem(data?.onCreateComment),
+    }),
+  ]
+  useSubscription({ subscribeFuncArray, newItems, toCSR })
 
   return (
     <Grid container alignItems="center" justifyContent="center">
-      {authenticated && (
-        <Grid item xs={12} sx={{ padding: '2%' }}>
-          <PostForm />
+      <Grid item xs={12}>
+        {render === 'ISR' ? <Posts posts={props.posts} /> : <Posts />}
+      </Grid>
+      {nextToken && (
+        <Grid item>
+          <Button onClick={appendPosts} variant="outlined">
+            Read more
+          </Button>
         </Grid>
       )}
-      <Grid item xs={12}>
-        <Posts />
-      </Grid>
-      <Grid item>
-        <Button onClick={getAdditionalPosts} variant="outlined">
-          Read more
-        </Button>
-      </Grid>
     </Grid>
   )
 }

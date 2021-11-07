@@ -1,16 +1,21 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import {
+  useRecoilState,
+  useRecoilValueLoadable,
+  useSetRecoilState,
+} from 'recoil'
+import { avatarQuery, forceAvatarUpdate } from '../state/avatarsState'
+import { drawerOpenState } from '../state/uiState'
+import {
   CreateAvatarMutationVariables,
   UpdateAvatarMutationVariables,
   DeleteAvatarMutationVariables,
 } from '../API'
 import { createAvatar, deleteAvatar, updateAvatar } from '../graphql/mutations'
 import { useAuth } from '../utils/auth'
-import { useAvatar, useAvatarUpdate } from '../utils/avatar'
 import { gqlMutation } from '../utils/graphql'
 import {
-  AppBar,
   Button,
   IconButton,
   ListItemButton,
@@ -21,43 +26,49 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { styled } from '@mui/material/styles'
 import { makeStyles } from '@mui/styles'
 import {
+  Menu as MenuIcon,
   PersonRemoveOutlined as PersonRemoveOutlinedIcon,
   Logout as SignOutIcon,
   ManageAccounts as ManageAccountsIcon,
-  GitHub as GitHubIcon,
 } from '@mui/icons-material'
 import { AmplifySignOut } from '@aws-amplify/ui-react'
+import { AppBar } from './Styled'
 import { Avatar } from './Avatar'
 
-const StyledToolbar = styled(Toolbar)(({ theme }) => ({
-  paddingTop: theme.spacing(1),
-  paddingBottom: theme.spacing(1),
-  '@media all': {
-    minHeight: 110,
-  },
-}))
-
 const useStyle = makeStyles({
-  logo: {
+  left: {
     flexGrow: 1,
   },
   button: {
     textTransform: 'none',
-    margin: '1%',
+    margin: '0 1%',
+  },
+  appBar: {
+    whiteSpace: 'nowrap',
+    overflowX: 'scroll',
   },
 })
 
 export const Appbar: React.FC = () => {
   const { authenticated, user } = useAuth()
+
+  const [drawerOpen, setDrawerOpen] = useRecoilState(drawerOpenState)
+  const openDrawer = () => setDrawerOpen(true)
+
   const classes = useStyle()
 
   return (
-    <AppBar position="static">
-      <StyledToolbar>
-        <div className={classes.logo}>
+    <AppBar position="fixed" open={drawerOpen} className={classes.appBar}>
+      <Toolbar>
+        <div className={classes.left}>
+          <IconButton
+            onClick={openDrawer}
+            sx={{ ...(drawerOpen && { display: 'none' }) }}
+          >
+            <MenuIcon />
+          </IconButton>
           <Link href="/">
             <Button className={classes.button}>
               <Typography variant="h4" color="primary">
@@ -65,18 +76,13 @@ export const Appbar: React.FC = () => {
               </Typography>
             </Button>
           </Link>
-          <Link href="https://github.com/shimehituzi/playsnippet">
-            <IconButton size="small">
-              <GitHubIcon sx={{ width: 45, height: 45 }} />
-            </IconButton>
-          </Link>
         </div>
         {authenticated && user?.username ? (
           <Account username={user.username} />
         ) : (
           <Sign />
         )}
-      </StyledToolbar>
+      </Toolbar>
     </AppBar>
   )
 }
@@ -87,8 +93,12 @@ type AccountProps = {
 
 const Account: React.FC<AccountProps> = ({ username }) => {
   const { user } = useAuth()
-  const avatar = useAvatar(username)
-  const forceUpdate = useAvatarUpdate()
+
+  const loadable = useRecoilValueLoadable(avatarQuery(username))
+  const hasAvatar =
+    loadable.state === 'hasValue' ? loadable.contents != null : false
+  const setForceAvatarUpdate = useSetRecoilState(forceAvatarUpdate)
+  const forceUpdate = () => setForceAvatarUpdate((n) => n + 1)
 
   const handleCreateAvatar = async (imageURL: string) => {
     if (!user || !user.username) return
@@ -132,7 +142,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
       if (!imageURL) return
       const size = Buffer.from(imageURL).length / 1e3
       if (size <= 400) {
-        if (avatar) {
+        if (hasAvatar) {
           handleUpdateAvatar(imageURL)
         } else {
           handleCreateAvatar(imageURL)
@@ -151,8 +161,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
   const handleDeleteAvatar = async () => {
     if (!user || !user.username) return
 
-    if (avatar) {
-      if (!user || !user.username) return
+    if (hasAvatar) {
       if (window.confirm('Are you sure you want to REMOVE Account Icon?')) {
         await gqlMutation<DeleteAvatarMutationVariables>({
           query: deleteAvatar,
@@ -180,8 +189,8 @@ const Account: React.FC<AccountProps> = ({ username }) => {
 
   return (
     <React.Fragment>
-      <IconButton onClick={openMenu}>
-        <Avatar username={username} size={75} />
+      <IconButton onClick={openMenu} size="small">
+        <Avatar username={username} size={50} />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={closeMenu} keepMounted>
         <MenuItem disableRipple style={{ backgroundColor: 'transparent' }}>
@@ -197,7 +206,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
             <ManageAccountsIcon />
           </ListItemIcon>
           <ListItemButton component="label">
-            {avatar ? 'Change Account Icon' : 'Upload Account Icon'}
+            {hasAvatar ? 'Change Account Icon' : 'Upload Account Icon'}
             <input
               type="file"
               accept="image/jpeg,image/png,image/jpg,image/gif,image/svg"
@@ -206,7 +215,7 @@ const Account: React.FC<AccountProps> = ({ username }) => {
             />
           </ListItemButton>
         </MenuItem>
-        {avatar && (
+        {hasAvatar && (
           <MenuItem disableRipple style={{ backgroundColor: 'transparent' }}>
             <ListItemIcon>
               <PersonRemoveOutlinedIcon />
@@ -234,7 +243,7 @@ const Sign: React.FC = () => {
           size="large"
           className={classes.button}
         >
-          <Typography variant="h5">Sign in</Typography>
+          <Typography variant="h6">Sign in</Typography>
         </Button>
       </Link>
       <Link href={'/signup'}>
@@ -245,7 +254,7 @@ const Sign: React.FC = () => {
           size="large"
           className={classes.button}
         >
-          <Typography variant="h5">Sign up</Typography>
+          <Typography variant="h6">Sign up</Typography>
         </Button>
       </Link>
     </React.Fragment>

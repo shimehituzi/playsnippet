@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 import { postFormState, codesFormState, CodeForm } from '../state/formState'
+import { subscribeFlagState } from '../state/uiState'
 import {
   CreatePostMutationVariables,
   CreatePostMutation,
@@ -51,8 +52,13 @@ const useStyle = makeStyles({
   },
 })
 
-export const PostForm: React.FC = () => {
+type Props = {
+  onClose: VoidFunction
+}
+
+export const PostForm: React.FC<Props> = ({ onClose }) => {
   const { authenticated } = useAuth()
+  const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
 
   const [post, setPost] = useRecoilState(postFormState)
   const [codes, setCodes] = useRecoilState(codesFormState)
@@ -60,6 +66,7 @@ export const PostForm: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!authenticated) return
+    setSubscribeFlag(true)
 
     const res = await gqlMutation<
       CreatePostMutationVariables,
@@ -96,6 +103,7 @@ export const PostForm: React.FC = () => {
       content: '',
     })
     setCodes([])
+    onClose()
   }
 
   const onChangePost = (e: React.ChangeEvent<HTMLInputElement>) => {

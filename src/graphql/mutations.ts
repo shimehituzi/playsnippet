@@ -45,6 +45,7 @@ export const createPost = /* GraphQL */ `
           owner
           postID
           content
+          type
           createdAt
           updatedAt
           post {
@@ -105,6 +106,7 @@ export const updatePost = /* GraphQL */ `
           owner
           postID
           content
+          type
           createdAt
           updatedAt
           post {
@@ -165,6 +167,7 @@ export const deletePost = /* GraphQL */ `
           owner
           postID
           content
+          type
           createdAt
           updatedAt
           post {
@@ -227,6 +230,7 @@ export const createCode = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -281,6 +285,7 @@ export const updateCode = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -335,6 +340,7 @@ export const deleteCode = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -354,6 +360,7 @@ export const createComment = /* GraphQL */ `
       owner
       postID
       content
+      type
       createdAt
       updatedAt
       post {
@@ -385,6 +392,7 @@ export const createComment = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -404,6 +412,7 @@ export const updateComment = /* GraphQL */ `
       owner
       postID
       content
+      type
       createdAt
       updatedAt
       post {
@@ -435,6 +444,7 @@ export const updateComment = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -454,6 +464,7 @@ export const deleteComment = /* GraphQL */ `
       owner
       postID
       content
+      type
       createdAt
       updatedAt
       post {
@@ -485,6 +496,7 @@ export const deleteComment = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }

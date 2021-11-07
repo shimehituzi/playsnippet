@@ -42,6 +42,7 @@ export const getPost = /* GraphQL */ `
           owner
           postID
           content
+          type
           createdAt
           updatedAt
           post {
@@ -95,6 +96,7 @@ export const listPosts = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -151,6 +153,7 @@ export const listPostsByDate = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -207,6 +210,7 @@ export const listPostsByOwner = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -259,6 +263,7 @@ export const getCode = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -402,6 +407,54 @@ export const listCodesByOwner = /* GraphQL */ `
     }
   }
 `;
+export const listCodesByPost = /* GraphQL */ `
+  query ListCodesByPost(
+    $postID: ID
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelCodeFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listCodesByPost(
+      postID: $postID
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        owner
+        postID
+        title
+        content
+        lang
+        skipline
+        type
+        createdAt
+        updatedAt
+        post {
+          id
+          owner
+          title
+          content
+          type
+          createdAt
+          updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
+        }
+      }
+      nextToken
+    }
+  }
+`;
 export const getComment = /* GraphQL */ `
   query GetComment($id: ID!) {
     getComment(id: $id) {
@@ -409,6 +462,7 @@ export const getComment = /* GraphQL */ `
       owner
       postID
       content
+      type
       createdAt
       updatedAt
       post {
@@ -440,6 +494,7 @@ export const getComment = /* GraphQL */ `
             owner
             postID
             content
+            type
             createdAt
             updatedAt
           }
@@ -461,6 +516,52 @@ export const listComments = /* GraphQL */ `
         owner
         postID
         content
+        type
+        createdAt
+        updatedAt
+        post {
+          id
+          owner
+          title
+          content
+          type
+          createdAt
+          updatedAt
+          codes {
+            nextToken
+          }
+          comments {
+            nextToken
+          }
+        }
+      }
+      nextToken
+    }
+  }
+`;
+export const listCommentsByDate = /* GraphQL */ `
+  query ListCommentsByDate(
+    $type: String
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelCommentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listCommentsByDate(
+      type: $type
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        owner
+        postID
+        content
+        type
         createdAt
         updatedAt
         post {
@@ -505,6 +606,7 @@ export const listCommentsByOwner = /* GraphQL */ `
         owner
         postID
         content
+        type
         createdAt
         updatedAt
         post {
@@ -549,6 +651,7 @@ export const listCommentsByPost = /* GraphQL */ `
         owner
         postID
         content
+        type
         createdAt
         updatedAt
         post {

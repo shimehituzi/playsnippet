@@ -1,6 +1,7 @@
 import React from 'react'
 import { useRecoilValue } from 'recoil'
 import { commentsSelector } from '../state/apiState'
+import * as APIt from '../API'
 import {
   List,
   ListItem,
@@ -12,11 +13,21 @@ import { Avatar } from './Avatar'
 
 type Props = {
   postID: string
+  comments?: APIt.Comment[]
 }
 
-export const Comments: React.FC<Props> = ({ postID }) => {
-  const comments = useRecoilValue(commentsSelector(postID))
+export const Comments: React.FC<Props> = (props) => {
+  const comments = useRecoilValue(commentsSelector(props.postID))
+  return (
+    <CommentsRenderer comments={props.comments ? props.comments : comments} />
+  )
+}
 
+type RendererProps = {
+  comments: APIt.Comment[]
+}
+
+const CommentsRenderer: React.FC<RendererProps> = ({ comments }) => {
   return (
     <List>
       {comments.map((comment, key) => (

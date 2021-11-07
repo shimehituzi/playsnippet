@@ -1,12 +1,18 @@
 import React from 'react'
 import { Appbar } from './Appbar'
-import { Container } from '@mui/material'
+import { Box, Container } from '@mui/material'
+import { Drawer } from './Drawer'
+import { DrawerHeader } from './Styled'
 
 export const Layout: React.FC = ({ children }) => {
   return (
-    <React.Fragment>
+    <Box sx={{ display: 'flex' }}>
       <Appbar />
-      <Container>{children}</Container>
-    </React.Fragment>
+      <Drawer />
+      <Box sx={{ flexGrow: 1 }}>
+        <DrawerHeader />
+        <Container>{children}</Container>
+      </Box>
+    </Box>
   )
 }
