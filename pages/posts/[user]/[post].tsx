@@ -2,22 +2,25 @@ import React, { useEffect } from 'react'
 import Head from 'next/head'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { ParsedUrlQuery } from 'querystring'
+import { useRecoilValue } from 'recoil'
 import {
+  postsState,
   codesState,
   commentsState,
-  postsState,
+  latestTimeStampSelector,
 } from '../../../src/state/apiState'
-import * as APIt from '../../../src/API'
-import * as query from '../../../src/graphql/queries'
-import { serverQuery } from '../../../src/utils/graphql'
+import { Post as TypePost } from '../../../src/API'
 import { useArraySettor } from '../../../src/utils/arraySettor'
-import { separatePosts } from '../../../src/utils/api/omit'
+import { omitCode, omitComment, omitPost } from '../../../src/utils/api/omit'
+import { useRenderState } from '../../../src/utils/render'
+import { listCommentsByPost, serverGetPost } from '../../../src/utils/api/query'
 import { Grid } from '@mui/material'
 import { Post } from '../../../src/components/Post'
-import { useRenderState } from '../../../src/utils/render'
+import { subscribeComment } from '../../../src/utils/api/subscription'
+import { useSubscription } from '../../../src/utils/subscribe'
 
 type Props = {
-  post: APIt.Post
+  post: TypePost
 }
 
 type Params = ParsedUrlQuery & {
@@ -39,13 +42,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   const postID = params?.post
   if (owner === undefined || postID === undefined) return { notFound: true }
 
-  const res = await serverQuery<APIt.GetPostQueryVariables, APIt.GetPostQuery>({
-    query: query.getPost,
-    variables: {
-      id: postID,
-    },
-  })
-
+  const res = await serverGetPost({ id: postID })
   const post = res.data?.getPost
 
   if (post && post.owner === owner) {
@@ -62,18 +59,32 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
 }
 
 const UserPost: NextPage<Props> = (props) => {
-  const { render } = useRenderState()
+  const { render, toCSR } = useRenderState()
 
-  const setPosts = useArraySettor(postsState, 'DESC')
-  const setCodes = useArraySettor(codesState, 'ASC')
-  const setComments = useArraySettor(commentsState, 'ASC')
+  const setPosts = useArraySettor(postsState, 'DESC', omitPost)
+  const setCodes = useArraySettor(codesState, 'ASC', omitCode)
+  const setComments = useArraySettor(commentsState, 'ASC', omitComment)
 
   useEffect(() => {
-    const data = separatePosts([props.post])
-    setPosts.initItems(data.posts)
-    setCodes.initItems(data.codes)
-    setComments.initItems(data.comments)
+    setPosts.initItems([props.post])
+    setCodes.initItems(props.post.codes?.items)
+    setComments.initItems(props.post.comments?.items)
   }, [])
+
+  const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
+  const newItems = async () => {
+    const comments = await listCommentsByPost({
+      postID: props.post.id,
+      createdAt: { gt: latestTimeStamp },
+    })
+    setComments.newItems(comments.data?.listCommentsByPost?.items)
+  }
+  const subscribeFuncArray = [
+    subscribeComment({
+      onCreate: (data) => setComments.createItem(data?.onCreateComment),
+    }),
+  ]
+  useSubscription({ subscribeFuncArray, newItems, toCSR })
 
   return (
     <>

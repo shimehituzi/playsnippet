@@ -6,7 +6,7 @@ import { GraphQLOptions, GraphQLResult } from '@aws-amplify/api-graphql'
 
 type defaultOptions<V extends Record<string, unknown>> = {
   query: GraphQLOptions['query']
-  defaultVariables: V
+  defaultVariables?: V
   server?: boolean
 }
 
@@ -53,6 +53,11 @@ export const serverListPostsByOwner = generateQueryFunc<
   server: true,
 })
 
+export const serverGetPost = generateQueryFunc<
+  APIt.GetPostQueryVariables,
+  APIt.GetPostQuery
+>({ query: query.getPost, server: true })
+
 export const listPostsByDate = generateQueryFunc<
   APIt.ListPostsByDateQueryVariables,
   APIt.ListPostsByDateQuery
@@ -92,6 +97,16 @@ export const listCommentsByDate = generateQueryFunc<
   query: query.listCommentsByDate,
   defaultVariables: {
     type: 'comment',
+    sortDirection: sd.ASC,
+  },
+})
+
+export const listCommentsByPost = generateQueryFunc<
+  APIt.ListCommentsByPostQueryVariables,
+  APIt.ListCommentsByPostQuery
+>({
+  query: query.listCommentsByPost,
+  defaultVariables: {
     sortDirection: sd.ASC,
   },
 })
