@@ -48,6 +48,11 @@ const useStyle = makeStyles({
   appBar: {
     whiteSpace: 'nowrap',
     overflowX: 'scroll',
+    msOverflowStyle: 'none',
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
   },
 })
 

@@ -10,7 +10,12 @@ const useStyle = makeStyles({
     textAlign: 'left',
     margin: '1em 0',
     padding: '0.5em',
-    overflow: 'scroll',
+    overflowX: 'scroll',
+    msOverflowStyle: 'none',
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
     '& .token-line': {
       lineHeight: '1.6em',
       height: '1.6em',
