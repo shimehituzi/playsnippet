@@ -3,11 +3,6 @@ import Highlight, { defaultProps, Language } from 'prism-react-renderer'
 import theme from 'prism-react-renderer/themes/vsDark'
 import { makeStyles } from '@mui/styles'
 
-type Props = {
-  code: string
-  lang: string
-}
-
 const useStyle = makeStyles({
   pre: {
     fontFamily:
@@ -15,7 +10,12 @@ const useStyle = makeStyles({
     textAlign: 'left',
     margin: '1em 0',
     padding: '0.5em',
-    overflow: 'scroll',
+    overflowX: 'scroll',
+    msOverflowStyle: 'none',
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
     '& .token-line': {
       lineHeight: '1.6em',
       height: '1.6em',
@@ -35,6 +35,11 @@ const useStyle = makeStyles({
     display: 'table-cell',
   },
 })
+
+type Props = {
+  code: string
+  lang: string
+}
 
 export const CodeBlock: React.FC<Props> = ({ code, lang }) => {
   const classes = useStyle()
