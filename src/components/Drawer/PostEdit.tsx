@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { useRecoilState, useSetRecoilState } from 'recoil'
-import { postFormState, codesFormState } from '../../state/formState'
+import React, { useEffect } from 'react'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { editPostFormState, editCodesFormState } from '../../state/formState'
 import {
   Dialog,
   Paper,
@@ -9,18 +9,18 @@ import {
   ListItemIcon,
   ListItemText,
   DialogTitle,
-  DialogContent,
   Grid,
   IconButton,
 } from '@mui/material'
 import Draggable from 'react-draggable'
 import {
   DeleteForever as DeleteForeverIcon,
-  PostAdd as PostAddIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material'
 import { useIconStyle } from './index'
 import { PostForm } from '../PostForm'
-import { subscribeFlagState } from '../../state/uiState'
+import { editState, subscribeFlagState } from '../../state/uiState'
+import { codesSelector, postSelector } from '../../state/apiState'
 
 const PaperComponent: React.FC<PaperProps> = (props) => {
   return (
@@ -33,23 +33,42 @@ const PaperComponent: React.FC<PaperProps> = (props) => {
   )
 }
 
-export const PostAdd: React.FC = () => {
+export const PostEdit: React.FC = () => {
   const classes = useIconStyle()
-  const [open, setOpenFlag] = useState<boolean>(false)
+  const [edit, setEdit] = useRecoilState(editState)
   const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
 
-  const postState = useRecoilState(postFormState)
+  const initialPost = useRecoilValue(postSelector(edit.id))
+  const initialCodes = useRecoilValue(codesSelector(edit.id))
+
+  const postState = useRecoilState(editPostFormState)
   const setPost = postState[1]
-  const codesState = useRecoilState(codesFormState)
+  const codesState = useRecoilState(editCodesFormState)
   const setCodes = codesState[1]
 
+  useEffect(() => {
+    setPost({
+      title: initialPost?.title ?? '',
+      content: initialPost?.content ?? '',
+    })
+    setCodes(
+      initialCodes.map(({ title, content, lang }) => ({ title, content, lang }))
+    )
+  }, [initialPost, initialCodes])
+
   const onClick = () => {
-    setOpenFlag(true)
+    setEdit((prev) => ({
+      ...prev,
+      open: true,
+    }))
     setSubscribeFlag(true)
   }
 
   const onClose = () => {
-    setOpenFlag(false)
+    setEdit((prev) => ({
+      ...prev,
+      open: false,
+    }))
     setSubscribeFlag(false)
   }
 
@@ -60,7 +79,11 @@ export const PostAdd: React.FC = () => {
         content: '',
       })
       setCodes([])
-      setOpenFlag(false)
+      setEdit({
+        isEdit: false,
+        open: false,
+        id: '',
+      })
     }
   }
 
@@ -68,19 +91,15 @@ export const PostAdd: React.FC = () => {
     <>
       <ListItem button onClick={onClick}>
         <ListItemIcon>
-          <PostAddIcon className={classes.icon} />
+          <EditIcon className={classes.icon} />
         </ListItemIcon>
-        <ListItemText>Create a Post</ListItemText>
+        <ListItemText>Edit a Post</ListItemText>
       </ListItem>
       <Dialog
-        open={open}
+        open={edit.open}
         onClose={onClose}
-        scroll="paper"
-        maxWidth="md"
-        fullWidth={true}
         PaperComponent={PaperComponent}
         aria-labelledby="draggable-dialog-title"
-        aria-describedby="scroll-dialog-description"
       >
         <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
           <Grid
@@ -89,7 +108,7 @@ export const PostAdd: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item>Post Form</Grid>
+            <Grid item>Edit Form</Grid>
             <Grid item>
               <IconButton onClick={cancel}>
                 <DeleteForeverIcon />
@@ -97,13 +116,11 @@ export const PostAdd: React.FC = () => {
             </Grid>
           </Grid>
         </DialogTitle>
-        <DialogContent id="scroll-dialog-description">
-          <PostForm
-            postState={postState}
-            codesState={codesState}
-            onClose={onClose}
-          />
-        </DialogContent>
+        <PostForm
+          postState={postState}
+          codesState={codesState}
+          onClose={onClose}
+        />
       </Dialog>
     </>
   )

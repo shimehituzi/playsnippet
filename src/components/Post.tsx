@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { postSelector } from '../state/apiState'
-import { subscribeFlagState } from '../state/uiState'
+import { editState, subscribeFlagState } from '../state/uiState'
 import * as APIt from '../API'
 import * as query from '../graphql/queries'
 import * as mutation from '../graphql/mutations'
@@ -17,6 +17,7 @@ import {
   CardHeader,
   Collapse,
   colors,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -25,6 +26,7 @@ import {
 import { makeStyles } from '@mui/styles'
 import {
   Delete as DeleteIcon,
+  Edit as EditIcon,
   ExpandLess,
   ExpandMore,
   MoreVert as MoreVertIcon,
@@ -69,10 +71,12 @@ type RendererProps = {
 
 const PostsRenderer: React.FC<RendererProps> = ({ post }) => {
   const { authenticated, user } = useAuth()
+  const isOwner = user?.username === post.owner
+
   const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
 
   const deletePost = async () => {
-    if (!authenticated) return
+    if (!isOwner) return
     setSubscribeFlag(true)
 
     const res = await gqlQuery<APIt.GetPostQueryVariables, APIt.GetPostQuery>({
@@ -104,10 +108,24 @@ const PostsRenderer: React.FC<RendererProps> = ({ post }) => {
     })
   }
 
-  const onClick = async () => {
+  const onDelete = async () => {
+    if (!isOwner) return
     if (window.confirm('Are you sure you want to delete it?')) {
+      closeMenu()
       deletePost()
     }
+  }
+
+  const setPostEdit = useSetRecoilState(editState)
+
+  const onEdit = () => {
+    if (!isOwner) return
+    closeMenu()
+    setPostEdit({
+      isEdit: true,
+      open: true,
+      id: post.id,
+    })
   }
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -151,13 +169,18 @@ const PostsRenderer: React.FC<RendererProps> = ({ post }) => {
           </Link>
         }
         action={
-          user?.username === post.owner ? (
+          isOwner ? (
             <React.Fragment>
               <IconButton onClick={openMenu}>
                 <MoreVertIcon />
               </IconButton>
               <Menu anchorEl={anchorEl} open={open} onClose={closeMenu}>
-                <MenuItem onClick={onClick}>
+                <MenuItem onClick={onEdit}>
+                  <EditIcon />
+                  EDIT
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={onDelete}>
                   <DeleteIcon />
                   DELETE
                 </MenuItem>

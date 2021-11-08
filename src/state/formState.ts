@@ -1,9 +1,9 @@
 import { atom } from 'recoil'
 import { CreatePostInput, CreateCodeInput } from '../API'
 
-export type PostForm = Pick<CreatePostInput, 'title' | 'content'>
+export type PostFormState = Pick<CreatePostInput, 'title' | 'content'>
 
-export const postFormState = atom<PostForm>({
+export const postFormState = atom<PostFormState>({
   key: 'PostFormFormState',
   default: {
     title: '',
@@ -11,9 +11,22 @@ export const postFormState = atom<PostForm>({
   },
 })
 
-export type CodeForm = Pick<CreateCodeInput, 'title' | 'content' | 'lang'>
+export const editPostFormState = atom<PostFormState>({
+  key: 'editPostFormFormState',
+  default: {
+    title: '',
+    content: '',
+  },
+})
 
-export const codesFormState = atom<CodeForm[]>({
+export type CodeFormState = Pick<CreateCodeInput, 'title' | 'content' | 'lang'>
+
+export const codesFormState = atom<CodeFormState[]>({
   key: 'codesFormState',
+  default: [],
+})
+
+export const editCodesFormState = atom<CodeFormState[]>({
+  key: 'editCodesFormState',
   default: [],
 })

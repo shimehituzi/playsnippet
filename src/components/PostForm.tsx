@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { useRecoilState, useSetRecoilState } from 'recoil'
-import { postFormState, codesFormState, CodeForm } from '../state/formState'
+import { SetterOrUpdater, useSetRecoilState } from 'recoil'
+import { CodeFormState, PostFormState } from '../state/formState'
 import { subscribeFlagState } from '../state/uiState'
 import {
   CreatePostMutationVariables,
@@ -52,16 +52,24 @@ const useStyle = makeStyles({
   },
 })
 
+type RecoilState<T> = [T, SetterOrUpdater<T>]
+
 type Props = {
+  postState: RecoilState<PostFormState>
+  codesState: RecoilState<CodeFormState[]>
   onClose: VoidFunction
 }
 
-export const PostForm: React.FC<Props> = ({ onClose }) => {
+export const PostForm: React.FC<Props> = ({
+  onClose,
+  postState,
+  codesState,
+}) => {
   const { authenticated } = useAuth()
   const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
 
-  const [post, setPost] = useRecoilState(postFormState)
-  const [codes, setCodes] = useRecoilState(codesFormState)
+  const [post, setPost] = postState
+  const [codes, setCodes] = codesState
   const [tab, setTab] = useState<number>(0)
 
   const handleSubmit = async () => {
@@ -117,7 +125,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
     (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setCodes((codes) => {
         const prevCode = codes[index]
-        const newItem: CodeForm = {
+        const newItem: CodeFormState = {
           ...prevCode,
           [e.target.name]: e.target.value,
         }
@@ -131,7 +139,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
   }
 
   const addCode = () => {
-    const emptyItem: CodeForm = {
+    const emptyItem: CodeFormState = {
       title: '',
       content: '',
       lang: '',
@@ -196,7 +204,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
                     fullWidth
                     variant="standard"
                     label="Code Title"
-                    value={codes[tab].title}
+                    value={codes[tab]?.title ?? ''}
                     onChange={onChangeCode(tab)}
                     name="title"
                   />
@@ -206,7 +214,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
                     fullWidth
                     variant="standard"
                     label="Code Language"
-                    value={codes[tab].lang}
+                    value={codes[tab]?.lang ?? ''}
                     onChange={onChangeCode(tab)}
                     name="lang"
                   />
@@ -226,7 +234,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
                     variant="outlined"
                     label="Code"
                     multiline
-                    value={codes[tab].content}
+                    value={codes[tab]?.content ?? ''}
                     onChange={onChangeCode(tab)}
                     name="content"
                   />
