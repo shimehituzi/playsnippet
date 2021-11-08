@@ -1,14 +1,6 @@
 import React, { useState } from 'react'
-import { SetterOrUpdater, useSetRecoilState } from 'recoil'
+import { SetterOrUpdater } from 'recoil'
 import { CodeFormState, PostFormState } from '../state/formState'
-import { subscribeFlagState } from '../state/uiState'
-import {
-  CreatePostMutationVariables,
-  CreatePostMutation,
-  CreateCodeMutationVariables,
-} from '../API'
-import { createCode, createPost } from '../graphql/mutations'
-import { gqlMutation } from '../utils/graphql'
 import {
   Button,
   Card,
@@ -25,7 +17,6 @@ import {
   Delete as DeleteIcon,
   Send as SendIcon,
 } from '@mui/icons-material'
-import { useAuth } from '../utils/auth'
 
 const useStyle = makeStyles({
   card: {
@@ -57,62 +48,17 @@ type RecoilState<T> = [T, SetterOrUpdater<T>]
 type Props = {
   postState: RecoilState<PostFormState>
   codesState: RecoilState<CodeFormState[]>
-  onClose: VoidFunction
+  submit: () => Promise<void>
 }
 
 export const PostForm: React.FC<Props> = ({
-  onClose,
   postState,
   codesState,
+  submit,
 }) => {
-  const { authenticated } = useAuth()
-  const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
-
   const [post, setPost] = postState
   const [codes, setCodes] = codesState
   const [tab, setTab] = useState<number>(0)
-
-  const handleSubmit = async () => {
-    if (!authenticated) return
-    setSubscribeFlag(true)
-
-    const res = await gqlMutation<
-      CreatePostMutationVariables,
-      CreatePostMutation
-    >({
-      query: createPost,
-      variables: {
-        input: {
-          ...post,
-          type: 'post',
-        },
-      },
-    })
-    const postID = res?.data?.createPost?.id
-
-    if (postID) {
-      codes.forEach(async (code) => {
-        await gqlMutation<CreateCodeMutationVariables>({
-          query: createCode,
-          variables: {
-            input: {
-              ...code,
-              skipline: '',
-              postID: postID,
-              type: 'code',
-            },
-          },
-        })
-      })
-    }
-
-    setPost({
-      title: '',
-      content: '',
-    })
-    setCodes([])
-    onClose()
-  }
 
   const onChangePost = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPost((post) => ({
@@ -254,12 +200,8 @@ export const PostForm: React.FC<Props> = ({
           </Button>
         </Grid>
         <Grid item>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            startIcon={<SendIcon />}
-          >
-            Create
+          <Button variant="contained" onClick={submit} startIcon={<SendIcon />}>
+            Submit
           </Button>
         </Grid>
       </Grid>

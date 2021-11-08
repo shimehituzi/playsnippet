@@ -1,6 +1,12 @@
 import React, { useState } from 'react'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 import { postFormState, codesFormState } from '../../state/formState'
+import { subscribeFlagState } from '../../state/uiState'
+import {
+  createCodeMutation,
+  createPostMutation,
+} from '../../utils/api/mutation'
+import { useAuth } from '../../utils/auth'
 import {
   Dialog,
   Paper,
@@ -20,7 +26,6 @@ import {
 } from '@mui/icons-material'
 import { useIconStyle } from './index'
 import { PostForm } from '../PostForm'
-import { subscribeFlagState } from '../../state/uiState'
 
 const PaperComponent: React.FC<PaperProps> = (props) => {
   return (
@@ -37,11 +42,12 @@ export const PostAdd: React.FC = () => {
   const classes = useIconStyle()
   const [open, setOpenFlag] = useState<boolean>(false)
   const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
+  const { authenticated } = useAuth()
 
   const postState = useRecoilState(postFormState)
-  const setPost = postState[1]
+  const [post, setPost] = postState
   const codesState = useRecoilState(codesFormState)
-  const setCodes = codesState[1]
+  const [codes, setCodes] = codesState
 
   const onClick = () => {
     setOpenFlag(true)
@@ -50,7 +56,6 @@ export const PostAdd: React.FC = () => {
 
   const onClose = () => {
     setOpenFlag(false)
-    setSubscribeFlag(false)
   }
 
   const cancel = () => {
@@ -62,6 +67,32 @@ export const PostAdd: React.FC = () => {
       setCodes([])
       setOpenFlag(false)
     }
+  }
+
+  const submit = async () => {
+    if (!authenticated) return
+    setSubscribeFlag(true)
+
+    const res = await createPostMutation({ input: { ...post, type: 'post' } })
+    const postID = res.data?.createPost?.id
+
+    if (postID) {
+      const input = {
+        postID,
+        skipline: '',
+        type: 'code',
+      }
+      codes.forEach(async (code) => {
+        createCodeMutation({ input: { ...code, ...input } })
+      })
+    }
+
+    setPost({
+      title: '',
+      content: '',
+    })
+    setCodes([])
+    onClose()
   }
 
   return (
@@ -101,7 +132,7 @@ export const PostAdd: React.FC = () => {
           <PostForm
             postState={postState}
             codesState={codesState}
-            onClose={onClose}
+            submit={submit}
           />
         </DialogContent>
       </Dialog>

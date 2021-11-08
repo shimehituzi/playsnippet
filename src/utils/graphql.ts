@@ -43,7 +43,7 @@ export const gqlQuery = async <V extends Record<string, unknown>, Q>({
 export const gqlMutation = async <V extends Record<string, unknown>, M = void>({
   query,
   variables,
-}: GqlOptions<V>): Promise<GraphQLResult<M> | undefined> => {
+}: GqlOptions<V>): Promise<GraphQLResult<M>> => {
   const res = (await API.graphql({
     query: query,
     variables: variables,

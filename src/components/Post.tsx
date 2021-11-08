@@ -121,6 +121,7 @@ const PostsRenderer: React.FC<RendererProps> = ({ post }) => {
   const onEdit = () => {
     if (!isOwner) return
     closeMenu()
+    setSubscribeFlag(true)
     setPostEdit({
       isEdit: true,
       open: true,

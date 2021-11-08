@@ -14,7 +14,11 @@ import { useArraySettor } from '../../../src/utils/arraySettor'
 import { omitCode, omitComment, omitPost } from '../../../src/utils/api/omit'
 import { useRenderState } from '../../../src/utils/render'
 import { listCommentsByPost, serverGetPost } from '../../../src/utils/api/query'
-import { subscribeComment } from '../../../src/utils/api/subscription'
+import {
+  subscribePost,
+  subscribeCode,
+  subscribeComment,
+} from '../../../src/utils/api/subscription'
 import { useSubscription } from '../../../src/utils/subscribe'
 import { Grid } from '@mui/material'
 import { Post } from '../../../src/components/Post'
@@ -81,6 +85,18 @@ const UserPost: NextPage<Props> = (props) => {
     setComments.newItems(comments.data?.listCommentsByPost?.items)
   }
   const subscribeFuncArray = [
+    subscribePost({
+      onUpdate: (data) => {
+        const postID = data?.onUpdatePost?.id
+        if (postID === props.post.id) setPosts.updateItem(data?.onUpdatePost)
+      },
+    }),
+    subscribeCode({
+      onUpdate: (data) => {
+        const postID = data?.onUpdateCode?.postID
+        if (postID === props.post.id) setCodes.updateItem(data?.onUpdateCode)
+      },
+    }),
     subscribeComment({
       onCreate: (data) => setComments.createItem(data?.onCreateComment),
     }),

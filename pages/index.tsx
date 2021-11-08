@@ -91,10 +91,12 @@ const Home: NextPage<Props> = (props) => {
   const subscribeFuncArray = [
     subscribePost({
       onCreate: (data) => setPosts.createItem(data?.onCreatePost),
+      onUpdate: (data) => setPosts.updateItem(data?.onUpdatePost),
       onDelete: (data) => setPosts.deleteItem(data?.onDeletePost),
     }),
     subscribeCode({
       onCreate: (data) => setCodes.createItem(data?.onCreateCode),
+      onUpdate: (data) => setCodes.updateItem(data?.onUpdateCode),
       onDelete: (data) => setCodes.deleteItem(data?.onDeleteCode),
     }),
     subscribeComment({

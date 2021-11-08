@@ -1,6 +1,13 @@
 import React, { useEffect } from 'react'
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import { editPostFormState, editCodesFormState } from '../../state/formState'
+import { editState, subscribeFlagState } from '../../state/uiState'
+import { codesSelector, postSelector } from '../../state/apiState'
+import {
+  updateCodeMutation,
+  updatePostMutation,
+} from '../../utils/api/mutation'
+import { useAuth } from '../../utils/auth'
 import {
   Dialog,
   Paper,
@@ -19,8 +26,6 @@ import {
 } from '@mui/icons-material'
 import { useIconStyle } from './index'
 import { PostForm } from '../PostForm'
-import { editState, subscribeFlagState } from '../../state/uiState'
-import { codesSelector, postSelector } from '../../state/apiState'
 
 const PaperComponent: React.FC<PaperProps> = (props) => {
   return (
@@ -37,14 +42,15 @@ export const PostEdit: React.FC = () => {
   const classes = useIconStyle()
   const [edit, setEdit] = useRecoilState(editState)
   const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
+  const { authenticated } = useAuth()
 
   const initialPost = useRecoilValue(postSelector(edit.id))
   const initialCodes = useRecoilValue(codesSelector(edit.id))
 
   const postState = useRecoilState(editPostFormState)
-  const setPost = postState[1]
+  const [post, setPost] = postState
   const codesState = useRecoilState(editCodesFormState)
-  const setCodes = codesState[1]
+  const [codes, setCodes] = codesState
 
   useEffect(() => {
     setPost({
@@ -69,11 +75,10 @@ export const PostEdit: React.FC = () => {
       ...prev,
       open: false,
     }))
-    setSubscribeFlag(false)
   }
 
   const cancel = () => {
-    if (window.confirm('Are you sure you want to delete post and codes?')) {
+    if (window.confirm('Are you sure you want to cancel edit?')) {
       setPost({
         title: '',
         content: '',
@@ -85,6 +90,24 @@ export const PostEdit: React.FC = () => {
         id: '',
       })
     }
+  }
+
+  const submit = async () => {
+    if (!authenticated) return
+    setSubscribeFlag(true)
+
+    await updatePostMutation({ input: { id: edit.id, ...post } })
+
+    codes.forEach(async (code) => {
+      updateCodeMutation({ input: { id: edit.id, ...code } })
+    })
+
+    setPost({
+      title: '',
+      content: '',
+    })
+    setCodes([])
+    onClose()
   }
 
   return (
@@ -119,7 +142,7 @@ export const PostEdit: React.FC = () => {
         <PostForm
           postState={postState}
           codesState={codesState}
-          onClose={onClose}
+          submit={submit}
         />
       </Dialog>
     </>
