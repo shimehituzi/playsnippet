@@ -1,7 +1,7 @@
 import React from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { codesSelector } from '../state/apiState'
-import { typingIDState } from '../state/uiState'
+import { typingIDState } from '../state/typingState'
 import * as APIt from '../API'
 import { Button, Grid, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'

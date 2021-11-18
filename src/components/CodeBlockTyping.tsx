@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Highlight, { defaultProps, Language } from 'prism-react-renderer'
 import theme from 'prism-react-renderer/themes/vsDark'
 import { makeStyles } from '@mui/styles'
+import { useSetRecoilState } from 'recoil'
+import { typingScoreState } from '../state/typingState'
 
 const useStyle = makeStyles({
   pre: {
@@ -73,6 +75,27 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
   getTokenProps,
   stop,
 }) => {
+  const setTypingScore = useSetRecoilState(typingScoreState)
+  const incrementTyped = () => {
+    setTypingScore((prev) => ({
+      ...prev,
+      typed: prev.typed + 1,
+    }))
+  }
+  const incrementCorrect = () => {
+    setTypingScore((prev) => ({
+      ...prev,
+      correct: prev.correct + 1,
+    }))
+  }
+  useEffect(() => {
+    setTypingScore({
+      startTime: Date.now(),
+      correct: 0,
+      typed: 0,
+    })
+  }, [])
+
   const classes = useStyle()
 
   const [gameOver, setGameOver] = useState<boolean>(false)
@@ -87,6 +110,8 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
       }),
     [tokens]
   )
+
+  const asciiOrEnter = new RegExp(/[\n\x20-\x7e]/)
 
   const charMap: CharMap = useMemo(
     () =>
@@ -111,26 +136,32 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
               !(val.character === '\n')
             )
         )
-        .filter((val) => val.character.match(/[\n\x20-\x7e]/) !== null),
+        .filter((val) => asciiOrEnter.test(val.character)),
     [remapedTokens]
   )
 
   const forward = useCallback(() => {
     setGameOver(cursor === charMap.length - 1)
     setCursor(gameOver ? cursor : cursor + 1)
+    incrementCorrect()
   }, [cursor, gameOver, charMap])
 
   const judge = useCallback(
     (e: KeyboardEvent) => {
+      if (gameOver) return
       e.preventDefault()
       if (e.key === 'Escape') {
         stop()
       }
-      if (gameOver) return
-      const current = charMap[cursor]?.character
-      if (e.key === current || (e.key === 'Enter' && current === '\n')) {
-        e.preventDefault()
-        forward()
+      if (
+        (e.key.length === 1 && asciiOrEnter.test(e.key)) ||
+        e.key === 'Enter'
+      ) {
+        incrementTyped()
+        const current = charMap[cursor]?.character
+        if (e.key === current || (e.key === 'Enter' && current === '\n')) {
+          forward()
+        }
       }
     },
     [gameOver, charMap, cursor, forward]

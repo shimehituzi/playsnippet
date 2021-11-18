@@ -19,14 +19,15 @@ import {
   listCommentsByDate,
   serverListPostsByDate,
 } from '../src/utils/api/query'
-import { Button, Grid } from '@mui/material'
-import { Posts } from '../src/components/Posts'
 import {
   subscribeCode,
   subscribeComment,
   subscribePost,
 } from '../src/utils/api/subscription'
 import { useSubscription } from '../src/utils/subscribe'
+import { Button, Grid } from '@mui/material'
+import { Posts } from '../src/components/Posts'
+import { TypingScore } from '../src/components/TypingScore'
 
 type Props = {
   posts: Post[]
@@ -104,6 +105,7 @@ const Home: NextPage<Props> = (props) => {
 
   return (
     <Grid container alignItems="center" justifyContent="center">
+      <TypingScore />
       <Grid item xs={12}>
         {render === 'ISR' ? <Posts posts={props.posts} /> : <Posts />}
       </Grid>
