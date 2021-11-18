@@ -14,10 +14,11 @@ import { useArraySettor } from '../../../src/utils/arraySettor'
 import { omitCode, omitComment, omitPost } from '../../../src/utils/api/omit'
 import { useRenderState } from '../../../src/utils/render'
 import { listCommentsByPost, serverGetPost } from '../../../src/utils/api/query'
-import { Grid } from '@mui/material'
-import { Post } from '../../../src/components/Post'
 import { subscribeComment } from '../../../src/utils/api/subscription'
 import { useSubscription } from '../../../src/utils/subscribe'
+import { Grid } from '@mui/material'
+import { Post } from '../../../src/components/Post'
+import { TypingScore } from '../../../src/components/TypingScore'
 
 type Props = {
   post: TypePost
@@ -92,6 +93,7 @@ const UserPost: NextPage<Props> = (props) => {
         <title>{`${props.post.title} - PlaySnippet`}</title>
       </Head>
       <Grid container alignItems="center" justifyContent="center">
+        <TypingScore />
         <Grid item xs={12} sx={{ padding: '2%' }}>
           {render === 'ISR' ? (
             <Post postID={props.post.id} post={props.post} />

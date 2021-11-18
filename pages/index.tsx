@@ -19,14 +19,14 @@ import {
   listCommentsByDate,
   serverListPostsByDate,
 } from '../src/utils/api/query'
-import { Button, Grid } from '@mui/material'
-import { Posts } from '../src/components/Posts'
 import {
   subscribeCode,
   subscribeComment,
   subscribePost,
 } from '../src/utils/api/subscription'
 import { useSubscription } from '../src/utils/subscribe'
+import { Button, Grid } from '@mui/material'
+import { Posts } from '../src/components/Posts'
 import { TypingScore } from '../src/components/TypingScore'
 
 type Props = {

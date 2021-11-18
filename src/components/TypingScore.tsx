@@ -58,7 +58,7 @@ export const TypingScore: React.FC = () => {
   return (
     <Grid item xs={12} sx={{ paddingX: '2%' }}>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        <Paper className={classes.paper} elevation={24}>
+        <Paper className={classes.paper} elevation={2}>
           <Stack direction="row" spacing={2}>
             <StackItem>Time: {formatTime(time)}</StackItem>
             <StackItem>Character/Second: {cps.toFixed(2)}</StackItem>
