@@ -24,7 +24,7 @@ export const accuracySelector = selector<number>({
   key: 'accuracySelector',
   get: ({ get }) => {
     const { correct, typed } = get(typingScoreState)
-    const accuracy = typed !== 0 ? correct / typed : 0
+    const accuracy = typed !== 0 ? (correct / typed) * 100 : 0
     return accuracy
   },
 })

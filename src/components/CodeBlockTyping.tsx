@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Highlight, { defaultProps, Language } from 'prism-react-renderer'
 import theme from 'prism-react-renderer/themes/vsDark'
 import { makeStyles } from '@mui/styles'
+import { useSetRecoilState } from 'recoil'
+import { typingScoreState } from '../state/typingState'
 
 const useStyle = makeStyles({
   pre: {
@@ -73,6 +75,27 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
   getTokenProps,
   stop,
 }) => {
+  const setTypingScore = useSetRecoilState(typingScoreState)
+  const incrementTyped = () => {
+    setTypingScore((prev) => ({
+      ...prev,
+      typed: prev.typed + 1,
+    }))
+  }
+  const incrementCorrect = () => {
+    setTypingScore((prev) => ({
+      ...prev,
+      correct: prev.correct + 1,
+    }))
+  }
+  useEffect(() => {
+    setTypingScore({
+      startTime: Date.now(),
+      correct: 0,
+      typed: 0,
+    })
+  }, [])
+
   const classes = useStyle()
 
   const [gameOver, setGameOver] = useState<boolean>(false)
@@ -118,6 +141,7 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
   const forward = useCallback(() => {
     setGameOver(cursor === charMap.length - 1)
     setCursor(gameOver ? cursor : cursor + 1)
+    incrementCorrect()
   }, [cursor, gameOver, charMap])
 
   const judge = useCallback(
@@ -127,6 +151,7 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
         stop()
       }
       if (gameOver) return
+      incrementTyped()
       const current = charMap[cursor]?.character
       if (e.key === current || (e.key === 'Enter' && current === '\n')) {
         e.preventDefault()

@@ -20,12 +20,11 @@ const useStyle = makeStyles({
 })
 
 export const TypingScore: React.FC = () => {
-  const [open, setOpen] = useState<boolean>(true)
-  const [typingScore, setTypingScore] = useRecoilState(typingScoreState)
+  const [open, setOpen] = useState<boolean>(false)
+  const [{ correct }, setTypingScore] = useRecoilState(typingScoreState)
   const accuracy = useRecoilValue(accuracySelector)
   const typingID = useRecoilValue(typingIDState)
-  const moutedTime = new Date().getTime()
-  const { time, stop } = useTimer(moutedTime)
+  const { time, stop } = useTimer()
 
   const close = () => {
     setTypingScore({
@@ -36,7 +35,7 @@ export const TypingScore: React.FC = () => {
     setOpen(false)
   }
 
-  const cps = time !== 0 ? Math.floor(typingScore.correct / time) : 0
+  const cps = time !== 0 ? correct / time : 0
 
   const formatTime = (time: number) => {
     const getSeconds = `0${time % 60}`.slice(-2)
@@ -45,6 +44,10 @@ export const TypingScore: React.FC = () => {
 
     return `${getHours} : ${getMinutes} : ${getSeconds}`
   }
+
+  useEffect(() => {
+    if (typingID !== null) setOpen(true)
+  }, [typingID])
 
   useEffect(() => {
     if (typingID === null) stop()
@@ -58,8 +61,8 @@ export const TypingScore: React.FC = () => {
         <Paper className={classes.paper} elevation={24}>
           <Stack direction="row" spacing={2}>
             <StackItem>Time: {formatTime(time)}</StackItem>
-            <StackItem>Character/Second: {cps}</StackItem>
-            <StackItem>Accuracy: {accuracy}%</StackItem>
+            <StackItem>Character/Second: {cps.toFixed(2)}</StackItem>
+            <StackItem>Accuracy: {accuracy.toFixed(2)}%</StackItem>
             {typingID === null && (
               <StackItem>
                 <IconButton onClick={close} sx={{ width: 15, height: 15 }}>
@@ -74,8 +77,9 @@ export const TypingScore: React.FC = () => {
   )
 }
 
-const useTimer = (startTime: number) => {
+const useTimer = () => {
   const [time, setTime] = useState<number>(0)
+  const { startTime } = useRecoilValue(typingScoreState)
   const ref: { current: NodeJS.Timeout | null } = useRef(null)
 
   const stop = () => {
@@ -85,15 +89,16 @@ const useTimer = (startTime: number) => {
   }
 
   useEffect(() => {
+    stop()
     ref.current = setInterval(() => {
-      const now = new Date().getTime()
+      const now = Date.now()
       const diff = Math.floor((now - startTime) / 1000)
       setTime(diff)
     }, 1000)
     return () => {
       if (ref.current !== null) clearInterval(ref.current)
     }
-  }, [])
+  }, [startTime])
 
   return { time, stop }
 }
