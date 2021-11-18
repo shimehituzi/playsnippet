@@ -7,6 +7,7 @@ import {
   ListItemIcon,
   ListItemText,
   DialogTitle,
+  DialogContent,
 } from '@mui/material'
 import Draggable from 'react-draggable'
 import { PostAdd as PostAddIcon } from '@mui/icons-material'
@@ -47,13 +48,19 @@ export const PostAdd: React.FC = () => {
       <Dialog
         open={open}
         onClose={onClose}
+        scroll="paper"
+        maxWidth="md"
+        fullWidth={true}
         PaperComponent={PaperComponent}
         aria-labelledby="draggable-dialog-title"
+        aria-describedby="scroll-dialog-description"
       >
         <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
           Post Form
         </DialogTitle>
-        <PostForm onClose={onClose} />
+        <DialogContent id="scroll-dialog-description">
+          <PostForm onClose={onClose} />
+        </DialogContent>
       </Dialog>
     </>
   )
