@@ -111,6 +111,8 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
     [tokens]
   )
 
+  const asciiOrEnter = new RegExp(/[\n\x20-\x7e]/)
+
   const charMap: CharMap = useMemo(
     () =>
       remapedTokens
@@ -134,7 +136,7 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
               !(val.character === '\n')
             )
         )
-        .filter((val) => val.character.match(/[\n\x20-\x7e]/) !== null),
+        .filter((val) => asciiOrEnter.test(val.character)),
     [remapedTokens]
   )
 
@@ -146,16 +148,20 @@ const CodeRenderer: React.FC<RenderProps & { stop: () => void }> = ({
 
   const judge = useCallback(
     (e: KeyboardEvent) => {
+      if (gameOver) return
       e.preventDefault()
       if (e.key === 'Escape') {
         stop()
       }
-      if (gameOver) return
-      incrementTyped()
-      const current = charMap[cursor]?.character
-      if (e.key === current || (e.key === 'Enter' && current === '\n')) {
-        e.preventDefault()
-        forward()
+      if (
+        (e.key.length === 1 && asciiOrEnter.test(e.key)) ||
+        e.key === 'Enter'
+      ) {
+        incrementTyped()
+        const current = charMap[cursor]?.character
+        if (e.key === current || (e.key === 'Enter' && current === '\n')) {
+          forward()
+        }
       }
     },
     [gameOver, charMap, cursor, forward]
