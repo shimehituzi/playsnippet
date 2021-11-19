@@ -68,15 +68,14 @@ export const commentsSelector = selectorFamily<OmitComment[], string>({
     },
 })
 
-export const latestTimeStampSelector = selector<string>({
+export const oldestPostTimeStampSelector = selector<string>({
   key: 'latestTimeStampSelector',
   get: ({ get }) => {
-    const posts = get(postsState).map((v) => v.createdAt)
-    const codes = get(codesState).map((v) => v.createdAt)
-    const comments = get(commentsState).map((v) => v.createdAt)
-    return [...posts, ...codes, ...comments].reduce(
-      (a, b) => (a > b ? a : b),
-      ''
-    )
+    const timeStamps = get(postsState).map((v) => v.createdAt)
+    if (timeStamps.length > 0) {
+      return timeStamps.reduce((a, b) => (a < b ? a : b))
+    } else {
+      return ''
+    }
   },
 })

@@ -79,6 +79,11 @@ export const listPostsByOwner = generateQueryFunc<
   },
 })
 
+export const getPost = generateQueryFunc<
+  APIt.GetPostQueryVariables,
+  APIt.GetPostQuery
+>({ query: query.getPost })
+
 export const listCodesByDate = generateQueryFunc<
   APIt.ListCodesByDateQueryVariables,
   APIt.ListCodesByDateQuery
@@ -86,6 +91,16 @@ export const listCodesByDate = generateQueryFunc<
   query: query.listCodesByDate,
   defaultVariables: {
     type: 'code',
+    sortDirection: sd.ASC,
+  },
+})
+
+export const listCodesByPost = generateQueryFunc<
+  APIt.ListCodesByPostQueryVariables,
+  APIt.ListCodesByPostQuery
+>({
+  query: query.listCodesByPost,
+  defaultVariables: {
     sortDirection: sd.ASC,
   },
 })

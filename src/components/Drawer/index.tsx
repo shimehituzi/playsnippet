@@ -1,14 +1,15 @@
 import React from 'react'
-import { useRecoilState } from 'recoil'
-import { drawerOpenState } from '../../state/uiState'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { drawerOpenState, editState } from '../../state/uiState'
 import { makeStyles } from '@mui/styles'
 import { Divider, IconButton, List } from '@mui/material'
 import { ChevronLeft as ChevronLeftIcon } from '@mui/icons-material'
 import { Drawer as StyledDrawer, DrawerHeader } from '../Styled'
+import { useAuth } from '../../utils/auth'
 import { GitHubLink } from './GitHubLink'
 import { Subscription } from './Subscription'
 import { PostAdd } from './PostAdd'
-import { useAuth } from '../../utils/auth'
+import { PostEdit } from './PostEdit'
 import { MyPosts } from './MyPosts'
 import { GlobalPosts } from './GlobalPosts'
 
@@ -21,6 +22,7 @@ export const useIconStyle = makeStyles({
 
 export const Drawer: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useRecoilState(drawerOpenState)
+  const { isEdit } = useRecoilValue(editState)
   const closeDrawer = () => setDrawerOpen(false)
 
   const { user } = useAuth()
@@ -39,6 +41,7 @@ export const Drawer: React.FC = () => {
         {user?.username != null && (
           <>
             <PostAdd />
+            {isEdit && <PostEdit />}
             <Divider />
             <MyPosts username={user.username} />
           </>

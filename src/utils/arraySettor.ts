@@ -41,19 +41,6 @@ export const createArrayItem = <T>(
   }
 }
 
-export const newArrayItems = <T>(
-  arr: T[],
-  items: T[],
-  sd: SortDirection
-): T[] => {
-  switch (sd) {
-    case 'DESC':
-      return [...items, ...arr]
-    case 'ASC':
-      return [...arr, ...items]
-  }
-}
-
 export const appendArrayItems = <T extends StringID>(
   arr: T[],
   items: T[],
@@ -88,7 +75,6 @@ export const useArraySettor = <O extends StringID, T extends O>(
 ): {
   initItems: (items: NullableArray<T>) => void
   appendItems: (items: NullableArray<T>) => void
-  newItems: (items: NullableArray<T>) => void
   createItem: (item: Nullable<T>) => void
   updateItem: (item: Nullable<T>) => void
   deleteItem: (item: Nullable<T>) => void
@@ -111,11 +97,6 @@ export const useArraySettor = <O extends StringID, T extends O>(
   const appendItems = useCallback((items: NullableArray<T>) => {
     if (items == null) return
     setArr((arr) => appendArrayItems(arr, items.filter(notNull).map(omit), sd))
-  }, [])
-
-  const newItems = useCallback((items: NullableArray<T>) => {
-    if (items == null) return
-    setArr((arr) => newArrayItems(arr, items.filter(notNull).map(omit), sd))
   }, [])
 
   const createItem = useCallback((item: Nullable<T>) => {
@@ -144,7 +125,6 @@ export const useArraySettor = <O extends StringID, T extends O>(
   return {
     initItems,
     appendItems,
-    newItems,
     createItem,
     updateItem,
     deleteItem,

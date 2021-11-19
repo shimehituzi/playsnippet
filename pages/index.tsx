@@ -6,19 +6,14 @@ import {
   codesState,
   commentsState,
   postNextTokenState,
-  latestTimeStampSelector,
+  oldestPostTimeStampSelector,
 } from '../src/state/apiState'
 import { Post } from '../src/API'
 import { notNull } from '../src/utils/nullable'
 import { useArraySettor } from '../src/utils/arraySettor'
 import { omitCode, omitComment, omitPost } from '../src/utils/api/omit'
 import { useRenderState } from '../src/utils/render'
-import {
-  listPostsByDate,
-  listCodesByDate,
-  listCommentsByDate,
-  serverListPostsByDate,
-} from '../src/utils/api/query'
+import { listPostsByDate, serverListPostsByDate } from '../src/utils/api/query'
 import {
   subscribeCode,
   subscribeComment,
@@ -76,32 +71,32 @@ const Home: NextPage<Props> = (props) => {
     toCSR()
   }
 
-  const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
-  const newItems = async () => {
-    const posts = await listPostsByDate({ createdAt: { gt: latestTimeStamp } })
-    const codes = await listCodesByDate({ createdAt: { gt: latestTimeStamp } })
-    const comments = await listCommentsByDate({
-      createdAt: { gt: latestTimeStamp },
+  const oldestPostTimeStamp = useRecoilValue(oldestPostTimeStampSelector)
+  const reloadQuery = async () => {
+    const res = await listPostsByDate({
+      createdAt: { ge: oldestPostTimeStamp },
     })
-
-    setPosts.newItems(posts.data?.listPostsByDate?.items)
-    setCodes.newItems(codes.data?.listCodesByDate?.items)
-    setComments.newItems(comments.data?.listCommentsByDate?.items)
+    const posts = res.data?.listPostsByDate?.items?.filter(notNull) ?? []
+    setPosts.initItems(posts)
+    setCodes.initItems(posts.flatMap((v) => v.codes?.items))
+    setComments.initItems(posts.flatMap((v) => v.comments?.items))
   }
   const subscribeFuncArray = [
     subscribePost({
       onCreate: (data) => setPosts.createItem(data?.onCreatePost),
+      onUpdate: (data) => setPosts.updateItem(data?.onUpdatePost),
       onDelete: (data) => setPosts.deleteItem(data?.onDeletePost),
     }),
     subscribeCode({
       onCreate: (data) => setCodes.createItem(data?.onCreateCode),
+      onUpdate: (data) => setCodes.updateItem(data?.onUpdateCode),
       onDelete: (data) => setCodes.deleteItem(data?.onDeleteCode),
     }),
     subscribeComment({
       onCreate: (data) => setComments.createItem(data?.onCreateComment),
     }),
   ]
-  useSubscription({ subscribeFuncArray, newItems, toCSR })
+  useSubscription({ subscribeFuncArray, reloadQuery, toCSR })
 
   return (
     <Grid container alignItems="center" justifyContent="center">

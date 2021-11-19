@@ -1,4 +1,12 @@
 import React, { useState } from 'react'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { postFormState, codesFormState } from '../../state/formState'
+import { subscribeFlagState } from '../../state/uiState'
+import {
+  createCodeMutation,
+  createPostMutation,
+} from '../../utils/api/mutation'
+import { useAuth } from '../../utils/auth'
 import {
   Dialog,
   Paper,
@@ -8,9 +16,14 @@ import {
   ListItemText,
   DialogTitle,
   DialogContent,
+  Grid,
+  IconButton,
 } from '@mui/material'
 import Draggable from 'react-draggable'
-import { PostAdd as PostAddIcon } from '@mui/icons-material'
+import {
+  DeleteForever as DeleteForeverIcon,
+  PostAdd as PostAddIcon,
+} from '@mui/icons-material'
 import { useIconStyle } from './index'
 import { PostForm } from '../PostForm'
 
@@ -28,12 +41,60 @@ const PaperComponent: React.FC<PaperProps> = (props) => {
 export const PostAdd: React.FC = () => {
   const classes = useIconStyle()
   const [open, setOpenFlag] = useState<boolean>(false)
+  const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
+  const { authenticated } = useAuth()
+
+  const postState = useRecoilState(postFormState)
+  const [post, setPost] = postState
+  const codesState = useRecoilState(codesFormState)
+  const [codes, setCodes] = codesState
 
   const onClick = () => {
     setOpenFlag(true)
+    setSubscribeFlag(true)
   }
 
   const onClose = () => {
+    setOpenFlag(false)
+  }
+
+  const cancel = () => {
+    if (window.confirm('Are you sure you want to delete post and codes?')) {
+      reset()
+    }
+  }
+
+  const submit = async () => {
+    if (!authenticated) return
+    setSubscribeFlag(true)
+
+    const res = await createPostMutation({ input: { ...post, type: 'post' } })
+    const postID = res.data?.createPost?.id
+
+    if (postID) {
+      codes.forEach(async (code) => {
+        await createCodeMutation({
+          input: {
+            title: code.title,
+            content: code.content,
+            lang: code.lang,
+            postID: postID,
+            skipline: '',
+            type: 'code',
+          },
+        })
+      })
+    }
+
+    reset()
+  }
+
+  const reset = () => {
+    setPost({
+      title: '',
+      content: '',
+    })
+    setCodes([])
     setOpenFlag(false)
   }
 
@@ -56,10 +117,26 @@ export const PostAdd: React.FC = () => {
         aria-describedby="scroll-dialog-description"
       >
         <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-          Post Form
+          <Grid
+            container
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Grid item>Post Form</Grid>
+            <Grid item>
+              <IconButton onClick={cancel}>
+                <DeleteForeverIcon />
+              </IconButton>
+            </Grid>
+          </Grid>
         </DialogTitle>
         <DialogContent id="scroll-dialog-description">
-          <PostForm onClose={onClose} />
+          <PostForm
+            postState={postState}
+            codesState={codesState}
+            submit={submit}
+          />
         </DialogContent>
       </Dialog>
     </>

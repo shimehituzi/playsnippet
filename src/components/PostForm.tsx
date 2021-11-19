@@ -1,14 +1,6 @@
 import React, { useState } from 'react'
-import { useRecoilState, useSetRecoilState } from 'recoil'
-import { postFormState, codesFormState, CodeForm } from '../state/formState'
-import { subscribeFlagState } from '../state/uiState'
-import {
-  CreatePostMutationVariables,
-  CreatePostMutation,
-  CreateCodeMutationVariables,
-} from '../API'
-import { createCode, createPost } from '../graphql/mutations'
-import { gqlMutation } from '../utils/graphql'
+import { SetterOrUpdater } from 'recoil'
+import { PostFormState, CodeFormState } from '../state/formState'
 import {
   Button,
   Card,
@@ -25,7 +17,6 @@ import {
   Delete as DeleteIcon,
   Send as SendIcon,
 } from '@mui/icons-material'
-import { useAuth } from '../utils/auth'
 
 const useStyle = makeStyles({
   card: {
@@ -52,59 +43,22 @@ const useStyle = makeStyles({
   },
 })
 
+type RecoilState<T> = [T, SetterOrUpdater<T>]
+
 type Props = {
-  onClose: VoidFunction
+  postState: RecoilState<PostFormState>
+  codesState: RecoilState<CodeFormState[]>
+  submit: () => Promise<void>
 }
 
-export const PostForm: React.FC<Props> = ({ onClose }) => {
-  const { authenticated } = useAuth()
-  const setSubscribeFlag = useSetRecoilState(subscribeFlagState)
-
-  const [post, setPost] = useRecoilState(postFormState)
-  const [codes, setCodes] = useRecoilState(codesFormState)
+export const PostForm: React.FC<Props> = ({
+  postState,
+  codesState,
+  submit,
+}) => {
+  const [post, setPost] = postState
+  const [codes, setCodes] = codesState
   const [tab, setTab] = useState<number>(0)
-
-  const handleSubmit = async () => {
-    if (!authenticated) return
-    setSubscribeFlag(true)
-
-    const res = await gqlMutation<
-      CreatePostMutationVariables,
-      CreatePostMutation
-    >({
-      query: createPost,
-      variables: {
-        input: {
-          ...post,
-          type: 'post',
-        },
-      },
-    })
-    const postID = res?.data?.createPost?.id
-
-    if (postID) {
-      codes.forEach(async (code) => {
-        await gqlMutation<CreateCodeMutationVariables>({
-          query: createCode,
-          variables: {
-            input: {
-              ...code,
-              skipline: '',
-              postID: postID,
-              type: 'code',
-            },
-          },
-        })
-      })
-    }
-
-    setPost({
-      title: '',
-      content: '',
-    })
-    setCodes([])
-    onClose()
-  }
 
   const onChangePost = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPost((post) => ({
@@ -117,7 +71,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
     (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setCodes((codes) => {
         const prevCode = codes[index]
-        const newItem: CodeForm = {
+        const newItem: CodeFormState = {
           ...prevCode,
           [e.target.name]: e.target.value,
         }
@@ -131,7 +85,8 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
   }
 
   const addCode = () => {
-    const emptyItem: CodeForm = {
+    const emptyItem: CodeFormState = {
+      id: `${Date.now()}`,
       title: '',
       content: '',
       lang: '',
@@ -196,7 +151,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
                     fullWidth
                     variant="standard"
                     label="Code Title"
-                    value={codes[tab].title}
+                    value={codes[tab]?.title ?? ''}
                     onChange={onChangeCode(tab)}
                     name="title"
                   />
@@ -206,7 +161,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
                     fullWidth
                     variant="standard"
                     label="Code Language"
-                    value={codes[tab].lang}
+                    value={codes[tab]?.lang ?? ''}
                     onChange={onChangeCode(tab)}
                     name="lang"
                   />
@@ -226,7 +181,7 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
                     variant="outlined"
                     label="Code"
                     multiline
-                    value={codes[tab].content}
+                    value={codes[tab]?.content ?? ''}
                     onChange={onChangeCode(tab)}
                     name="content"
                   />
@@ -246,12 +201,8 @@ export const PostForm: React.FC<Props> = ({ onClose }) => {
           </Button>
         </Grid>
         <Grid item>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            startIcon={<SendIcon />}
-          >
-            Create
+          <Button variant="contained" onClick={submit} startIcon={<SendIcon />}>
+            Submit
           </Button>
         </Grid>
       </Grid>
