@@ -4,8 +4,10 @@ import { editPostFormState, editCodesFormState } from '../../state/formState'
 import { editState, subscribeFlagState } from '../../state/uiState'
 import { codesSelector, postSelector } from '../../state/apiState'
 import {
-  updateCodeMutation,
   updatePostMutation,
+  createCodeMutation,
+  updateCodeMutation,
+  deleteCodeMutation,
 } from '../../utils/api/mutation'
 import { useAuth } from '../../utils/auth'
 import {
@@ -26,6 +28,9 @@ import {
 } from '@mui/icons-material'
 import { useIconStyle } from './index'
 import { PostForm } from '../PostForm'
+import { getPost, listCodesByPost } from '../../utils/api/query'
+import { notNull } from '../../utils/nullable'
+import { differenceSet, intersectionSet } from '../../utils/set'
 
 const PaperComponent: React.FC<PaperProps> = (props) => {
   return (
@@ -58,7 +63,12 @@ export const PostEdit: React.FC = () => {
       content: initialPost?.content ?? '',
     })
     setCodes(
-      initialCodes.map(({ title, content, lang }) => ({ title, content, lang }))
+      initialCodes.map(({ title, content, lang, id }) => ({
+        id,
+        title,
+        content,
+        lang,
+      }))
     )
   }, [initialPost, initialCodes])
 
@@ -96,11 +106,46 @@ export const PostEdit: React.FC = () => {
     if (!authenticated) return
     setSubscribeFlag(true)
 
-    await updatePostMutation({ input: { id: edit.id, ...post } })
+    const serverPost = (await getPost({ id: edit.id })).data?.getPost
+    if (serverPost != null) {
+      await updatePostMutation({ input: { ...post, id: serverPost.id } })
 
-    codes.forEach(async (code) => {
-      updateCodeMutation({ input: { id: edit.id, ...code } })
-    })
+      const res = await listCodesByPost({ postID: serverPost.id })
+      const serverCodeIDs = new Set(
+        res.data?.listCodesByPost?.items?.filter(notNull).map((v) => v.id) ?? []
+      )
+      const localCodeIDs = new Set(codes.map((v) => v.id))
+
+      const createIDs = differenceSet(localCodeIDs, serverCodeIDs)
+      const updateIDs = intersectionSet(localCodeIDs, serverCodeIDs)
+      const deleteIDs = differenceSet(serverCodeIDs, localCodeIDs)
+
+      const createCodes = codes.filter((code) => createIDs.has(code.id))
+      const updateCodes = codes.filter((code) => updateIDs.has(code.id))
+
+      createCodes.forEach(async (code) => {
+        await createCodeMutation({
+          input: {
+            title: code.title,
+            content: code.content,
+            lang: code.lang,
+            postID: serverPost.id,
+            skipline: '',
+            type: 'code',
+          },
+        })
+      })
+
+      updateCodes.forEach(async (code) => {
+        await updateCodeMutation({ input: { ...code } })
+      })
+
+      Array.from(deleteIDs).forEach(async (id) => {
+        await deleteCodeMutation({ input: { id } })
+      })
+    } else {
+      alert('This post has already been deleted.')
+    }
 
     setPost({
       title: '',

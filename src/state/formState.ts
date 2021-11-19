@@ -19,7 +19,10 @@ export const editPostFormState = atom<PostFormState>({
   },
 })
 
-export type CodeFormState = Pick<CreateCodeInput, 'title' | 'content' | 'lang'>
+export type CodeFormState = Pick<
+  CreateCodeInput,
+  'title' | 'content' | 'lang'
+> & { id: string }
 
 export const codesFormState = atom<CodeFormState[]>({
   key: 'codesFormState',

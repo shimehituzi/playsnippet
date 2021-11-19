@@ -77,13 +77,17 @@ export const PostAdd: React.FC = () => {
     const postID = res.data?.createPost?.id
 
     if (postID) {
-      const input = {
-        postID,
-        skipline: '',
-        type: 'code',
-      }
       codes.forEach(async (code) => {
-        createCodeMutation({ input: { ...code, ...input } })
+        await createCodeMutation({
+          input: {
+            title: code.title,
+            content: code.content,
+            lang: code.lang,
+            postID: postID,
+            skipline: '',
+            type: 'code',
+          },
+        })
       })
     }
 

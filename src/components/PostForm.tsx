@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { SetterOrUpdater } from 'recoil'
-import { CodeFormState, PostFormState } from '../state/formState'
+import { PostFormState, CodeFormState } from '../state/formState'
 import {
   Button,
   Card,
@@ -86,6 +86,7 @@ export const PostForm: React.FC<Props> = ({
 
   const addCode = () => {
     const emptyItem: CodeFormState = {
+      id: `${Date.now()}`,
       title: '',
       content: '',
       lang: '',
