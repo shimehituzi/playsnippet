@@ -60,12 +60,7 @@ export const PostAdd: React.FC = () => {
 
   const cancel = () => {
     if (window.confirm('Are you sure you want to delete post and codes?')) {
-      setPost({
-        title: '',
-        content: '',
-      })
-      setCodes([])
-      setOpenFlag(false)
+      reset()
     }
   }
 
@@ -91,12 +86,16 @@ export const PostAdd: React.FC = () => {
       })
     }
 
+    reset()
+  }
+
+  const reset = () => {
     setPost({
       title: '',
       content: '',
     })
     setCodes([])
-    onClose()
+    setOpenFlag(false)
   }
 
   return (

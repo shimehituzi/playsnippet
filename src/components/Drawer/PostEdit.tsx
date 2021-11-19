@@ -90,16 +90,7 @@ export const PostEdit: React.FC = () => {
 
   const cancel = () => {
     if (window.confirm('Are you sure you want to cancel edit?')) {
-      setPost({
-        title: '',
-        content: '',
-      })
-      setCodes([])
-      setEdit({
-        isEdit: false,
-        open: false,
-        id: '',
-      })
+      reset()
     }
   }
 
@@ -148,12 +139,20 @@ export const PostEdit: React.FC = () => {
       alert('This post has already been deleted.')
     }
 
+    reset()
+  }
+
+  const reset = () => {
     setPost({
       title: '',
       content: '',
     })
     setCodes([])
-    onClose()
+    setEdit({
+      isEdit: false,
+      open: false,
+      id: '',
+    })
   }
 
   return (
