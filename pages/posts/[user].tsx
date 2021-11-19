@@ -9,7 +9,7 @@ import {
   codesState,
   commentsState,
   postNextTokenState,
-  latestTimeStampSelector,
+  oldestPostTimeStampSelector,
 } from '../../src/state/apiState'
 import { Post } from '../../src/API'
 import { notNull } from '../../src/utils/nullable'
@@ -17,8 +17,6 @@ import { useArraySettor } from '../../src/utils/arraySettor'
 import { omitCode, omitComment, omitPost } from '../../src/utils/api/omit'
 import { useRenderState } from '../../src/utils/render'
 import {
-  listCodesByDate,
-  listCommentsByDate,
   listPostsByOwner,
   serverListPostsByOwner,
 } from '../../src/utils/api/query'
@@ -103,20 +101,16 @@ const UserPosts: NextPage<Props> = (props) => {
     toCSR()
   }
 
-  const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
-  const newItems = async () => {
-    const posts = await listPostsByOwner({
+  const oldestPostTimeStamp = useRecoilValue(oldestPostTimeStampSelector)
+  const reloadQuery = async () => {
+    const res = await listPostsByOwner({
       owner: owner,
-      createdAt: { gt: latestTimeStamp },
+      createdAt: { ge: oldestPostTimeStamp },
     })
-    const codes = await listCodesByDate({ createdAt: { gt: latestTimeStamp } })
-    const comments = await listCommentsByDate({
-      createdAt: { gt: latestTimeStamp },
-    })
-
-    setPosts.newItems(posts.data?.listPostsByOwner?.items)
-    setCodes.newItems(codes.data?.listCodesByDate?.items)
-    setComments.newItems(comments.data?.listCommentsByDate?.items)
+    const posts = res.data?.listPostsByOwner?.items?.filter(notNull) ?? []
+    setPosts.initItems(posts)
+    setCodes.initItems(posts.flatMap((v) => v.codes?.items))
+    setComments.initItems(posts.flatMap((v) => v.comments?.items))
   }
   const subscribeFuncArray = [
     subscribePost({
@@ -133,7 +127,7 @@ const UserPosts: NextPage<Props> = (props) => {
       onCreate: (data) => setComments.createItem(data?.onCreateComment),
     }),
   ]
-  useSubscription({ subscribeFuncArray, newItems, toCSR })
+  useSubscription({ subscribeFuncArray, reloadQuery, toCSR })
 
   return (
     <>

@@ -1,19 +1,18 @@
 import React, { useEffect } from 'react'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { ParsedUrlQuery } from 'querystring'
-import { useRecoilValue } from 'recoil'
 import {
   postsState,
   codesState,
   commentsState,
-  latestTimeStampSelector,
 } from '../../../src/state/apiState'
 import { Post as TypePost } from '../../../src/API'
 import { useArraySettor } from '../../../src/utils/arraySettor'
 import { omitCode, omitComment, omitPost } from '../../../src/utils/api/omit'
 import { useRenderState } from '../../../src/utils/render'
-import { listCommentsByPost, serverGetPost } from '../../../src/utils/api/query'
+import { getPost, serverGetPost } from '../../../src/utils/api/query'
 import {
   subscribePost,
   subscribeCode,
@@ -76,13 +75,17 @@ const UserPost: NextPage<Props> = (props) => {
     setComments.initItems(props.post.comments?.items)
   }, [])
 
-  const latestTimeStamp = useRecoilValue(latestTimeStampSelector)
-  const newItems = async () => {
-    const comments = await listCommentsByPost({
-      postID: props.post.id,
-      createdAt: { gt: latestTimeStamp },
-    })
-    setComments.newItems(comments.data?.listCommentsByPost?.items)
+  const router = useRouter()
+
+  const reloadQuery = async () => {
+    const post = (await getPost({ id: props.post.id })).data?.getPost
+    if (post) {
+      setPosts.initItems([post])
+      setCodes.initItems(post.codes?.items)
+      setComments.initItems(post.comments?.items)
+    } else {
+      router.replace('/404')
+    }
   }
   const subscribeFuncArray = [
     subscribePost({
@@ -98,10 +101,14 @@ const UserPost: NextPage<Props> = (props) => {
       },
     }),
     subscribeComment({
-      onCreate: (data) => setComments.createItem(data?.onCreateComment),
+      onCreate: (data) => {
+        const postID = data?.onCreateComment?.postID
+        if (postID === props.post.id)
+          setComments.createItem(data?.onCreateComment)
+      },
     }),
   ]
-  useSubscription({ subscribeFuncArray, newItems, toCSR })
+  useSubscription({ subscribeFuncArray, reloadQuery, toCSR })
 
   return (
     <>
