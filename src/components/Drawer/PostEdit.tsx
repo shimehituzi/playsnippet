@@ -18,6 +18,7 @@ import {
   ListItemIcon,
   ListItemText,
   DialogTitle,
+  DialogContent,
   Grid,
   IconButton,
 } from '@mui/material'
@@ -166,8 +167,12 @@ export const PostEdit: React.FC = () => {
       <Dialog
         open={edit.open}
         onClose={onClose}
+        scroll="paper"
+        maxWidth="md"
+        fullWidth={true}
         PaperComponent={PaperComponent}
         aria-labelledby="draggable-dialog-title"
+        aria-describedby="scroll-dialog-description"
       >
         <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
           <Grid
@@ -184,11 +189,13 @@ export const PostEdit: React.FC = () => {
             </Grid>
           </Grid>
         </DialogTitle>
-        <PostForm
-          postState={postState}
-          codesState={codesState}
-          submit={submit}
-        />
+        <DialogContent id="scroll-dialog-description">
+          <PostForm
+            postState={postState}
+            codesState={codesState}
+            submit={submit}
+          />
+        </DialogContent>
       </Dialog>
     </>
   )
