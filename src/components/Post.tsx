@@ -241,14 +241,14 @@ const SubHeader: React.FC<SubHeaderProps> = ({ createdAt, owner }) => {
 
   const diffTimeHeader = calcDiff(createdAt)
   const timeHeader = calcTime(createdAt)
-  const [timestamp, setTimeStamp] = useState<string>(diffTimeHeader)
+  const [hover, setHover] = useState<boolean>(false)
 
-  const hoverTimeStamp = () => {
-    setTimeStamp(timeHeader)
+  const onMouseEnter = () => {
+    setHover(true)
   }
 
-  const leaveTimeStame = () => {
-    setTimeStamp(diffTimeHeader)
+  const onMouseLeave = () => {
+    setHover(false)
   }
 
   const ownerString = `@${owner} - `
@@ -256,8 +256,12 @@ const SubHeader: React.FC<SubHeaderProps> = ({ createdAt, owner }) => {
   return (
     <Typography variant="body2" color="textSecondary">
       {ownerString}
-      <span onMouseEnter={hoverTimeStamp} onMouseLeave={leaveTimeStame}>
-        {timestamp}
+      <span
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        suppressHydrationWarning
+      >
+        {hover ? timeHeader : diffTimeHeader}
       </span>
     </Typography>
   )
